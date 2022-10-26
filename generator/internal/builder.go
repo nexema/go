@@ -76,7 +76,7 @@ func (b *Builder) generateNode(node DeclarationNode) error {
 
 			fmt.Printf("FileName: %s\n", file.FileName)
 
-			b.files[filepath.Join(b.input.Output, file.FileName)] = code
+			b.files[filepath.Join(b.input.Output, file.Path)] = code
 		}
 	}
 
@@ -127,7 +127,7 @@ func (b *Builder) generateStruct(t SchemaTypeDefinition, file *File) error {
 	for i, field := range t.Fields {
 		stmt := Id(field.Name)
 
-		WriteField(stmt, field.Type)
+		b.WriteField(stmt, field.Type)
 
 		fields[i] = stmt
 	}
@@ -200,11 +200,11 @@ func (b *Builder) writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
 	}
 
 	// append return
-	body = append(body, Return().List(Id("buf").Dot("Bytes").Call(), Nil()))
+	body = append(body, Return(Nil()))
 
 	file.Func().Params(
 		Id("u").Op("*").Id(t.Name), //receiver
-	).Id("MergeFrom").Params(Id("buffer").Index().Byte()).Params(Index().Byte(), Error()).Block(body...)
+	).Id("MergeFrom").Params(Id("buffer").Index().Byte()).Params(Error()).Block(body...)
 }
 
 func writeMergeUsing(file *File, t SchemaTypeDefinition) {

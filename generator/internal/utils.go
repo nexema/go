@@ -54,11 +54,11 @@ var decoderMapper map[string]string = map[string]string{
 	"binary":  "DecodeBytes",
 }
 
-func WriteField(stmt *Statement, t SchemaFieldType) {
-	WritePrimitive(stmt, t.Primitive, t.TypeArguments)
+func (b *Builder) WriteField(stmt *Statement, t SchemaFieldType) {
+	b.WritePrimitive(stmt, t.Primitive, t.TypeArguments, t.ImportId)
 }
 
-func WritePrimitive(stmt *Statement, t string, arguments []SchemaFieldType) {
+func (b *Builder) WritePrimitive(stmt *Statement, t string, arguments []SchemaFieldType, importId string) {
 	switch t {
 	case "string":
 		stmt.String()
@@ -101,15 +101,20 @@ func WritePrimitive(stmt *Statement, t string, arguments []SchemaFieldType) {
 
 	case "list":
 		arrType := arguments[0].Primitive
-		WritePrimitive(stmt.Index(), arrType, nil)
+		b.WritePrimitive(stmt.Index(), arrType, nil, importId)
 
 	case "map":
 		keyType := arguments[0].Primitive
 		valueType := arguments[1].Primitive
-		WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, nil)
+		b.WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, nil, importId)
 
 	case "custom":
+		importType, ok := (*b.typeRegistry)[importId]
+		if !ok {
+			panic(fmt.Sprintf("type with id %s not found in registry", importId))
+		}
 
+		stmt.Qual(importType.ImportPath, importType.Definition.Name)
 	}
 }
 
@@ -196,7 +201,7 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 
 		stmts = append(stmts, List(Id(arrName), Id("err")).Op(":=").Id("decoder").Dot("DecodeArrayLen").Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-			Return(List(Nil(), Id("err"))),
+			Return().Id("err"),
 		))
 
 		stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Make(Index().Custom(Options{}, primitiveMapper[typeArgumentPrimitive]), Id(arrName)))
@@ -207,7 +212,7 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 		).Block(
 			List(Id("u").Dot(field.Name).Index(Id("i")), Id("err")).Op("=").Id("decoder").Dot(decoderMapper[typeArgumentPrimitive]).Call(),
 			If(Id("err").Op("!=").Nil()).Block(
-				Return().Nil(),
+				Return().Id("err"),
 			),
 		))
 	} else if field.Type.Primitive == "map" {
@@ -218,7 +223,7 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 
 		stmts = append(stmts, List(Id(mapName), Id("err")).Op(":=").Id("decoder").Dot("DecodeMapLen").Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-			Return(List(Nil(), Id("err"))),
+			Return().Id("err"),
 		))
 
 		stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Make(Map(primitiveMapper[keyArgumentPrimitive]).Custom(Options{}, primitiveMapper[valueArgumentPrimitive])))
@@ -229,12 +234,12 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 		).Block(
 			List(Id("k"), Id("err")).Op(":=").Id("decoder").Dot(decoderMapper[keyArgumentPrimitive]).Call(),
 			If(Id("err").Op("!=").Nil()).Block(
-				Return().Nil(),
+				Return().Id("err"),
 			),
 
 			List(Id("v"), Id("err")).Op(":=").Id("decoder").Dot(decoderMapper[valueArgumentPrimitive]).Call(),
 			If(Id("err").Op("!=").Nil()).Block(
-				Return().Nil(),
+				Return().Id("err"),
 			),
 
 			Id("u").Dot(field.Name).Index(Id("k")).Op("=").Id("v"),
@@ -250,7 +255,7 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 	} else {
 		stmts = append(stmts, List(Id("u").Dot(field.Name), Id("err")).Op("=").Custom(Options{}, GetDecodeTypeStatement(field.Type.Primitive)).Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-			Return(List(Nil(), Id("err"))),
+			Return(Id("err")),
 		))
 	}
 

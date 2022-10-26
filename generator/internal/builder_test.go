@@ -159,8 +159,8 @@ func TestGenerateRaw(t *testing.T) {
 	generateInput := GenerateInput{}
 	json.Unmarshal(data, &generateInput)
 
-	generateInput.Options["packageName"] = "github.com/mpack/test_files"
-	generateInput.Output = "test_files_generated"
+	generateInput.Options["packageName"] = "github.com/example/test_files"
+	generateInput.Output = "../../example/test_files_generated"
 
 	builder := NewBuilder(&generateInput)
 	err := builder.Build()
