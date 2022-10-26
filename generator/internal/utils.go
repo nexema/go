@@ -113,7 +113,7 @@ func WritePrimitive(stmt *Statement, t string, arguments []SchemaFieldType) {
 	}
 }
 
-func WriteEncodeField(field TypeFieldDefinition) []*Statement {
+func (b *Builder) WriteEncodeField(field TypeFieldDefinition) []*Statement {
 	stmts := []*Statement{}
 
 	if field.Type.Primitive == "list" {
@@ -150,6 +150,24 @@ func WriteEncodeField(field TypeFieldDefinition) []*Statement {
 				Return(List(Nil(), Id("err"))),
 			),
 		))
+	} else if field.Type.Primitive == "custom" {
+		importId := field.Type.ImportId
+		_, ok := (*b.typeRegistry)[importId]
+		if !ok {
+			panic(fmt.Sprintf("type with id %s not found", importId))
+		}
+
+		varName := fmt.Sprintf("%sBinary", field.Name)
+		stmts = append(stmts, List(Id(varName), Id("err")).Op(":=").Id("u").Dot(field.Name).Dot("Serialize").Call())
+		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
+			Return(List(Nil(), Id("err"))),
+		))
+
+		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeBytes").Params(Id(varName)))
+		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
+			Return(List(Nil(), Id("err"))),
+		))
+
 	} else {
 		stmts = append(stmts, Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.Name))))
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
@@ -163,17 +181,13 @@ func WriteEncodeField(field TypeFieldDefinition) []*Statement {
 func GetEncodeTypeStatement(primitive string, fieldName *Statement) *Statement {
 	encoder, ok := encoderMapper[primitive]
 	if !ok {
-		if primitive == "custom" {
-
-		} else {
-			panic(fmt.Sprintf("unknown encoder for %s", primitive))
-		}
+		panic(fmt.Sprintf("unknown encoder for %s", primitive))
 	}
 
 	return Id("writer").Dot(encoder).Params(fieldName)
 }
 
-func WriteDecodeField(field TypeFieldDefinition) []*Statement {
+func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 	stmts := []*Statement{}
 
 	if field.Type.Primitive == "list" {
@@ -225,6 +239,14 @@ func WriteDecodeField(field TypeFieldDefinition) []*Statement {
 
 			Id("u").Dot(field.Name).Index(Id("k")).Op("=").Id("v"),
 		))
+	} else if field.Type.Primitive == "custom" {
+		importId := field.Type.ImportId
+		t, ok := (*b.typeRegistry)[importId]
+		if !ok {
+			panic(fmt.Sprintf("type with id %s not found", importId))
+		}
+
+		_ = t
 	} else {
 		stmts = append(stmts, List(Id("u").Dot(field.Name), Id("err")).Op("=").Custom(Options{}, GetDecodeTypeStatement(field.Type.Primitive)).Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(

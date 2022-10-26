@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	. "github.com/dave/jennifer/jen"
@@ -41,6 +42,16 @@ func (b *Builder) Build() error {
 	}
 
 	for name, content := range b.files {
+		err := os.MkdirAll(filepath.Dir(name), os.ModePerm)
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(fmt.Sprintf("%s.go", name), []byte(content), 0644)
+		if err != nil {
+			return err
+		}
+
 		fmt.Printf("File: %v\n", name)
 		fmt.Println(content)
 		fmt.Println("=================================")
@@ -125,13 +136,13 @@ func (b *Builder) generateStruct(t SchemaTypeDefinition, file *File) error {
 	file.Type().Id(t.Name).Struct(fields...)
 
 	// Write Serialize method
-	writeSerializeMethod(file, t)
+	b.writeSerializeMethod(file, t)
 
 	// Write MustSerialize method
 	writeMustSerializeMethod(file, t)
 
 	// Write MergeFrom method
-	writeMergeFromMethod(file, t)
+	b.writeMergeFromMethod(file, t)
 
 	// Write MergeUsing method
 	writeMergeUsing(file, t)
@@ -139,7 +150,7 @@ func (b *Builder) generateStruct(t SchemaTypeDefinition, file *File) error {
 	return nil
 }
 
-func writeSerializeMethod(file *File, t SchemaTypeDefinition) {
+func (b *Builder) writeSerializeMethod(file *File, t SchemaTypeDefinition) {
 	body := []Code{
 		Id("buf").Op(":=").Id("new").Params(Qual("bytes", "Buffer")),
 		Id("writer").Op(":=").Qual("github.com/vmihailenco/msgpack/v5", "NewEncoder").Params(Id("buf")),
@@ -147,7 +158,7 @@ func writeSerializeMethod(file *File, t SchemaTypeDefinition) {
 	}
 
 	for _, field := range t.Fields {
-		stmts := WriteEncodeField(field)
+		stmts := b.WriteEncodeField(field)
 		for _, stmt := range stmts {
 			body = append(body, stmt)
 		}
@@ -174,7 +185,7 @@ func writeMustSerializeMethod(file *File, t SchemaTypeDefinition) {
 	)
 }
 
-func writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
+func (b *Builder) writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
 	body := []Code{
 		Id("reader").Op(":=").Qual("bytes", "NewBuffer").Call(Id("buffer")),
 		Id("decoder").Op(":=").Qual("github.com/vmihailenco/msgpack/v5", "NewDecoder").Params(Id("reader")),
@@ -182,7 +193,7 @@ func writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
 	}
 
 	for _, field := range t.Fields {
-		stmts := WriteDecodeField(field)
+		stmts := b.WriteDecodeField(field)
 		for _, stmt := range stmts {
 			body = append(body, stmt)
 		}
