@@ -2,12 +2,12 @@ package test_files
 
 import (
 	"bytes"
-
+	nested "github.com/example/test_files/test_files_generated/sub_package/another/nested"
 	v5 "github.com/vmihailenco/msgpack/v5"
 )
 
 type MyBarNested struct {
-	first MyNestedType
+	first nested.MyNestedType
 }
 
 func (u *MyBarNested) Serialize() ([]byte, error) {
@@ -35,6 +35,12 @@ func (u *MyBarNested) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	decoder := v5.NewDecoder(reader)
 	var err error
+	firstBinary, err := decoder.DecodeBytes()
+	if err != nil {
+		return err
+	}
+	u.first = MyNestedType{}
+	u.first.MergeFrom(firstBinary)
 	return nil
 }
 func (u *MyBarNested) MergeUsing(other *MyBarNested) error {

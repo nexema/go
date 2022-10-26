@@ -157,21 +157,28 @@ func (b *Builder) WriteEncodeField(field TypeFieldDefinition) []*Statement {
 		))
 	} else if field.Type.Primitive == "custom" {
 		importId := field.Type.ImportId
-		_, ok := (*b.typeRegistry)[importId]
+		td, ok := (*b.typeRegistry)[importId]
 		if !ok {
 			panic(fmt.Sprintf("type with id %s not found", importId))
 		}
 
-		varName := fmt.Sprintf("%sBinary", field.Name)
-		stmts = append(stmts, List(Id(varName), Id("err")).Op(":=").Id("u").Dot(field.Name).Dot("Serialize").Call())
-		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-			Return(List(Nil(), Id("err"))),
-		))
+		if td.Definition.Modifier == "enum" {
+			stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeUint8").Params(Id("u").Dot(field.Name).Dot("Index").Call()))
+			stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
+				Return(List(Nil(), Id("err"))),
+			))
+		} else {
+			varName := fmt.Sprintf("%sBinary", field.Name)
+			stmts = append(stmts, List(Id(varName), Id("err")).Op(":=").Id("u").Dot(field.Name).Dot("Serialize").Call())
+			stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
+				Return(List(Nil(), Id("err"))),
+			))
 
-		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeBytes").Params(Id(varName)))
-		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-			Return(List(Nil(), Id("err"))),
-		))
+			stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeBytes").Params(Id(varName)))
+			stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
+				Return(List(Nil(), Id("err"))),
+			))
+		}
 
 	} else {
 		stmts = append(stmts, Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.Name))))
@@ -246,12 +253,30 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 		))
 	} else if field.Type.Primitive == "custom" {
 		importId := field.Type.ImportId
-		t, ok := (*b.typeRegistry)[importId]
+		td, ok := (*b.typeRegistry)[importId]
 		if !ok {
 			panic(fmt.Sprintf("type with id %s not found", importId))
 		}
 
-		_ = t
+		if td.Definition.Modifier == "enum" {
+			varName := fmt.Sprintf("%sIdx", field.Name)
+			stmts = append(stmts, List(Id(varName), Err()).Op(":=").Id("decoder").Dot("DecodeUint8").Call())
+			stmts = append(stmts, If(Err().Op("!=").Nil()).Block(
+				Return(Err()),
+			))
+			stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Id(fmt.Sprintf("%sPicker", td.Definition.Name)).Dot("ByIndex").Call(Id(varName)))
+		} else {
+			varName := fmt.Sprintf("%sBinary", field.Name)
+
+			stmts = append(stmts, List(Id(varName), Err()).Op(":=").Id("decoder").Dot("DecodeBytes").Call())
+			stmts = append(stmts, If(Err().Op("!=").Nil()).Block(
+				Return(Err()),
+			))
+
+			stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Id(td.Definition.Name).Values())
+			stmts = append(stmts, Id("u").Dot(field.Name).Dot("MergeFrom").Call(Id(varName)))
+		}
+
 	} else {
 		stmts = append(stmts, List(Id("u").Dot(field.Name), Id("err")).Op("=").Custom(Options{}, GetDecodeTypeStatement(field.Type.Primitive)).Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
