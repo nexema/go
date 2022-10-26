@@ -163,7 +163,11 @@ func WriteEncodeField(field TypeFieldDefinition) []*Statement {
 func GetEncodeTypeStatement(primitive string, fieldName *Statement) *Statement {
 	encoder, ok := encoderMapper[primitive]
 	if !ok {
-		panic(fmt.Sprintf("unknown encoder for %s", primitive))
+		if primitive == "custom" {
+
+		} else {
+			panic(fmt.Sprintf("unknown encoder for %s", primitive))
+		}
 	}
 
 	return Id("writer").Dot(encoder).Params(fieldName)
@@ -174,36 +178,55 @@ func WriteDecodeField(field TypeFieldDefinition) []*Statement {
 
 	if field.Type.Primitive == "list" {
 		typeArgumentPrimitive := field.Type.TypeArguments[0].Primitive
+		arrName := fmt.Sprintf("%sLen", field.Name)
 
-		stmts = append(stmts, List(Id(fmt.Sprintf("%sLen", field.Name)), Id("err")).Op(":=").Id("decoder").Dot("DecodeArrayLen"))
+		stmts = append(stmts, List(Id(arrName), Id("err")).Op(":=").Id("decoder").Dot("DecodeArrayLen").Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(List(Nil(), Id("err"))),
 		))
 
-		stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Make(Index().Custom(Options{}, primitiveMapper[typeArgumentPrimitive]), Id(fmt.Sprintf("%sLen", field.Name))))
-		stmts = append(stmts, For(Id("i").Op(":=").Lit(0))) // TODO: continue loop
+		stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Make(Index().Custom(Options{}, primitiveMapper[typeArgumentPrimitive]), Id(arrName)))
+		stmts = append(stmts, For(
+			Id("i").Op(":=").Lit(0),
+			Id("i").Op("<").Id(arrName),
+			Id("i").Op("++"),
+		).Block(
+			List(Id("u").Dot(field.Name).Index(Id("i")), Id("err")).Op("=").Id("decoder").Dot(decoderMapper[typeArgumentPrimitive]).Call(),
+			If(Id("err").Op("!=").Nil()).Block(
+				Return().Nil(),
+			),
+		))
 	} else if field.Type.Primitive == "map" {
 		keyArgumentPrimitive := field.Type.TypeArguments[0].Primitive
 		valueArgumentPrimitive := field.Type.TypeArguments[1].Primitive
 
-		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeMapLen").Params(Id("len").Params(Id("u").Dot(field.Name))))
+		mapName := fmt.Sprintf("%sLen", field.Name)
+
+		stmts = append(stmts, List(Id(mapName), Id("err")).Op(":=").Id("decoder").Dot("DecodeMapLen").Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(List(Nil(), Id("err"))),
 		))
 
-		stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.Name)).Block(
-			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(keyArgumentPrimitive, Id("k"))),
+		stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Make(Map(primitiveMapper[keyArgumentPrimitive]).Custom(Options{}, primitiveMapper[valueArgumentPrimitive])))
+		stmts = append(stmts, For(
+			Id("i").Op(":=").Lit(0),
+			Id("i").Op("<").Id(mapName),
+			Id("i").Op("++"),
+		).Block(
+			List(Id("k"), Id("err")).Op(":=").Id("decoder").Dot(decoderMapper[keyArgumentPrimitive]).Call(),
 			If(Id("err").Op("!=").Nil()).Block(
-				Return(List(Nil(), Id("err"))),
+				Return().Nil(),
 			),
 
-			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(valueArgumentPrimitive, Id("v"))),
+			List(Id("v"), Id("err")).Op(":=").Id("decoder").Dot(decoderMapper[valueArgumentPrimitive]).Call(),
 			If(Id("err").Op("!=").Nil()).Block(
-				Return(List(Nil(), Id("err"))),
+				Return().Nil(),
 			),
+
+			Id("u").Dot(field.Name).Index(Id("k")).Op("=").Id("v"),
 		))
 	} else {
-		stmts = append(stmts, List(Id("u").Dot(field.Name), Id("err")).Op("=").Custom(Options{}, GetDecodeTypeStatement(field.Type.Primitive)))
+		stmts = append(stmts, List(Id("u").Dot(field.Name), Id("err")).Op("=").Custom(Options{}, GetDecodeTypeStatement(field.Type.Primitive)).Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(List(Nil(), Id("err"))),
 		))

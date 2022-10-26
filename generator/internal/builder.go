@@ -3,31 +3,34 @@ package internal
 import (
 	"bytes"
 	"fmt"
-	"io"
+	"path/filepath"
 
 	. "github.com/dave/jennifer/jen"
 )
 
 type Builder struct {
-	input       *GenerateInput
-	packageName string
-	files       map[string]string
-	writer      *io.Writer
+	input        *GenerateInput
+	packageName  string
+	files        map[string]string
+	typeRegistry *TypeRegistry
 }
 
 func NewBuilder(input *GenerateInput) *Builder {
 	builder := &Builder{
-		input: input,
-		files: make(map[string]string),
+		input:        input,
+		files:        make(map[string]string),
+		typeRegistry: NewTypeRegistry(),
 	}
 
 	builder.packageName = input.Options["packageName"].(string)
+	builder.typeRegistry.Fill(input.RootPackage, builder.packageName, input.Output)
+
+	fmt.Println("Types:")
+	for k, v := range *builder.typeRegistry {
+		fmt.Printf("%s (%s) : %s\n", k, v.Definition.Name, v.ImportPath)
+	}
 
 	return builder
-}
-
-func (b *Builder) SetWriter(w *io.Writer) {
-	b.writer = w
 }
 
 func (b *Builder) Build() error {
@@ -60,7 +63,9 @@ func (b *Builder) generateNode(node DeclarationNode) error {
 				return err
 			}
 
-			b.files[file.Path] = code
+			fmt.Printf("FileName: %s\n", file.FileName)
+
+			b.files[filepath.Join(b.input.Output, file.FileName)] = code
 		}
 	}
 
@@ -68,7 +73,7 @@ func (b *Builder) generateNode(node DeclarationNode) error {
 }
 
 func (b *Builder) generateFile(fd FileDeclaration) (code string, err error) {
-	file := NewFile(b.packageName)
+	file := NewFile(filepath.Base(b.packageName))
 
 	for _, t := range fd.Types {
 		switch t.Modifier {
@@ -92,6 +97,12 @@ func (b *Builder) generateFile(fd FileDeclaration) (code string, err error) {
 	buf := new(bytes.Buffer)
 	err = file.Render(buf)
 	if err != nil {
+		fmt.Println("Printing file:::::")
+
+		fmt.Printf("%#v\n", file)
+
+		fmt.Println("========================")
+
 		return "", err
 	}
 
@@ -122,6 +133,9 @@ func (b *Builder) generateStruct(t SchemaTypeDefinition, file *File) error {
 	// Write MergeFrom method
 	writeMergeFromMethod(file, t)
 
+	// Write MergeUsing method
+	writeMergeUsing(file, t)
+
 	return nil
 }
 
@@ -144,7 +158,7 @@ func writeSerializeMethod(file *File, t SchemaTypeDefinition) {
 
 	file.Func().Params(
 		Id("u").Op("*").Id(t.Name), //receiver
-	).Id("Serialize").Params().Params(Index().Byte(), Err()).Block(body...)
+	).Id("Serialize").Params().Params(Index().Byte(), Error()).Block(body...)
 }
 
 func writeMustSerializeMethod(file *File, t SchemaTypeDefinition) {
@@ -168,7 +182,7 @@ func writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
 	}
 
 	for _, field := range t.Fields {
-		stmts := WriteEncodeField(field)
+		stmts := WriteDecodeField(field)
 		for _, stmt := range stmts {
 			body = append(body, stmt)
 		}
@@ -179,5 +193,20 @@ func writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
 
 	file.Func().Params(
 		Id("u").Op("*").Id(t.Name), //receiver
-	).Id("MergeFrom").Params(Id("buffer").Index().Byte()).Params(Index().Byte(), Err()).Block(body...)
+	).Id("MergeFrom").Params(Id("buffer").Index().Byte()).Params(Index().Byte(), Error()).Block(body...)
+}
+
+func writeMergeUsing(file *File, t SchemaTypeDefinition) {
+	body := []Code{}
+
+	for _, field := range t.Fields {
+		body = append(body, Id("u").Dot(field.Name).Op("=").Id("other").Dot(field.Name))
+	}
+
+	// append return
+	body = append(body, Return().Nil())
+
+	file.Func().Params(
+		Id("u").Op("*").Id(t.Name), //receiver
+	).Id("MergeUsing").Params(Id("other").Op("*").Id(t.Name)).Params(Error()).Block(body...)
 }
