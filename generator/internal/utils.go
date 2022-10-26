@@ -38,6 +38,22 @@ var encoderMapper map[string]string = map[string]string{
 	"binary":  "EncodeBytes",
 }
 
+var decoderMapper map[string]string = map[string]string{
+	"boolean": "DecodeBool",
+	"string":  "DecodeString",
+	"uint8":   "DecodeUint8",
+	"uint16":  "DecodeUint16",
+	"uint32":  "DecodeUint32",
+	"uint64":  "DecodeUint64",
+	"int8":    "DecodeInt8",
+	"int16":   "DecodeInt16",
+	"int32":   "DecodeInt32",
+	"int64":   "DecodeInt64",
+	"float32": "DecodeFloat32",
+	"float64": "DecodeFloat64",
+	"binary":  "DecodeBytes",
+}
+
 func WriteField(stmt *Statement, t SchemaFieldType) {
 	WritePrimitive(stmt, t.Primitive, t.TypeArguments)
 }
@@ -151,4 +167,56 @@ func GetEncodeTypeStatement(primitive string, fieldName *Statement) *Statement {
 	}
 
 	return Id("writer").Dot(encoder).Params(fieldName)
+}
+
+func WriteDecodeField(field TypeFieldDefinition) []*Statement {
+	stmts := []*Statement{}
+
+	if field.Type.Primitive == "list" {
+		typeArgumentPrimitive := field.Type.TypeArguments[0].Primitive
+
+		stmts = append(stmts, List(Id(fmt.Sprintf("%sLen", field.Name)), Id("err")).Op(":=").Id("decoder").Dot("DecodeArrayLen"))
+		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
+			Return(List(Nil(), Id("err"))),
+		))
+
+		stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Make(Index().Custom(Options{}, primitiveMapper[typeArgumentPrimitive]), Id(fmt.Sprintf("%sLen", field.Name))))
+		stmts = append(stmts, For(Id("i").Op(":=").Lit(0))) // TODO: continue loop
+	} else if field.Type.Primitive == "map" {
+		keyArgumentPrimitive := field.Type.TypeArguments[0].Primitive
+		valueArgumentPrimitive := field.Type.TypeArguments[1].Primitive
+
+		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeMapLen").Params(Id("len").Params(Id("u").Dot(field.Name))))
+		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
+			Return(List(Nil(), Id("err"))),
+		))
+
+		stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.Name)).Block(
+			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(keyArgumentPrimitive, Id("k"))),
+			If(Id("err").Op("!=").Nil()).Block(
+				Return(List(Nil(), Id("err"))),
+			),
+
+			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(valueArgumentPrimitive, Id("v"))),
+			If(Id("err").Op("!=").Nil()).Block(
+				Return(List(Nil(), Id("err"))),
+			),
+		))
+	} else {
+		stmts = append(stmts, List(Id("u").Dot(field.Name), Id("err")).Op("=").Custom(Options{}, GetDecodeTypeStatement(field.Type.Primitive)))
+		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
+			Return(List(Nil(), Id("err"))),
+		))
+	}
+
+	return stmts
+}
+
+func GetDecodeTypeStatement(primitive string) *Statement {
+	decoder, ok := decoderMapper[primitive]
+	if !ok {
+		panic(fmt.Sprintf("unknown decoder for %s", primitive))
+	}
+
+	return Id("decoder").Dot(decoder)
 }
