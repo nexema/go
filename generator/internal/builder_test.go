@@ -30,12 +30,12 @@ func TestGenerateStruct(t *testing.T) {
 						FileName: "a.mpack",
 						Path:     "root/a.mpack",
 						Id:       "123456789",
-						Types: []SchemaTypeDefinition{
+						Types: []*SchemaTypeDefinition{
 							{
 								Id:       "454545",
 								Name:     "MyType",
 								Modifier: "struct",
-								Fields: []TypeFieldDefinition{
+								Fields: []*TypeFieldDefinition{
 									{
 										Name:  "a",
 										Index: 1,
@@ -103,12 +103,12 @@ func TestGenerateEnum(t *testing.T) {
 						FileName: "a.mpack",
 						Path:     "root/a.mpack",
 						Id:       "123456789",
-						Types: []SchemaTypeDefinition{
+						Types: []*SchemaTypeDefinition{
 							{
 								Id:       "454545",
 								Name:     "MyType",
 								Modifier: "struct",
-								Fields: []TypeFieldDefinition{
+								Fields: []*TypeFieldDefinition{
 									{
 										Name:  "a",
 										Index: 1,

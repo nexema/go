@@ -54,11 +54,11 @@ var decoderMapper map[string]string = map[string]string{
 	"binary":  "DecodeBytes",
 }
 
-func (b *Builder) WriteField(stmt *Statement, t SchemaFieldType) {
-	b.WritePrimitive(stmt, t.Primitive, t.TypeArguments, t.ImportId)
+func (b *Builder) WriteField(stmt *Statement, t SchemaFieldType, referencePkg string) {
+	b.WritePrimitive(stmt, t.Primitive, t.TypeArguments, t.ImportId, referencePkg)
 }
 
-func (b *Builder) WritePrimitive(stmt *Statement, t string, arguments []SchemaFieldType, importId string) {
+func (b *Builder) WritePrimitive(stmt *Statement, t string, arguments []SchemaFieldType, importId string, referencePkg string) {
 	switch t {
 	case "string":
 		stmt.String()
@@ -101,12 +101,12 @@ func (b *Builder) WritePrimitive(stmt *Statement, t string, arguments []SchemaFi
 
 	case "list":
 		arrType := arguments[0].Primitive
-		b.WritePrimitive(stmt.Index(), arrType, nil, importId)
+		b.WritePrimitive(stmt.Index(), arrType, nil, importId, referencePkg)
 
 	case "map":
 		keyType := arguments[0].Primitive
 		valueType := arguments[1].Primitive
-		b.WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, nil, importId)
+		b.WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, nil, importId, referencePkg)
 
 	case "custom":
 		importType, ok := (*b.typeRegistry)[importId]
@@ -114,22 +114,27 @@ func (b *Builder) WritePrimitive(stmt *Statement, t string, arguments []SchemaFi
 			panic(fmt.Sprintf("type with id %s not found in registry", importId))
 		}
 
-		stmt.Qual(importType.ImportPath, importType.Definition.Name)
+		samePkg := importType.ImportPath == referencePkg
+		if samePkg {
+			stmt.Id(importType.Definition.Name)
+		} else {
+			stmt.Qual(importType.ImportPath, importType.Definition.Name)
+		}
 	}
 }
 
-func (b *Builder) WriteEncodeField(field TypeFieldDefinition) []*Statement {
+func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) []*Statement {
 	stmts := []*Statement{}
 
 	if field.Type.Primitive == "list" {
 		typeArgumentPrimitive := field.Type.TypeArguments[0].Primitive
 
-		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeArrayLen").Params(Id("len").Params(Id("u").Dot(field.Name))))
+		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeArrayLen").Params(Id("len").Params(Id("u").Dot(field.GoName))))
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(List(Nil(), Id("err"))),
 		))
 
-		stmts = append(stmts, For(List(Id("_"), Id("v")).Op(":=").Range().Id("u").Dot(field.Name)).Block(
+		stmts = append(stmts, For(List(Id("_"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
 			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(typeArgumentPrimitive, Id("v"))),
 			If(Id("err").Op("!=").Nil()).Block(
 				Return(List(Nil(), Id("err"))),
@@ -139,12 +144,12 @@ func (b *Builder) WriteEncodeField(field TypeFieldDefinition) []*Statement {
 		keyArgumentPrimitive := field.Type.TypeArguments[0].Primitive
 		valueArgumentPrimitive := field.Type.TypeArguments[1].Primitive
 
-		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeMapLen").Params(Id("len").Params(Id("u").Dot(field.Name))))
+		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeMapLen").Params(Id("len").Params(Id("u").Dot(field.GoName))))
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(List(Nil(), Id("err"))),
 		))
 
-		stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.Name)).Block(
+		stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
 			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(keyArgumentPrimitive, Id("k"))),
 			If(Id("err").Op("!=").Nil()).Block(
 				Return(List(Nil(), Id("err"))),
@@ -163,13 +168,13 @@ func (b *Builder) WriteEncodeField(field TypeFieldDefinition) []*Statement {
 		}
 
 		if td.Definition.Modifier == "enum" {
-			stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeUint8").Params(Id("u").Dot(field.Name).Dot("Index").Call()))
+			stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeUint8").Params(Id("u").Dot(field.GoName).Dot("Index").Call()))
 			stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 				Return(List(Nil(), Id("err"))),
 			))
 		} else {
-			varName := fmt.Sprintf("%sBinary", field.Name)
-			stmts = append(stmts, List(Id(varName), Id("err")).Op(":=").Id("u").Dot(field.Name).Dot("Serialize").Call())
+			varName := fmt.Sprintf("%sBinary", field.GoName)
+			stmts = append(stmts, List(Id(varName), Id("err")).Op(":=").Id("u").Dot(field.GoName).Dot("Serialize").Call())
 			stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 				Return(List(Nil(), Id("err"))),
 			))
@@ -181,7 +186,7 @@ func (b *Builder) WriteEncodeField(field TypeFieldDefinition) []*Statement {
 		}
 
 	} else {
-		stmts = append(stmts, Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.Name))))
+		stmts = append(stmts, Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.GoName))))
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(List(Nil(), Id("err"))),
 		))
@@ -199,25 +204,25 @@ func GetEncodeTypeStatement(primitive string, fieldName *Statement) *Statement {
 	return Id("writer").Dot(encoder).Params(fieldName)
 }
 
-func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
+func (b *Builder) WriteDecodeField(field *TypeFieldDefinition, pkg string) []*Statement {
 	stmts := []*Statement{}
 
 	if field.Type.Primitive == "list" {
 		typeArgumentPrimitive := field.Type.TypeArguments[0].Primitive
-		arrName := fmt.Sprintf("%sLen", field.Name)
+		arrName := fmt.Sprintf("%sLen", field.GoName)
 
 		stmts = append(stmts, List(Id(arrName), Id("err")).Op(":=").Id("decoder").Dot("DecodeArrayLen").Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return().Id("err"),
 		))
 
-		stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Make(Index().Custom(Options{}, primitiveMapper[typeArgumentPrimitive]), Id(arrName)))
+		stmts = append(stmts, Id("u").Dot(field.GoName).Op("=").Make(Index().Custom(Options{}, primitiveMapper[typeArgumentPrimitive]), Id(arrName)))
 		stmts = append(stmts, For(
 			Id("i").Op(":=").Lit(0),
 			Id("i").Op("<").Id(arrName),
 			Id("i").Op("++"),
 		).Block(
-			List(Id("u").Dot(field.Name).Index(Id("i")), Id("err")).Op("=").Id("decoder").Dot(decoderMapper[typeArgumentPrimitive]).Call(),
+			List(Id("u").Dot(field.GoName).Index(Id("i")), Id("err")).Op("=").Id("decoder").Dot(decoderMapper[typeArgumentPrimitive]).Call(),
 			If(Id("err").Op("!=").Nil()).Block(
 				Return().Id("err"),
 			),
@@ -226,14 +231,14 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 		keyArgumentPrimitive := field.Type.TypeArguments[0].Primitive
 		valueArgumentPrimitive := field.Type.TypeArguments[1].Primitive
 
-		mapName := fmt.Sprintf("%sLen", field.Name)
+		mapName := fmt.Sprintf("%sLen", field.GoName)
 
 		stmts = append(stmts, List(Id(mapName), Id("err")).Op(":=").Id("decoder").Dot("DecodeMapLen").Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return().Id("err"),
 		))
 
-		stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Make(Map(primitiveMapper[keyArgumentPrimitive]).Custom(Options{}, primitiveMapper[valueArgumentPrimitive])))
+		stmts = append(stmts, Id("u").Dot(field.GoName).Op("=").Make(Map(primitiveMapper[keyArgumentPrimitive]).Custom(Options{}, primitiveMapper[valueArgumentPrimitive])))
 		stmts = append(stmts, For(
 			Id("i").Op(":=").Lit(0),
 			Id("i").Op("<").Id(mapName),
@@ -249,7 +254,7 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 				Return().Id("err"),
 			),
 
-			Id("u").Dot(field.Name).Index(Id("k")).Op("=").Id("v"),
+			Id("u").Dot(field.GoName).Index(Id("k")).Op("=").Id("v"),
 		))
 	} else if field.Type.Primitive == "custom" {
 		importId := field.Type.ImportId
@@ -258,27 +263,44 @@ func (b *Builder) WriteDecodeField(field TypeFieldDefinition) []*Statement {
 			panic(fmt.Sprintf("type with id %s not found", importId))
 		}
 
+		samePackage := td.ImportPath == pkg
+
 		if td.Definition.Modifier == "enum" {
-			varName := fmt.Sprintf("%sIdx", field.Name)
+			varName := fmt.Sprintf("%sIdx", field.GoName)
 			stmts = append(stmts, List(Id(varName), Err()).Op(":=").Id("decoder").Dot("DecodeUint8").Call())
 			stmts = append(stmts, If(Err().Op("!=").Nil()).Block(
 				Return(Err()),
 			))
-			stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Id(fmt.Sprintf("%sPicker", td.Definition.Name)).Dot("ByIndex").Call(Id(varName)))
+
+			op := Id("u").Dot(field.GoName).Op("=")
+			if samePackage {
+				op.Id(fmt.Sprintf("%sPicker", td.Definition.Name))
+			} else {
+				op.Qual(td.ImportPath, fmt.Sprintf("%sPicker", td.Definition.Name))
+			}
+
+			stmts = append(stmts, op.Dot("ByIndex").Call(Id(varName)))
 		} else {
-			varName := fmt.Sprintf("%sBinary", field.Name)
+			varName := fmt.Sprintf("%sBinary", field.GoName)
 
 			stmts = append(stmts, List(Id(varName), Err()).Op(":=").Id("decoder").Dot("DecodeBytes").Call())
 			stmts = append(stmts, If(Err().Op("!=").Nil()).Block(
 				Return(Err()),
 			))
 
-			stmts = append(stmts, Id("u").Dot(field.Name).Op("=").Id(td.Definition.Name).Values())
-			stmts = append(stmts, Id("u").Dot(field.Name).Dot("MergeFrom").Call(Id(varName)))
+			op := Id("u").Dot(field.GoName).Op("=")
+			if samePackage {
+				op.Id(td.Definition.Name)
+			} else {
+				op.Qual(td.ImportPath, td.Definition.Name)
+			}
+
+			stmts = append(stmts, op.Values())
+			stmts = append(stmts, Id("u").Dot(field.GoName).Dot("MergeFrom").Call(Id(varName)))
 		}
 
 	} else {
-		stmts = append(stmts, List(Id("u").Dot(field.Name), Id("err")).Op("=").Custom(Options{}, GetDecodeTypeStatement(field.Type.Primitive)).Call())
+		stmts = append(stmts, List(Id("u").Dot(field.GoName), Id("err")).Op("=").Custom(Options{}, GetDecodeTypeStatement(field.Type.Primitive)).Call())
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(Id("err")),
 		))

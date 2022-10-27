@@ -31,7 +31,7 @@ func (d *DeclarationNode) UnmarshalJSON(b []byte) error {
 	if ok {
 		fd := struct {
 			Name     string            `json:"name"`
-			Value    FileDeclaration   `json:"value"`
+			Value    *FileDeclaration  `json:"value"`
 			Children []DeclarationNode `json:"children"`
 		}{}
 
@@ -45,9 +45,9 @@ func (d *DeclarationNode) UnmarshalJSON(b []byte) error {
 		d.Value = fd.Value
 	} else {
 		pd := struct {
-			Name     string             `json:"name"`
-			Value    PackageDeclaration `json:"value"`
-			Children []DeclarationNode  `json:"children"`
+			Name     string              `json:"name"`
+			Value    *PackageDeclaration `json:"value"`
+			Children []DeclarationNode   `json:"children"`
 		}{}
 
 		err = json.Unmarshal(b, &pd)
@@ -70,18 +70,18 @@ type PackageDeclaration struct {
 }
 
 type FileDeclaration struct {
-	FileName string                 `json:"fileName"`
-	Path     string                 `json:"path"`
-	Id       string                 `json:"id"`
-	Types    []SchemaTypeDefinition `json:"types"`
-	Imports  []string               `json:"imports"`
+	FileName string                  `json:"fileName"`
+	Path     string                  `json:"path"`
+	Id       string                  `json:"id"`
+	Types    []*SchemaTypeDefinition `json:"types"`
+	Imports  []string                `json:"imports"`
 }
 
 type SchemaTypeDefinition struct {
-	Id       string                `json:"id"`
-	Name     string                `json:"name"`
-	Modifier string                `json:"modifier"`
-	Fields   []TypeFieldDefinition `json:"fields"`
+	Id       string                 `json:"id"`
+	Name     string                 `json:"name"`
+	Modifier string                 `json:"modifier"`
+	Fields   []*TypeFieldDefinition `json:"fields"`
 }
 
 type TypeFieldDefinition struct {
@@ -90,6 +90,7 @@ type TypeFieldDefinition struct {
 	DefaultValue interface{}            `json:"defaultValue"`
 	Metadata     map[string]interface{} `json:"metadata"`
 	Type         SchemaFieldType        `json:"type"`
+	GoName       string                 `json:"-"`
 }
 
 type SchemaFieldType struct {

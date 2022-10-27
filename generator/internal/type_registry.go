@@ -25,12 +25,12 @@ func (tr *TypeRegistry) Fill(root DeclarationNode, packageName, relativePath str
 		if entry.IsPackage {
 			tr.Fill(entry, packageName, relativePath)
 		} else {
-			file := entry.Value.(FileDeclaration)
+			file := entry.Value.(*FileDeclaration)
 			for _, t := range file.Types {
 				f := strings.ReplaceAll(filepath.Dir(file.Path), "\\", "/")
 				importPath := filepath.Clean(fmt.Sprintf("%s/%s/%s", packageName, filepath.Base(relativePath), f))
 				(*tr)[t.Id] = &SchemaTypeReference{
-					Definition: &t,
+					Definition: t,
 					ImportPath: importPath,
 				}
 			}

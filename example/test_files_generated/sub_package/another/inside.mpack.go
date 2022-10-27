@@ -3,30 +3,28 @@ package test_files
 import (
 	"bytes"
 	"fmt"
-
-	another "github.com/example/test_files/test_files_generated/sub_package/another"
 	v5 "github.com/vmihailenco/msgpack/v5"
 )
 
 type AnotherType struct {
-	first  string
-	second bool
-	status another.AnotherEnum
+	First  string
+	Second bool
+	Status AnotherEnum
 }
 
 func (u *AnotherType) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	writer := v5.NewEncoder(buf)
 	var err error
-	err = writer.EncodeString(u.first)
+	err = writer.EncodeString(u.First)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeBool(u.second)
+	err = writer.EncodeBool(u.Second)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeUint8(u.status.Index())
+	err = writer.EncodeUint8(u.Status.Index())
 	if err != nil {
 		return nil, err
 	}
@@ -43,25 +41,25 @@ func (u *AnotherType) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	decoder := v5.NewDecoder(reader)
 	var err error
-	u.first, err = decoder.DecodeString()
+	u.First, err = decoder.DecodeString()
 	if err != nil {
 		return err
 	}
-	u.second, err = decoder.DecodeBool()
+	u.Second, err = decoder.DecodeBool()
 	if err != nil {
 		return err
 	}
-	statusIdx, err := decoder.DecodeUint8()
+	StatusIdx, err := decoder.DecodeUint8()
 	if err != nil {
 		return err
 	}
-	u.status = AnotherEnumPicker.ByIndex(statusIdx)
+	u.Status = AnotherEnumPicker.ByIndex(StatusIdx)
 	return nil
 }
 func (u *AnotherType) MergeUsing(other *AnotherType) error {
-	u.first = other.first
-	u.second = other.second
-	u.status = other.status
+	u.First = other.First
+	u.Second = other.Second
+	u.Status = other.Status
 	return nil
 }
 

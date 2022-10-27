@@ -7,14 +7,18 @@ import (
 )
 
 type MyNestedType struct {
-	first another.AnotherEnum
+	First another.AnotherType
 }
 
 func (u *MyNestedType) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	writer := v5.NewEncoder(buf)
 	var err error
-	err = writer.EncodeUint8(u.first.Index())
+	FirstBinary, err := u.First.Serialize()
+	if err != nil {
+		return nil, err
+	}
+	err = writer.EncodeBytes(FirstBinary)
 	if err != nil {
 		return nil, err
 	}
@@ -31,14 +35,15 @@ func (u *MyNestedType) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	decoder := v5.NewDecoder(reader)
 	var err error
-	firstIdx, err := decoder.DecodeUint8()
+	FirstBinary, err := decoder.DecodeBytes()
 	if err != nil {
 		return err
 	}
-	u.first = AnotherEnumPicker.ByIndex(firstIdx)
+	u.First = another.AnotherType{}
+	u.First.MergeFrom(FirstBinary)
 	return nil
 }
 func (u *MyNestedType) MergeUsing(other *MyNestedType) error {
-	u.first = other.first
+	u.First = other.First
 	return nil
 }

@@ -26,11 +26,7 @@ func NewBuilder(input *GenerateInput) *Builder {
 
 	builder.packageName = input.Options["packageName"].(string)
 	builder.typeRegistry.Fill(input.RootPackage, builder.packageName, input.Output)
-
-	fmt.Println("Types:")
-	for k, v := range *builder.typeRegistry {
-		fmt.Printf("%s (%s) : %s\n", k, v.Definition.Name, v.ImportPath)
-	}
+	builder.sanitize()
 
 	return builder
 }
@@ -69,14 +65,11 @@ func (b *Builder) generateNode(node DeclarationNode) error {
 				return err
 			}
 		} else {
-			file := child.Value.(FileDeclaration)
+			file := child.Value.(*FileDeclaration)
 			code, err := b.generateFile(file)
 			if err != nil {
 				return err
 			}
-
-			fmt.Printf("FileName: %s\n", file.FileName)
-
 			b.files[filepath.Join(b.input.Output, file.Path)] = code
 		}
 	}
@@ -84,7 +77,7 @@ func (b *Builder) generateNode(node DeclarationNode) error {
 	return nil
 }
 
-func (b *Builder) generateFile(fd FileDeclaration) (code string, err error) {
+func (b *Builder) generateFile(fd *FileDeclaration) (code string, err error) {
 	file := NewFile(filepath.Base(b.packageName))
 
 	for _, t := range fd.Types {
@@ -124,14 +117,16 @@ func (b *Builder) generateFile(fd FileDeclaration) (code string, err error) {
 	return buf.String(), nil
 }
 
-func (b *Builder) generateStruct(t SchemaTypeDefinition, file *File) error {
+func (b *Builder) generateStruct(t *SchemaTypeDefinition, file *File) error {
+
+	pkgPath := (*b.typeRegistry)[t.Id].ImportPath
 
 	// Create fields
 	fields := make([]Code, len(t.Fields))
 	for i, field := range t.Fields {
-		stmt := Id(field.Name)
+		stmt := Id(field.GoName)
 
-		b.WriteField(stmt, field.Type)
+		b.WriteField(stmt, field.Type, pkgPath)
 
 		fields[i] = stmt
 	}
@@ -146,7 +141,7 @@ func (b *Builder) generateStruct(t SchemaTypeDefinition, file *File) error {
 	writeMustSerializeMethod(file, t)
 
 	// Write MergeFrom method
-	b.writeMergeFromMethod(file, t)
+	b.writeMergeFromMethod(file, t, pkgPath)
 
 	// Write MergeUsing method
 	writeMergeUsing(file, t)
@@ -154,7 +149,7 @@ func (b *Builder) generateStruct(t SchemaTypeDefinition, file *File) error {
 	return nil
 }
 
-func (b *Builder) generateEnum(t SchemaTypeDefinition, file *File) error {
+func (b *Builder) generateEnum(t *SchemaTypeDefinition, file *File) error {
 
 	// Create Enum struct
 	file.Type().Id(t.Name).Struct(
@@ -234,7 +229,7 @@ func (b *Builder) generateEnum(t SchemaTypeDefinition, file *File) error {
 	return nil
 }
 
-func (b *Builder) writeSerializeMethod(file *File, t SchemaTypeDefinition) {
+func (b *Builder) writeSerializeMethod(file *File, t *SchemaTypeDefinition) {
 	body := []Code{
 		Id("buf").Op(":=").Id("new").Params(Qual("bytes", "Buffer")),
 		Id("writer").Op(":=").Qual("github.com/vmihailenco/msgpack/v5", "NewEncoder").Params(Id("buf")),
@@ -256,7 +251,7 @@ func (b *Builder) writeSerializeMethod(file *File, t SchemaTypeDefinition) {
 	).Id("Serialize").Params().Params(Index().Byte(), Error()).Block(body...)
 }
 
-func writeMustSerializeMethod(file *File, t SchemaTypeDefinition) {
+func writeMustSerializeMethod(file *File, t *SchemaTypeDefinition) {
 	file.Func().Params(
 		Id("u").Op("*").Id(t.Name), //receiver
 	).Id("MustSerialize").Params().Index().Byte().Block(
@@ -269,7 +264,7 @@ func writeMustSerializeMethod(file *File, t SchemaTypeDefinition) {
 	)
 }
 
-func (b *Builder) writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
+func (b *Builder) writeMergeFromMethod(file *File, t *SchemaTypeDefinition, pkgName string) {
 	body := []Code{
 		Id("reader").Op(":=").Qual("bytes", "NewBuffer").Call(Id("buffer")),
 		Id("decoder").Op(":=").Qual("github.com/vmihailenco/msgpack/v5", "NewDecoder").Params(Id("reader")),
@@ -277,7 +272,7 @@ func (b *Builder) writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
 	}
 
 	for _, field := range t.Fields {
-		stmts := b.WriteDecodeField(field)
+		stmts := b.WriteDecodeField(field, pkgName)
 		for _, stmt := range stmts {
 			body = append(body, stmt)
 		}
@@ -291,11 +286,11 @@ func (b *Builder) writeMergeFromMethod(file *File, t SchemaTypeDefinition) {
 	).Id("MergeFrom").Params(Id("buffer").Index().Byte()).Params(Error()).Block(body...)
 }
 
-func writeMergeUsing(file *File, t SchemaTypeDefinition) {
+func writeMergeUsing(file *File, t *SchemaTypeDefinition) {
 	body := []Code{}
 
 	for _, field := range t.Fields {
-		body = append(body, Id("u").Dot(field.Name).Op("=").Id("other").Dot(field.Name))
+		body = append(body, Id("u").Dot(field.GoName).Op("=").Id("other").Dot(field.GoName))
 	}
 
 	// append return
@@ -304,4 +299,23 @@ func writeMergeUsing(file *File, t SchemaTypeDefinition) {
 	file.Func().Params(
 		Id("u").Op("*").Id(t.Name), //receiver
 	).Id("MergeUsing").Params(Id("other").Op("*").Id(t.Name)).Params(Error()).Block(body...)
+}
+
+func (b *Builder) sanitize() {
+	b.sanitizePkg(b.input.RootPackage)
+}
+
+func (b *Builder) sanitizePkg(t DeclarationNode) {
+	for _, n := range t.Children {
+		if n.IsPackage {
+			b.sanitizePkg(n)
+		} else {
+			fd := n.Value.(*FileDeclaration)
+			for _, td := range fd.Types {
+				for _, field := range td.Fields {
+					field.GoName = strcase.ToCamel(field.Name)
+				}
+			}
+		}
+	}
 }
