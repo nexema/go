@@ -2,6 +2,7 @@ package test_files
 
 import (
 	"bytes"
+
 	runtime "github.com/messagepack-schema/go/runtime"
 	msgpack "github.com/messagepack-schema/go/runtime/msgpack"
 )
@@ -28,55 +29,107 @@ func (u *Nullables) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	writer := msgpack.NewEncoder(buf)
 	var err error
-	err = writer.EncodeNullable(u.A1)
+	if u.A1.HasValue() {
+		err = writer.EncodeBool(u.A1.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A2)
+	if u.A2.HasValue() {
+		err = writer.EncodeString(u.A2.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A3)
+	if u.A3.HasValue() {
+		err = writer.EncodeUint8(u.A3.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A4)
+	if u.A4.HasValue() {
+		err = writer.EncodeUint16(u.A4.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A5)
+	if u.A5.HasValue() {
+		err = writer.EncodeUint32(u.A5.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A6)
+	if u.A6.HasValue() {
+		err = writer.EncodeUint64(u.A6.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A7)
+	if u.A7.HasValue() {
+		err = writer.EncodeInt8(u.A7.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A8)
+	if u.A8.HasValue() {
+		err = writer.EncodeInt16(u.A8.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A9)
+	if u.A9.HasValue() {
+		err = writer.EncodeInt32(u.A9.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A10)
+	if u.A10.HasValue() {
+		err = writer.EncodeInt64(u.A10.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A11)
+	if u.A11.HasValue() {
+		err = writer.EncodeFloat32(u.A11.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A12)
+	if u.A12.HasValue() {
+		err = writer.EncodeFloat64(u.A12.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeNullable(u.A13)
+	if u.A13.HasValue() {
+		err = writer.EncodeBytes(u.A13.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +138,11 @@ func (u *Nullables) Serialize() ([]byte, error) {
 		return nil, err
 	}
 	for _, v := range u.A14 {
-		err = writer.EncodeBool(v)
+		if v.HasValue() {
+			err = writer.EncodeBool(v.GetValue())
+		} else {
+			err = writer.EncodeNil()
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -99,7 +156,11 @@ func (u *Nullables) Serialize() ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		err = writer.EncodeFloat32(v)
+		if v.HasValue() {
+			err = writer.EncodeFloat32(v.GetValue())
+		} else {
+			err = writer.EncodeNil()
+		}
 		if err != nil {
 			return nil, err
 		}

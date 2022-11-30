@@ -9,6 +9,10 @@ type Nullable[T any] struct {
 	Value *T
 }
 
+func (n *Nullable[T]) GetValue() T {
+	return *n.Value
+}
+
 func NewNullable[T any](value T) Nullable[T] {
 	return Nullable[T]{
 		Value: &value,

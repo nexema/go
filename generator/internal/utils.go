@@ -201,12 +201,21 @@ func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) []*Statement {
 			Return(List(Nil(), Id("err"))),
 		))
 
-		stmts = append(stmts, For(List(Id("_"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
-			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(typeArgumentPrimitive, Id("v"))),
-			If(Id("err").Op("!=").Nil()).Block(
-				Return(List(Nil(), Id("err"))),
-			),
-		))
+		if field.Type.TypeArguments[0].Nullable {
+			stmts = append(stmts, For(List(Id("_"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
+				GetEncodeNullable(typeArgumentPrimitive, Id("v")),
+				If(Id("err").Op("!=").Nil()).Block(
+					Return(List(Nil(), Id("err"))),
+				),
+			))
+		} else {
+			stmts = append(stmts, For(List(Id("_"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
+				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(typeArgumentPrimitive, Id("v"))),
+				If(Id("err").Op("!=").Nil()).Block(
+					Return(List(Nil(), Id("err"))),
+				),
+			))
+		}
 	} else if field.Type.Primitive == "map" {
 		keyArgumentPrimitive := field.Type.TypeArguments[0].Primitive
 		valueArgumentPrimitive := field.Type.TypeArguments[1].Primitive
@@ -216,17 +225,31 @@ func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) []*Statement {
 			Return(List(Nil(), Id("err"))),
 		))
 
-		stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
-			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(keyArgumentPrimitive, Id("k"))),
-			If(Id("err").Op("!=").Nil()).Block(
-				Return(List(Nil(), Id("err"))),
-			),
+		if field.Type.TypeArguments[1].Nullable {
+			stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
+				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(keyArgumentPrimitive, Id("k"))),
+				If(Id("err").Op("!=").Nil()).Block(
+					Return(List(Nil(), Id("err"))),
+				),
 
-			Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(valueArgumentPrimitive, Id("v"))),
-			If(Id("err").Op("!=").Nil()).Block(
-				Return(List(Nil(), Id("err"))),
-			),
-		))
+				GetEncodeNullable(valueArgumentPrimitive, Id("v")),
+				If(Id("err").Op("!=").Nil()).Block(
+					Return(List(Nil(), Id("err"))),
+				),
+			))
+		} else {
+			stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
+				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(keyArgumentPrimitive, Id("k"))),
+				If(Id("err").Op("!=").Nil()).Block(
+					Return(List(Nil(), Id("err"))),
+				),
+
+				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(valueArgumentPrimitive, Id("v"))),
+				If(Id("err").Op("!=").Nil()).Block(
+					Return(List(Nil(), Id("err"))),
+				),
+			))
+		}
 	} else if field.Type.Primitive == "custom" {
 		importId := field.Type.ImportId
 		td, ok := (*b.typeRegistry)[importId]
@@ -253,20 +276,33 @@ func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) []*Statement {
 		}
 
 	} else {
-		var encodeStmt *Statement
 		if field.Type.Nullable {
-			encodeStmt = Id("writer").Dot("EncodeNullable").Params(Id("u").Dot(field.GoName))
+			stmts = append(stmts, If(
+				Id("u").Dot(field.GoName).Dot("HasValue").Call(),
+			).Block(
+				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.GoName).Dot("GetValue").Call()))).Else().Block(
+				Id("err").Op("=").Custom(Options{}, GetEncodeNil()),
+			))
 		} else {
-			encodeStmt = GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.GoName))
+			stmts = append(stmts, Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.GoName))))
 		}
 
-		stmts = append(stmts, Id("err").Op("=").Custom(Options{}, encodeStmt))
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(List(Nil(), Id("err"))),
 		))
+
 	}
 
 	return stmts
+}
+
+func GetEncodeNullable(fieldPrimitive string, field *Statement) *Statement {
+	return If(
+		field.Clone().Dot("HasValue").Call(),
+	).Block(
+		Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(fieldPrimitive, field.Clone().Dot("GetValue").Call()))).Else().Block(
+		Id("err").Op("=").Custom(Options{}, GetEncodeNil()),
+	)
 }
 
 func GetEncodeTypeStatement(primitive string, fieldName *Statement) *Statement {
@@ -276,6 +312,10 @@ func GetEncodeTypeStatement(primitive string, fieldName *Statement) *Statement {
 	}
 
 	return Id("writer").Dot(encoder).Params(fieldName)
+}
+
+func GetEncodeNil() *Statement {
+	return Id("writer").Dot("EncodeNil").Call()
 }
 
 func (b *Builder) WriteDecodeField(field *TypeFieldDefinition, pkg string) []*Statement {

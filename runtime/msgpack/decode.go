@@ -554,6 +554,15 @@ func (d *Decoder) PeekCode() (byte, error) {
 	return c, d.s.UnreadByte()
 }
 
+func (d *Decoder) IsNextNil() (bool, error) {
+	code, err := d.PeekCode()
+	if err != nil {
+		return false, err
+	}
+
+	return code == msgpcode.Nil, nil
+}
+
 // ReadFull reads exactly len(buf) bytes into the buf.
 func (d *Decoder) ReadFull(buf []byte) error {
 	_, err := readN(d.r, buf, len(buf))
