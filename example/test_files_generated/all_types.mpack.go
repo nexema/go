@@ -2,7 +2,7 @@ package test_files
 
 import (
 	"bytes"
-	v5 "github.com/vmihailenco/msgpack/v5"
+	msgpack "github.com/messagepack-schema/go/runtime/msgpack"
 )
 
 type AllTypes struct {
@@ -35,7 +35,7 @@ type AllTypes struct {
 
 func (u *AllTypes) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	writer := v5.NewEncoder(buf)
+	writer := msgpack.NewEncoder(buf)
 	var err error
 	err = writer.EncodeBool(u.A)
 	if err != nil {
@@ -220,7 +220,7 @@ func (u *AllTypes) MustSerialize() []byte {
 }
 func (u *AllTypes) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
-	decoder := v5.NewDecoder(reader)
+	decoder := msgpack.NewDecoder(reader)
 	var err error
 	u.A, err = decoder.DecodeBool()
 	if err != nil {

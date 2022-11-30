@@ -232,7 +232,7 @@ func (b *Builder) generateEnum(t *SchemaTypeDefinition, file *File) error {
 func (b *Builder) writeSerializeMethod(file *File, t *SchemaTypeDefinition) {
 	body := []Code{
 		Id("buf").Op(":=").Id("new").Params(Qual("bytes", "Buffer")),
-		Id("writer").Op(":=").Qual("github.com/vmihailenco/msgpack/v5", "NewEncoder").Params(Id("buf")),
+		Id("writer").Op(":=").Qual("github.com/messagepack-schema/go/runtime/msgpack", "NewEncoder").Params(Id("buf")),
 		Var().Id("err").Id("error"),
 	}
 
@@ -267,7 +267,7 @@ func writeMustSerializeMethod(file *File, t *SchemaTypeDefinition) {
 func (b *Builder) writeMergeFromMethod(file *File, t *SchemaTypeDefinition, pkgName string) {
 	body := []Code{
 		Id("reader").Op(":=").Qual("bytes", "NewBuffer").Call(Id("buffer")),
-		Id("decoder").Op(":=").Qual("github.com/vmihailenco/msgpack/v5", "NewDecoder").Params(Id("reader")),
+		Id("decoder").Op(":=").Qual("github.com/messagepack-schema/go/runtime/msgpack", "NewDecoder").Params(Id("reader")),
 		Var().Id("err").Id("error"),
 	}
 

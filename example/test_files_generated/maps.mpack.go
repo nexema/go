@@ -2,7 +2,7 @@ package test_files
 
 import (
 	"bytes"
-	v5 "github.com/vmihailenco/msgpack/v5"
+	msgpack "github.com/messagepack-schema/go/runtime/msgpack"
 )
 
 type MapTest struct {
@@ -142,7 +142,7 @@ type MapTest struct {
 
 func (u *MapTest) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	writer := v5.NewEncoder(buf)
+	writer := msgpack.NewEncoder(buf)
 	var err error
 	err = writer.EncodeMapLen(len(u.A1))
 	if err != nil {
@@ -2003,7 +2003,7 @@ func (u *MapTest) MustSerialize() []byte {
 }
 func (u *MapTest) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
-	decoder := v5.NewDecoder(reader)
+	decoder := msgpack.NewDecoder(reader)
 	var err error
 	A1Len, err := decoder.DecodeMapLen()
 	if err != nil {

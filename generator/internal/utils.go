@@ -6,6 +6,8 @@ import (
 	. "github.com/dave/jennifer/jen"
 )
 
+const runtimeImport = "github.com/messagepack-schema/go/runtime"
+
 var primitiveMapper map[string]Code = map[string]Code{
 	"boolean": Bool(),
 	"string":  String(),
@@ -23,19 +25,20 @@ var primitiveMapper map[string]Code = map[string]Code{
 }
 
 var encoderMapper map[string]string = map[string]string{
-	"boolean": "EncodeBool",
-	"string":  "EncodeString",
-	"uint8":   "EncodeUint8",
-	"uint16":  "EncodeUint16",
-	"uint32":  "EncodeUint32",
-	"uint64":  "EncodeUint64",
-	"int8":    "EncodeInt8",
-	"int16":   "EncodeInt16",
-	"int32":   "EncodeInt32",
-	"int64":   "EncodeInt64",
-	"float32": "EncodeFloat32",
-	"float64": "EncodeFloat64",
-	"binary":  "EncodeBytes",
+	"boolean":  "EncodeBool",
+	"string":   "EncodeString",
+	"uint8":    "EncodeUint8",
+	"uint16":   "EncodeUint16",
+	"uint32":   "EncodeUint32",
+	"uint64":   "EncodeUint64",
+	"int8":     "EncodeInt8",
+	"int16":    "EncodeInt16",
+	"int32":    "EncodeInt32",
+	"int64":    "EncodeInt64",
+	"float32":  "EncodeFloat32",
+	"float64":  "EncodeFloat64",
+	"binary":   "EncodeBytes",
+	"nullable": "EncodeNullable",
 }
 
 var decoderMapper map[string]string = map[string]string{
@@ -55,58 +58,118 @@ var decoderMapper map[string]string = map[string]string{
 }
 
 func (b *Builder) WriteField(stmt *Statement, t SchemaFieldType, referencePkg string) {
-	b.WritePrimitive(stmt, t.Primitive, t.TypeArguments, t.ImportId, referencePkg)
+	b.WritePrimitive(stmt, t.Primitive, t.Nullable, t.TypeArguments, t.ImportId, referencePkg)
 }
 
-func (b *Builder) WritePrimitive(stmt *Statement, t string, arguments []SchemaFieldType, importId string, referencePkg string) {
+func (b *Builder) WritePrimitive(stmt *Statement, t string, nullable bool, arguments []SchemaFieldType, importId string, referencePkg string) {
 	switch t {
 	case "string":
-		stmt.String()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(String())
+		} else {
+			stmt.String()
+		}
 
 	case "int8":
-		stmt.Int8()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Int8())
+		} else {
+			stmt.Int8()
+		}
 
 	case "int16":
-		stmt.Int16()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Int16())
+		} else {
+			stmt.Int16()
+		}
 
 	case "int32":
-		stmt.Int32()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Int32())
+		} else {
+			stmt.Int32()
+		}
 
 	case "int64":
-		stmt.Int64()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Int64())
+		} else {
+			stmt.Int64()
+		}
 
 	case "uint8":
-		stmt.Uint8()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Uint8())
+		} else {
+			stmt.Uint8()
+		}
 
 	case "uint16":
-		stmt.Uint16()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Uint16())
+		} else {
+			stmt.Uint16()
+		}
 
 	case "uint32":
-		stmt.Uint32()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Uint32())
+		} else {
+			stmt.Uint32()
+		}
 
 	case "uint64":
-		stmt.Uint64()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Uint64())
+		} else {
+			stmt.Uint64()
+		}
 
 	case "boolean":
-		stmt.Bool()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Bool())
+		} else {
+			stmt.Bool()
+		}
 
 	case "float32":
-		stmt.Float32()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Float32())
+		} else {
+			stmt.Float32()
+		}
 
 	case "float64":
-		stmt.Float64()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Float64())
+		} else {
+			stmt.Float64()
+		}
 
 	case "binary":
-		stmt.Index().Byte()
+		if nullable {
+			stmt.Qual(runtimeImport, "Nullable").Types(Index().Byte())
+		} else {
+			stmt.Index().Byte()
+		}
 
 	case "list":
 		arrType := arguments[0].Primitive
-		b.WritePrimitive(stmt.Index(), arrType, nil, importId, referencePkg)
+		if arguments[0].Nullable {
+			b.WritePrimitive(stmt.Index(), arrType, true, nil, importId, referencePkg)
+		} else {
+			b.WritePrimitive(stmt.Index(), arrType, false, nil, importId, referencePkg)
+		}
 
 	case "map":
 		keyType := arguments[0].Primitive
 		valueType := arguments[1].Primitive
-		b.WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, nil, importId, referencePkg)
+		if arguments[1].Nullable {
+			b.WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, true, nil, importId, referencePkg)
+		} else {
+			b.WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, false, nil, importId, referencePkg)
+		}
 
 	case "custom":
 		importType, ok := (*b.typeRegistry)[importId]
@@ -115,10 +178,14 @@ func (b *Builder) WritePrimitive(stmt *Statement, t string, arguments []SchemaFi
 		}
 
 		samePkg := importType.ImportPath == referencePkg
-		if samePkg {
-			stmt.Id(importType.Definition.Name)
+		if nullable {
+
 		} else {
-			stmt.Qual(importType.ImportPath, importType.Definition.Name)
+			if samePkg {
+				stmt.Id(importType.Definition.Name)
+			} else {
+				stmt.Qual(importType.ImportPath, importType.Definition.Name)
+			}
 		}
 	}
 }
@@ -186,7 +253,14 @@ func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) []*Statement {
 		}
 
 	} else {
-		stmts = append(stmts, Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.GoName))))
+		var encodeStmt *Statement
+		if field.Type.Nullable {
+			encodeStmt = Id("writer").Dot("EncodeNullable").Params(Id("u").Dot(field.GoName))
+		} else {
+			encodeStmt = GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.GoName))
+		}
+
+		stmts = append(stmts, Id("err").Op("=").Custom(Options{}, encodeStmt))
 		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
 			Return(List(Nil(), Id("err"))),
 		))

@@ -2,80 +2,81 @@ package test_files
 
 import (
 	"bytes"
-	v5 "github.com/vmihailenco/msgpack/v5"
+	runtime "github.com/messagepack-schema/go/runtime"
+	msgpack "github.com/messagepack-schema/go/runtime/msgpack"
 )
 
 type Nullables struct {
-	A1  bool
-	A2  string
-	A3  uint8
-	A4  uint16
-	A5  uint32
-	A6  uint64
-	A7  int8
-	A8  int16
-	A9  int32
-	A10 int64
-	A11 float32
-	A12 float64
-	A13 []byte
-	A14 []bool
-	A15 map[string]float32
+	A1  runtime.Nullable[bool]
+	A2  runtime.Nullable[string]
+	A3  runtime.Nullable[uint8]
+	A4  runtime.Nullable[uint16]
+	A5  runtime.Nullable[uint32]
+	A6  runtime.Nullable[uint64]
+	A7  runtime.Nullable[int8]
+	A8  runtime.Nullable[int16]
+	A9  runtime.Nullable[int32]
+	A10 runtime.Nullable[int64]
+	A11 runtime.Nullable[float32]
+	A12 runtime.Nullable[float64]
+	A13 runtime.Nullable[[]byte]
+	A14 []runtime.Nullable[bool]
+	A15 map[string]runtime.Nullable[float32]
 }
 
 func (u *Nullables) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	writer := v5.NewEncoder(buf)
+	writer := msgpack.NewEncoder(buf)
 	var err error
-	err = writer.EncodeBool(u.A1)
+	err = writer.EncodeNullable(u.A1)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeString(u.A2)
+	err = writer.EncodeNullable(u.A2)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeUint8(u.A3)
+	err = writer.EncodeNullable(u.A3)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeUint16(u.A4)
+	err = writer.EncodeNullable(u.A4)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeUint32(u.A5)
+	err = writer.EncodeNullable(u.A5)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeUint64(u.A6)
+	err = writer.EncodeNullable(u.A6)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeInt8(u.A7)
+	err = writer.EncodeNullable(u.A7)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeInt16(u.A8)
+	err = writer.EncodeNullable(u.A8)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeInt32(u.A9)
+	err = writer.EncodeNullable(u.A9)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeInt64(u.A10)
+	err = writer.EncodeNullable(u.A10)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeFloat32(u.A11)
+	err = writer.EncodeNullable(u.A11)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeFloat64(u.A12)
+	err = writer.EncodeNullable(u.A12)
 	if err != nil {
 		return nil, err
 	}
-	err = writer.EncodeBytes(u.A13)
+	err = writer.EncodeNullable(u.A13)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +115,7 @@ func (u *Nullables) MustSerialize() []byte {
 }
 func (u *Nullables) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
-	decoder := v5.NewDecoder(reader)
+	decoder := msgpack.NewDecoder(reader)
 	var err error
 	u.A1, err = decoder.DecodeBool()
 	if err != nil {

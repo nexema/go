@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/messagepack-schema/go/runtime"
+	"github.com/messagepack-schema/go/runtime/msgpack"
 	"github.com/stretchr/testify/require"
-	"github.com/vmihailenco/msgpack/v5"
 )
 
 func TestCreateUnion(t *testing.T) {

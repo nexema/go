@@ -3,7 +3,7 @@ package test_files
 import (
 	"bytes"
 	another "github.com/example/test_files/test_files_generated/sub_package/another"
-	v5 "github.com/vmihailenco/msgpack/v5"
+	msgpack "github.com/messagepack-schema/go/runtime/msgpack"
 )
 
 type MyNestedType struct {
@@ -12,7 +12,7 @@ type MyNestedType struct {
 
 func (u *MyNestedType) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
-	writer := v5.NewEncoder(buf)
+	writer := msgpack.NewEncoder(buf)
 	var err error
 	FirstBinary, err := u.First.Serialize()
 	if err != nil {
@@ -33,7 +33,7 @@ func (u *MyNestedType) MustSerialize() []byte {
 }
 func (u *MyNestedType) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
-	decoder := v5.NewDecoder(reader)
+	decoder := msgpack.NewDecoder(reader)
 	var err error
 	FirstBinary, err := decoder.DecodeBytes()
 	if err != nil {
