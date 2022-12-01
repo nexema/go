@@ -71,3 +71,7 @@ func (u *MyBarNested) MergeFrom(buffer []byte) error {
 
 	return nil
 }
+
+func (u *MyBarNested) MergeUsing(other *MyBarNested) {
+	u.First = other.First
+}

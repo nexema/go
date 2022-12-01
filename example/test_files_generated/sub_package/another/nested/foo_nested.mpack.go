@@ -50,3 +50,7 @@ func (u *MyNestedType) MergeFrom(buffer []byte) error {
 
 	return nil
 }
+
+func (u *MyNestedType) MergeUsing(other *MyNestedType) {
+	u.First = other.First
+}

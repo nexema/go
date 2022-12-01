@@ -65,3 +65,9 @@ func (u *AnotherType) MergeFrom(buffer []byte) error {
 
 	return nil
 }
+
+func (u *AnotherType) MergeUsing(other *AnotherType) {
+	u.First = other.First
+	u.Second = other.Second
+	u.Status = other.Status
+}

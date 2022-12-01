@@ -485,3 +485,31 @@ func (u *AllTypes) MergeFrom(buffer []byte) error {
 
 	return nil
 }
+
+func (u *AllTypes) MergeUsing(other *AllTypes) {
+	u.A = other.A
+	u.B = other.B
+	u.C = other.C
+	u.D = other.D
+	u.E = other.E
+	u.F = other.F
+	u.G = other.G
+	u.H = other.H
+	u.I = other.I
+	u.J = other.J
+	u.K = other.K
+	u.L = other.L
+	u.M = other.M
+	u.N = other.N
+	u.O = other.O
+	u.P = other.P
+	u.Q = other.Q
+	u.R = other.R
+	u.S = other.S
+	u.T = other.T
+	u.U = other.U
+	u.V = other.V
+	u.W = other.W
+	u.X = other.X
+	u.Y = other.Y
+}

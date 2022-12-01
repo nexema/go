@@ -455,3 +455,21 @@ func (u *Nullables) MergeFrom(buffer []byte) error {
 
 	return nil
 }
+
+func (u *Nullables) MergeUsing(other *Nullables) {
+	u.A1 = other.A1
+	u.A2 = other.A2
+	u.A3 = other.A3
+	u.A4 = other.A4
+	u.A5 = other.A5
+	u.A6 = other.A6
+	u.A7 = other.A7
+	u.A8 = other.A8
+	u.A9 = other.A9
+	u.A10 = other.A10
+	u.A11 = other.A11
+	u.A12 = other.A12
+	u.A13 = other.A13
+	u.A14 = other.A14
+	u.A15 = other.A15
+}

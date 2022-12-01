@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
 )
 
@@ -165,7 +164,7 @@ func (b *Builder) generateStruct(t *SchemaTypeDefinition) (sourceCode string, er
 	b.writeSerializeMethod(sb, t)
 	b.writeMustSerializeMethod(sb, t)
 	b.writeMergeFromMethod(sb, t, pkgPath)
-	// b.writeMergeUsing(sb, t)
+	b.writeMergeUsing(sb, t)
 
 	return sb.String(), nil
 }
@@ -318,19 +317,20 @@ func (b *Builder) writeMergeFromMethod(sb *strings.Builder, t *SchemaTypeDefinit
 	sb.WriteString(body)
 }
 
-func writeMergeUsing(file *File, t *SchemaTypeDefinition) {
-	body := []Code{}
-
-	for _, field := range t.Fields {
-		body = append(body, Id("u").Dot(field.GoName).Op("=").Id("other").Dot(field.GoName))
+func (b *Builder) writeMergeUsing(sb *strings.Builder, t *SchemaTypeDefinition) {
+	stmts := make([]string, len(t.Fields))
+	for i, field := range t.Fields {
+		stmts[i] = fmt.Sprintf("u.%[1]s = other.%[1]s", field.GoName)
 	}
 
-	// append return
-	body = append(body, Return().Nil())
+	body := fmt.Sprintf(
+		`
+		func (u *%[1]s) MergeUsing(other *%[1]s) {
+			%s
+		}%s
+	`, t.Name, strings.Join(stmts, "\n"), "\n")
 
-	file.Func().Params(
-		Id("u").Op("*").Id(t.Name), //receiver
-	).Id("MergeUsing").Params(Id("other").Op("*").Id(t.Name)).Params(Error()).Block(body...)
+	sb.WriteString(body)
 }
 
 func (b *Builder) sanitize() {
