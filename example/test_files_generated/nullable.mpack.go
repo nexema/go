@@ -27,5 +27,170 @@ func (u *Nullables) Serialize() ([]byte, error) {
 	writer := msgpack.NewEncoder(buf)
 	var err error
 
+	if u.A1.HasValue() {
+		err = writer.EncodeBool(u.A1.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A2.HasValue() {
+		err = writer.EncodeString(u.A2.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A3.HasValue() {
+		err = writer.EncodeUint8(u.A3.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A4.HasValue() {
+		err = writer.EncodeUint16(u.A4.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A5.HasValue() {
+		err = writer.EncodeUint32(u.A5.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A6.HasValue() {
+		err = writer.EncodeUint64(u.A6.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A7.HasValue() {
+		err = writer.EncodeInt8(u.A7.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A8.HasValue() {
+		err = writer.EncodeInt16(u.A8.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A9.HasValue() {
+		err = writer.EncodeInt32(u.A9.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A10.HasValue() {
+		err = writer.EncodeInt64(u.A10.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A11.HasValue() {
+		err = writer.EncodeFloat32(u.A11.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A12.HasValue() {
+		err = writer.EncodeFloat64(u.A12.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if u.A13.HasValue() {
+		err = writer.EncodeBytes(u.A13.GetValue())
+	} else {
+		err = writer.EncodeNil()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeArrayLen(len(u.A14))
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range u.A14 {
+		if v.HasValue() {
+			err = writer.EncodeBool(v.GetValue())
+		} else {
+			err = writer.EncodeNil()
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A15))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A15 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		if v.HasValue() {
+			err = writer.EncodeFloat32(v.GetValue())
+		} else {
+			err = writer.EncodeNil()
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return buf.Bytes(), nil
 }

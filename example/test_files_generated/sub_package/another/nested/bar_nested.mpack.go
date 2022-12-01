@@ -11,5 +11,15 @@ func (u *MyBarNested) Serialize() ([]byte, error) {
 	writer := msgpack.NewEncoder(buf)
 	var err error
 
+	FirstBinary, err := u.First.Serialize()
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeBytes(FirstBinary)
+	if err != nil {
+		return nil, err
+	}
+
 	return buf.Bytes(), nil
 }

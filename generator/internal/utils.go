@@ -7,6 +7,8 @@ const runtimeImport = "github.com/messagepack-schema/go/runtime"
 const listPrimitive = "list"
 const mapPrimitive = "map"
 const customPrimitive = "custom"
+const enumModifier = "enum"
+const structModifier = "struct"
 
 var primitiveMapper map[string]string = map[string]string{
 	"boolean": "bool",
@@ -211,7 +213,21 @@ func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) string {
 	if field.Type.Primitive == listPrimitive {
 		typeArgument := field.Type.TypeArguments[0]
 		if typeArgument.Nullable {
+			return fmt.Sprintf(
+				`
+				err = writer.EncodeArrayLen(len(u.%[1]s))
+				if err != nil {
+					return nil, err
+				}
 
+				for _, v := range u.%[1]s {
+					if v.HasValue() {
+						err = writer.%s(v.GetValue())
+					} else {
+						err = writer.EncodeNil()
+					}
+				}
+			`, field.GoName, encoderMapper[typeArgument.Primitive])
 		} else {
 			return fmt.Sprintf(
 				`
@@ -229,143 +245,133 @@ func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) string {
 			`, field.GoName, encoderMapper[typeArgument.Primitive])
 		}
 	} else if field.Type.Primitive == mapPrimitive {
+		keyArgument := field.Type.TypeArguments[0]
+		valueArgument := field.Type.TypeArguments[1]
 
+		if valueArgument.Nullable {
+			return fmt.Sprintf(
+				`
+				err = writer.EncodeMapLen(len(u.%[1]s))
+				if err != nil {
+					return nil, err
+				}
+
+				for k, v := range u.%[1]s {
+					err = writer.%s(k)
+					if err != nil {
+						return nil, err
+					}
+
+					if v.HasValue() {
+						err = writer.%s(v.GetValue())
+					} else {
+						err = writer.EncodeNil()
+					}
+
+					if err != nil {
+						return nil, err
+					}
+				}
+			`, field.GoName, encoderMapper[keyArgument.Primitive], encoderMapper[valueArgument.Primitive])
+		} else {
+			return fmt.Sprintf(
+				`
+				err = writer.EncodeMapLen(len(u.%[1]s))
+				if err != nil {
+					return nil, err
+				}
+
+				for k, v := range u.%[1]s {
+					err = writer.%s(k)
+					if err != nil {
+						return nil, err
+					}
+
+					err = writer.%s(v)
+					if err != nil {
+						return nil, err
+					}
+				}
+			`, field.GoName, encoderMapper[keyArgument.Primitive], encoderMapper[valueArgument.Primitive])
+		}
 	} else if field.Type.Primitive == customPrimitive {
-
-	} else {
-
-	}
-
-	return ""
-}
-
-/*func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) []*Statement {
-	stmts := []*Statement{}
-
-	if field.Type.Primitive == "list" {
-		typeArgumentPrimitive := field.Type.TypeArguments[0].Primitive
-
-		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeArrayLen").Params(Id("len").Params(Id("u").Dot(field.GoName))))
-		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-			Return(List(Nil(), Id("err"))),
-		))
-
-		if field.Type.TypeArguments[0].Nullable {
-			stmts = append(stmts, For(List(Id("_"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
-				GetEncodeNullable(typeArgumentPrimitive, Id("v")),
-				If(Id("err").Op("!=").Nil()).Block(
-					Return(List(Nil(), Id("err"))),
-				),
-			))
-		} else {
-			stmts = append(stmts, For(List(Id("_"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
-				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(typeArgumentPrimitive, Id("v"))),
-				If(Id("err").Op("!=").Nil()).Block(
-					Return(List(Nil(), Id("err"))),
-				),
-			))
-		}
-	} else if field.Type.Primitive == "map" {
-		keyArgumentPrimitive := field.Type.TypeArguments[0].Primitive
-		valueArgumentPrimitive := field.Type.TypeArguments[1].Primitive
-
-		stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeMapLen").Params(Id("len").Params(Id("u").Dot(field.GoName))))
-		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-			Return(List(Nil(), Id("err"))),
-		))
-
-		if field.Type.TypeArguments[1].Nullable {
-			stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
-				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(keyArgumentPrimitive, Id("k"))),
-				If(Id("err").Op("!=").Nil()).Block(
-					Return(List(Nil(), Id("err"))),
-				),
-
-				GetEncodeNullable(valueArgumentPrimitive, Id("v")),
-				If(Id("err").Op("!=").Nil()).Block(
-					Return(List(Nil(), Id("err"))),
-				),
-			))
-		} else {
-			stmts = append(stmts, For(List(Id("k"), Id("v")).Op(":=").Range().Id("u").Dot(field.GoName)).Block(
-				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(keyArgumentPrimitive, Id("k"))),
-				If(Id("err").Op("!=").Nil()).Block(
-					Return(List(Nil(), Id("err"))),
-				),
-
-				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(valueArgumentPrimitive, Id("v"))),
-				If(Id("err").Op("!=").Nil()).Block(
-					Return(List(Nil(), Id("err"))),
-				),
-			))
-		}
-	} else if field.Type.Primitive == "custom" {
 		importId := field.Type.ImportId
 		td, ok := (*b.typeRegistry)[importId]
 		if !ok {
 			panic(fmt.Sprintf("type with id %s not found", importId))
 		}
 
-		if td.Definition.Modifier == "enum" {
-			stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeUint8").Params(Id("u").Dot(field.GoName).Dot("Index").Call()))
-			stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-				Return(List(Nil(), Id("err"))),
-			))
+		if td.Definition.Modifier == enumModifier {
+			return fmt.Sprintf(
+				`
+				err = writer.EncodeUint8(u.%s.Index())
+				if err != nil {
+					return nil, err
+				}
+			`, field.GoName)
 		} else {
 			varName := fmt.Sprintf("%sBinary", field.GoName)
-			stmts = append(stmts, List(Id(varName), Id("err")).Op(":=").Id("u").Dot(field.GoName).Dot("Serialize").Call())
-			stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-				Return(List(Nil(), Id("err"))),
-			))
-
-			stmts = append(stmts, Id("err").Op("=").Id("writer").Dot("EncodeBytes").Params(Id(varName)))
-			stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-				Return(List(Nil(), Id("err"))),
-			))
+			if field.Type.Nullable {
+				return fmt.Sprintf(
+					`
+					if u.HasValue() {
+						%[1]s, err := u.%s.GetValue().Serialize()
+						if err != nil {
+							return nil, err
+						}
+		
+						err = writer.EncodeBytes(%[1]s)
+						if err != nil {
+							return nil, err
+						}
+					} else {
+						err = writer.EncodeNil()
+						if err != nil {
+							return nil, err
+						}
+					}
+					
+				`, varName, field.GoName)
+			} else {
+				return fmt.Sprintf(
+					`
+					%[1]s, err := u.%s.Serialize()
+					if err != nil {
+						return nil, err
+					}
+	
+					err = writer.EncodeBytes(%[1]s)
+					if err != nil {
+						return nil, err
+					}
+				`, varName, field.GoName)
+			}
 		}
-
 	} else {
 		if field.Type.Nullable {
-			stmts = append(stmts, If(
-				Id("u").Dot(field.GoName).Dot("HasValue").Call(),
-			).Block(
-				Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.GoName).Dot("GetValue").Call()))).Else().Block(
-				Id("err").Op("=").Custom(Options{}, GetEncodeNil()),
-			))
+			return fmt.Sprintf(
+				`
+				if u.%[1]s.HasValue() {
+					err = writer.%s(u.%[1]s.GetValue())
+				} else {
+					err = writer.EncodeNil()
+				}
+
+				if err != nil {
+					return nil, err
+				}
+			`, field.GoName, encoderMapper[field.Type.Primitive])
 		} else {
-			stmts = append(stmts, Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(field.Type.Primitive, Id("u").Dot(field.GoName))))
+			return fmt.Sprintf(
+				`
+				err = writer.%s(u.%s)
+				if err != nil {
+					return nil, err
+				}
+			`, encoderMapper[field.Type.Primitive], field.GoName)
 		}
-
-		stmts = append(stmts, If(Id("err").Op("!=").Nil()).Block(
-			Return(List(Nil(), Id("err"))),
-		))
-
 	}
-
-	return stmts
-}*/
-
-// func GetEncodeNullable(fieldPrimitive string, field *Statement) *Statement {
-// 	return If(
-// 		field.Clone().Dot("HasValue").Call(),
-// 	).Block(
-// 		Id("err").Op("=").Custom(Options{}, GetEncodeTypeStatement(fieldPrimitive, field.Clone().Dot("GetValue").Call()))).Else().Block(
-// 		Id("err").Op("=").Custom(Options{}, GetEncodeNil()),
-// 	)
-// }
-
-// func GetEncodeTypeStatement(primitive string, fieldName *Statement) *Statement {
-// 	encoder, ok := encoderMapper[primitive]
-// 	if !ok {
-// 		panic(fmt.Sprintf("unknown encoder for %s", primitive))
-// 	}
-
-// 	return Id("writer").Dot(encoder).Params(fieldName)
-// }
-
-// func GetEncodeNil() *Statement {
-// 	return Id("writer").Dot("EncodeNil").Call()
-// }
+}
 
 // func (b *Builder) WriteDecodeField(field *TypeFieldDefinition, pkg string) []*Statement {
 // 	stmts := []*Statement{}

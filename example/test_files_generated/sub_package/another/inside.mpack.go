@@ -15,5 +15,20 @@ func (u *AnotherType) Serialize() ([]byte, error) {
 	writer := msgpack.NewEncoder(buf)
 	var err error
 
+	err = writer.EncodeString(u.First)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeBool(u.Second)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeUint8(u.Status.Index())
+	if err != nil {
+		return nil, err
+	}
+
 	return buf.Bytes(), nil
 }

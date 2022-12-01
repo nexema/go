@@ -144,5 +144,2249 @@ func (u *MapTest) Serialize() ([]byte, error) {
 	writer := msgpack.NewEncoder(buf)
 	var err error
 
+	err = writer.EncodeMapLen(len(u.A1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A1 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A2 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A3 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A4 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A5 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A6 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A7 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A8 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A9 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A10 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A11 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.A12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.A12 {
+		err = writer.EncodeString(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B1 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B2 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B3 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B4 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B5 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B6 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B7 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B8 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B9 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B10 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B11 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.B12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.B12 {
+		err = writer.EncodeUint8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C1 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C2 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C3 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C4 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C5 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C6 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C7 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C8 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C9 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C10 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C11 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.C12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.C12 {
+		err = writer.EncodeUint16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D1 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D2 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D3 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D4 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D5 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D6 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D7 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D8 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D9 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D10 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D11 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.D12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.D12 {
+		err = writer.EncodeUint32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E1 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E2 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E3 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E4 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E5 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E6 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E7 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E8 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E9 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E10 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E11 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.E12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.E12 {
+		err = writer.EncodeUint64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F1 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F2 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F3 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F4 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F5 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F6 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F7 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F8 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F9 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F10 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F11 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.F12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.F12 {
+		err = writer.EncodeInt8(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G1 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G2 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G3 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G4 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G5 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G6 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G7 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G8 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G9 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G10 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G11 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.G12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.G12 {
+		err = writer.EncodeInt16(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H1 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H2 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H3 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H4 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H5 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H6 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H7 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H8 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H9 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H10 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H11 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.H12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.H12 {
+		err = writer.EncodeInt32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I1 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I2 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I3 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I4 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I5 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I6 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I7 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I8 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I9 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I10 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I11 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.I12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.I12 {
+		err = writer.EncodeInt64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J1 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J2 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J3 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J4 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J5 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J6 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J7 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J8 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J9 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J10 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J11 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.J12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.J12 {
+		err = writer.EncodeFloat32(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K1))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K1 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeBool(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K2))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K2 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeString(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K3))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K3 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K4))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K4 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K5))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K5 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K6))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K6 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeUint64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K7))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K7 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt8(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K8))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K8 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt16(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K9))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K9 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K10))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K10 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeInt64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K11))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K11 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat32(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err = writer.EncodeMapLen(len(u.K12))
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range u.K12 {
+		err = writer.EncodeFloat64(k)
+		if err != nil {
+			return nil, err
+		}
+
+		err = writer.EncodeFloat64(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return buf.Bytes(), nil
 }

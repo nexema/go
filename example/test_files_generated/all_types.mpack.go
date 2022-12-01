@@ -37,6 +37,71 @@ func (u *AllTypes) Serialize() ([]byte, error) {
 	writer := msgpack.NewEncoder(buf)
 	var err error
 
+	err = writer.EncodeBool(u.A)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeString(u.B)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeUint8(u.C)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeUint16(u.D)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeUint32(u.E)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeUint64(u.F)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeInt8(u.G)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeInt16(u.H)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeInt32(u.I)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeInt64(u.J)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeFloat32(u.K)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeFloat64(u.L)
+	if err != nil {
+		return nil, err
+	}
+
+	err = writer.EncodeBytes(u.M)
+	if err != nil {
+		return nil, err
+	}
+
 	err = writer.EncodeArrayLen(len(u.N))
 	if err != nil {
 		return nil, err
