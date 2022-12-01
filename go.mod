@@ -3,7 +3,6 @@ module github.com/messagepack-schema/go
 go 1.19
 
 require (
-	github.com/dave/jennifer v1.6.0
 	github.com/iancoleman/strcase v0.2.0
 	github.com/stretchr/testify v1.8.1
 	github.com/vmihailenco/tagparser/v2 v2.0.0

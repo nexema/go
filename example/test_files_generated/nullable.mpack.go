@@ -1,11 +1,8 @@
 package test_files
 
-import (
-	"bytes"
-
-	runtime "github.com/messagepack-schema/go/runtime"
-	msgpack "github.com/messagepack-schema/go/runtime/msgpack"
-)
+import "github.com/messagepack-schema/go/runtime"
+import "github.com/messagepack-schema/go/runtime/msgpack"
+import "bytes"
 
 type Nullables struct {
 	A1  runtime.Nullable[bool]
@@ -29,237 +26,437 @@ func (u *Nullables) Serialize() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	writer := msgpack.NewEncoder(buf)
 	var err error
+
 	if u.A1.HasValue() {
 		err = writer.EncodeBool(u.A1.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A2.HasValue() {
 		err = writer.EncodeString(u.A2.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A3.HasValue() {
 		err = writer.EncodeUint8(u.A3.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A4.HasValue() {
 		err = writer.EncodeUint16(u.A4.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A5.HasValue() {
 		err = writer.EncodeUint32(u.A5.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A6.HasValue() {
 		err = writer.EncodeUint64(u.A6.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A7.HasValue() {
 		err = writer.EncodeInt8(u.A7.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A8.HasValue() {
 		err = writer.EncodeInt16(u.A8.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A9.HasValue() {
 		err = writer.EncodeInt32(u.A9.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A10.HasValue() {
 		err = writer.EncodeInt64(u.A10.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A11.HasValue() {
 		err = writer.EncodeFloat32(u.A11.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A12.HasValue() {
 		err = writer.EncodeFloat64(u.A12.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	if u.A13.HasValue() {
 		err = writer.EncodeBytes(u.A13.GetValue())
 	} else {
 		err = writer.EncodeNil()
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	err = writer.EncodeArrayLen(len(u.A14))
 	if err != nil {
 		return nil, err
 	}
+
 	for _, v := range u.A14 {
 		if v.HasValue() {
 			err = writer.EncodeBool(v.GetValue())
 		} else {
 			err = writer.EncodeNil()
 		}
-		if err != nil {
-			return nil, err
-		}
 	}
+
 	err = writer.EncodeMapLen(len(u.A15))
 	if err != nil {
 		return nil, err
 	}
+
 	for k, v := range u.A15 {
 		err = writer.EncodeString(k)
 		if err != nil {
 			return nil, err
 		}
+
 		if v.HasValue() {
 			err = writer.EncodeFloat32(v.GetValue())
 		} else {
 			err = writer.EncodeNil()
 		}
+
 		if err != nil {
 			return nil, err
 		}
 	}
+
 	return buf.Bytes(), nil
 }
+
 func (u *Nullables) MustSerialize() []byte {
 	buf, err := u.Serialize()
 	if err != nil {
 		panic(err)
 	}
+
 	return buf
 }
+
 func (u *Nullables) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	decoder := msgpack.NewDecoder(reader)
 	var err error
-	u.A1, err = decoder.DecodeBool()
+	var isNextNil bool
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A2, err = decoder.DecodeString()
+
+	if isNextNil {
+		u.A1 = runtime.NewNull[bool]()
+	} else {
+		value, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.A1 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A3, err = decoder.DecodeUint8()
+
+	if isNextNil {
+		u.A2 = runtime.NewNull[string]()
+	} else {
+		value, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.A2 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A4, err = decoder.DecodeUint16()
+
+	if isNextNil {
+		u.A3 = runtime.NewNull[uint8]()
+	} else {
+		value, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.A3 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A5, err = decoder.DecodeUint32()
+
+	if isNextNil {
+		u.A4 = runtime.NewNull[uint16]()
+	} else {
+		value, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.A4 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A6, err = decoder.DecodeUint64()
+
+	if isNextNil {
+		u.A5 = runtime.NewNull[uint32]()
+	} else {
+		value, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.A5 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A7, err = decoder.DecodeInt8()
+
+	if isNextNil {
+		u.A6 = runtime.NewNull[uint64]()
+	} else {
+		value, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.A6 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A8, err = decoder.DecodeInt16()
+
+	if isNextNil {
+		u.A7 = runtime.NewNull[int8]()
+	} else {
+		value, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.A7 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A9, err = decoder.DecodeInt32()
+
+	if isNextNil {
+		u.A8 = runtime.NewNull[int16]()
+	} else {
+		value, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.A8 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A10, err = decoder.DecodeInt64()
+
+	if isNextNil {
+		u.A9 = runtime.NewNull[int32]()
+	} else {
+		value, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.A9 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A11, err = decoder.DecodeFloat32()
+
+	if isNextNil {
+		u.A10 = runtime.NewNull[int64]()
+	} else {
+		value, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.A10 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A12, err = decoder.DecodeFloat64()
+
+	if isNextNil {
+		u.A11 = runtime.NewNull[float32]()
+	} else {
+		value, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.A11 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
-	u.A13, err = decoder.DecodeBytes()
+
+	if isNextNil {
+		u.A12 = runtime.NewNull[float64]()
+	} else {
+		value, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.A12 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
 	if err != nil {
 		return err
 	}
+
+	if isNextNil {
+		u.A13 = runtime.NewNull[[]byte]()
+	} else {
+		value, err := decoder.DecodeBytes()
+		if err != nil {
+			return err
+		}
+
+		u.A13 = runtime.NewNullable(value)
+	}
+
 	A14Len, err := decoder.DecodeArrayLen()
 	if err != nil {
 		return err
 	}
-	u.A14 = make([]bool, A14Len)
+
+	u.A14 = make([]runtime.Nullable[bool], A14Len)
 	for i := 0; i < A14Len; i++ {
-		u.A14[i], err = decoder.DecodeBool()
+		value, err := decoder.DecodeBool()
 		if err != nil {
 			return err
 		}
+
+		u.A14[i] = runtime.NewNullable(value)
 	}
+
 	A15Len, err := decoder.DecodeMapLen()
 	if err != nil {
 		return err
 	}
-	u.A15 = make(map[string]float32)
+
+	u.A15 = make(map[string]runtime.Nullable[float32])
 	for i := 0; i < A15Len; i++ {
 		k, err := decoder.DecodeString()
 		if err != nil {
 			return err
 		}
+
 		v, err := decoder.DecodeFloat32()
 		if err != nil {
 			return err
 		}
-		u.A15[k] = v
+
+		u.A15[k] = runtime.NewNullable(v)
 	}
+
 	return nil
 }
-func (u *Nullables) MergeUsing(other *Nullables) error {
+
+func (u *Nullables) MergeUsing(other *Nullables) {
 	u.A1 = other.A1
 	u.A2 = other.A2
 	u.A3 = other.A3
@@ -275,5 +472,4 @@ func (u *Nullables) MergeUsing(other *Nullables) error {
 	u.A13 = other.A13
 	u.A14 = other.A14
 	u.A15 = other.A15
-	return nil
 }
