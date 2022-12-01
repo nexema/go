@@ -1,8 +1,8 @@
 package test_files
 
+import "bytes"
 import "github.com/messagepack-schema/go/runtime"
 import "github.com/messagepack-schema/go/runtime/msgpack"
-import "bytes"
 
 type Nullables struct {
 	A1  runtime.Nullable[bool]

@@ -112,10 +112,12 @@ func (b *Builder) generateFile(fd *FileDeclaration) (sourceCode string, err erro
 			break
 
 		case "enum":
-			// err := b.generateEnum(t, file)
-			// if err != nil {
-			// 	return "", err
-			// }
+			sourceCode, err := b.generateEnum(t)
+			if err != nil {
+				return "", err
+			}
+
+			typesSourceCode[i] = sourceCode
 
 		default:
 			return "", fmt.Errorf("unknown type modifier %s", t.Modifier)
@@ -169,86 +171,6 @@ func (b *Builder) generateStruct(t *SchemaTypeDefinition) (sourceCode string, er
 	return sb.String(), nil
 }
 
-// func (b *Builder) generateEnum(t *SchemaTypeDefinition, file *File) error {
-
-// 	// Create Enum struct
-// 	file.Type().Id(t.Name).Struct(
-// 		Id("index").Uint8(),
-// 		Id("name").String(),
-// 	)
-
-// 	lowerCamel := strcase.ToLowerCamel(t.Name)
-// 	pickerName := fmt.Sprintf("%sPicker", lowerCamel)
-
-// 	// create enum picker struct
-// 	file.Type().Id(pickerName).Struct()
-
-// 	// create enum picker instance
-// 	file.Var().Id(fmt.Sprintf("%sPicker", t.Name)).Id(pickerName).Op("=").Id(pickerName).Block()
-
-// 	//write each item in enum
-// 	for _, field := range t.Fields {
-// 		file.Var().Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name))).Id(t.Name).Op("=").Id(t.Name).Values(Dict{
-// 			Id("index"): Lit(field.Index),
-// 			Id("name"):  Lit(field.Name),
-// 		})
-// 	}
-
-// 	// Write Picker method for each field
-// 	for _, field := range t.Fields {
-// 		file.Func().Params(Id(pickerName)).Id(strcase.ToCamel(field.Name)).Params().Params(Id(t.Name)).Block(
-// 			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
-// 		)
-// 	}
-
-// 	// Write Index() method
-// 	file.Func().Params(Id("e").Id(t.Name)).Id("Index").Params().Params(Uint8()).Block(
-// 		Return(Id("e").Dot("index")),
-// 	)
-
-// 	// Write Name() method
-// 	file.Func().Params(Id("e").Id(t.Name)).Id("Name").Params().Params(String()).Block(
-// 		Return(Id("e").Dot("name")),
-// 	)
-
-// 	// Write ByIndex method
-// 	byIndexStmts := make([]Code, 0)
-// 	for _, field := range t.Fields {
-// 		byIndexStmts = append(byIndexStmts, Case(
-// 			Lit(field.Index),
-// 		).Block(
-// 			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
-// 		))
-// 	}
-
-// 	byIndexStmts = append(byIndexStmts, Default().Block(
-// 		Panic(Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("%s with index %%v not found", t.Name)), Id("index"))),
-// 	))
-
-// 	file.Func().Params(Id(pickerName)).Id("ByIndex").Params(Id("index").Uint8()).Params(Id(t.Name)).Block(
-// 		Switch(Id("index")).Block(byIndexStmts...),
-// 	)
-
-// 	byNameStmts := make([]Code, 0)
-// 	for _, field := range t.Fields {
-// 		byNameStmts = append(byNameStmts, Case(
-// 			Lit(field.Name),
-// 		).Block(
-// 			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
-// 		))
-// 	}
-
-// 	byNameStmts = append(byNameStmts, Default().Block(
-// 		Panic(Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("%s with name %%v not found", t.Name)), Id("name"))),
-// 	))
-
-// 	file.Func().Params(Id(pickerName)).Id("ByName").Params(Id("name").String()).Params(Id(t.Name)).Block(
-// 		Switch(Id("name")).Block(byNameStmts...),
-// 	)
-
-// 	return nil
-// }
-
 func (b *Builder) writeSerializeMethod(sb *strings.Builder, t *SchemaTypeDefinition) {
 
 	stmts := make([]string, len(t.Fields))
@@ -269,7 +191,6 @@ func (u *%s) Serialize() ([]byte, error) {
 }%s`, t.Name, strings.Join(stmts, "\n"), "\n")
 
 	sb.WriteString(body)
-
 }
 
 func (b *Builder) writeMustSerializeMethod(sb *strings.Builder, t *SchemaTypeDefinition) {
@@ -332,6 +253,128 @@ func (b *Builder) writeMergeUsing(sb *strings.Builder, t *SchemaTypeDefinition) 
 
 	sb.WriteString(body)
 }
+
+func (b *Builder) generateEnum(t *SchemaTypeDefinition) (sourceCode string, err error) {
+
+	b.currentContext.MustImport("fmt")
+
+	lowerCamel := strcase.ToLowerCamel(t.Name)
+	pickerName := fmt.Sprintf("%sPicker", lowerCamel)
+	sb := new(strings.Builder)
+
+	// Create enum struct
+	sb.WriteString(fmt.Sprintf(
+		`
+		type %s struct {
+			index uint8
+			name string
+		}%s
+	`, t.Name, "\n"))
+
+	// create enum picker struct
+	sb.WriteString(fmt.Sprintf(`type %s struct {}%s`, pickerName, "\n"))
+
+	// create enum picker instance
+	sb.WriteString(fmt.Sprintf(`var %[1]sPicker %[2]s = %[2]s{}%s`, t.Name, pickerName, "\n"))
+
+	// write each field as enum a value
+	stmts := make([]string, len(t.Fields))
+	for i, field := range t.Fields {
+		stmts[i] = fmt.Sprintf(`var %s%s %[3]s = %[3]s{index: %v,name: "%s"}`, lowerCamel, strcase.ToCamel(field.Name), t.Name, field.Index, field.Name)
+	}
+	sb.WriteString(strings.Join(stmts, "\n"))
+
+	// write picker for each enum value
+	for i, field := range t.Fields {
+		stmts[i] = fmt.Sprintf(
+			`
+			func (%s) %[2]s() %s {
+				return %s%[2]s
+			}
+		`, pickerName, strcase.ToCamel(field.Name), t.Name, lowerCamel)
+	}
+	sb.WriteString(strings.Join(stmts, "\n"))
+
+	// write Index() method
+	sb.WriteString(fmt.Sprintf(
+		`
+	func (e %s) Index() uint8 {
+		return e.index
+	}
+	%s`, t.Name, "\n"))
+
+	// write Name() method
+	sb.WriteString(fmt.Sprintf(
+		`
+	func (e %s) Name() string {
+		return e.name
+	}
+	%s`, t.Name, "\n"))
+
+	// write ByIndex() method
+	for i, field := range t.Fields {
+		stmts[i] = fmt.Sprintf(
+			`
+		case %v:
+			return %s%s
+		`, field.Index, lowerCamel, strcase.ToCamel(field.Name))
+	}
+
+	sb.WriteString(fmt.Sprintf(
+		`
+	func (%s) ByIndex(index uint8) %s {
+		switch index {
+			%s
+		default:
+			panic(fmt.Sprintf("%s with index %%v not found", index))
+		}
+	}
+	%s`, pickerName, t.Name, strings.Join(stmts, "\n"), t.Name, "\n"))
+
+	// write ByName method
+	for i, field := range t.Fields {
+		stmts[i] = fmt.Sprintf(
+			`
+		case "%s":
+			return %s%s
+		`, field.Name, lowerCamel, strcase.ToCamel(field.Name))
+	}
+
+	sb.WriteString(fmt.Sprintf(
+		`
+	func (%s) ByName(name string) %s {
+		switch name {
+			%s
+		default:
+			panic(fmt.Sprintf("%s with name %%v not found", name))
+		}
+	}
+	%s`, pickerName, t.Name, strings.Join(stmts, "\n"), t.Name, "\n"))
+
+	return sb.String(), nil
+}
+
+/*
+
+	byNameStmts := make([]Code, 0)
+	for _, field := range t.Fields {
+		byNameStmts = append(byNameStmts, Case(
+			Lit(field.Name),
+		).Block(
+			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
+		))
+	}
+
+	byNameStmts = append(byNameStmts, Default().Block(
+		Panic(Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("%s with name %%v not found", t.Name)), Id("name"))),
+	))
+
+	file.Func().Params(Id(pickerName)).Id("ByName").Params(Id("name").String()).Params(Id(t.Name)).Block(
+		Switch(Id("name")).Block(byNameStmts...),
+	)
+
+	return nil
+}*/
 
 func (b *Builder) sanitize() {
 	b.sanitizePkg(b.input.RootPackage)

@@ -1,5 +1,6 @@
 package test_files
 
+import "fmt"
 import "github.com/messagepack-schema/go/runtime/msgpack"
 import "bytes"
 
@@ -70,4 +71,70 @@ func (u *AnotherType) MergeUsing(other *AnotherType) {
 	u.First = other.First
 	u.Second = other.Second
 	u.Status = other.Status
+}
+
+type AnotherEnum struct {
+	index uint8
+	name  string
+}
+
+type anotherEnumPicker struct{}
+
+var AnotherEnumPicker anotherEnumPicker = anotherEnumPicker{}
+var anotherEnumUnknown AnotherEnum = AnotherEnum{index: 0, name: "unknown"}
+var anotherEnumSuccess AnotherEnum = AnotherEnum{index: 1, name: "success"}
+var anotherEnumFailed AnotherEnum = AnotherEnum{index: 2, name: "failed"}
+
+func (anotherEnumPicker) Unknown() AnotherEnum {
+	return anotherEnumUnknown
+}
+
+func (anotherEnumPicker) Success() AnotherEnum {
+	return anotherEnumSuccess
+}
+
+func (anotherEnumPicker) Failed() AnotherEnum {
+	return anotherEnumFailed
+}
+
+func (e AnotherEnum) Index() uint8 {
+	return e.index
+}
+
+func (e AnotherEnum) Name() string {
+	return e.name
+}
+
+func (anotherEnumPicker) ByIndex(index uint8) AnotherEnum {
+	switch index {
+
+	case 0:
+		return anotherEnumUnknown
+
+	case 1:
+		return anotherEnumSuccess
+
+	case 2:
+		return anotherEnumFailed
+
+	default:
+		panic(fmt.Sprintf("AnotherEnum with index %v not found", index))
+	}
+}
+
+func (anotherEnumPicker) ByName(name string) AnotherEnum {
+	switch name {
+
+	case "unknown":
+		return anotherEnumUnknown
+
+	case "success":
+		return anotherEnumSuccess
+
+	case "failed":
+		return anotherEnumFailed
+
+	default:
+		panic(fmt.Sprintf("AnotherEnum with name %v not found", name))
+	}
 }
