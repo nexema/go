@@ -109,7 +109,14 @@ func (b *Builder) generateFile(fd *FileDeclaration) (sourceCode string, err erro
 			b.currentContext.MustImport("bytes")
 
 		case "union":
-			break
+			sourceCode, err := b.generateUnion(t, pkgDeclaration)
+			if err != nil {
+				return "", err
+			}
+
+			typesSourceCode[i] = sourceCode
+			b.currentContext.MustImport("github.com/messagepack-schema/go/runtime/msgpack")
+			b.currentContext.MustImport("bytes")
 
 		case "enum":
 			sourceCode, err := b.generateEnum(t)

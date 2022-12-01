@@ -1,8 +1,8 @@
 package test_files
 
-import "fmt"
 import "github.com/messagepack-schema/go/runtime/msgpack"
 import "bytes"
+import "fmt"
 
 type AnotherType struct {
 	First  string
@@ -80,20 +80,20 @@ type AnotherEnum struct {
 
 type anotherEnumPicker struct{}
 
-var AnotherEnumPicker anotherEnumPicker = anotherEnumPicker{}
+var AnotherEnumPicker *anotherEnumPicker = &anotherEnumPicker{}
 var anotherEnumUnknown AnotherEnum = AnotherEnum{index: 0, name: "unknown"}
 var anotherEnumSuccess AnotherEnum = AnotherEnum{index: 1, name: "success"}
 var anotherEnumFailed AnotherEnum = AnotherEnum{index: 2, name: "failed"}
 
-func (anotherEnumPicker) Unknown() AnotherEnum {
+func (*anotherEnumPicker) Unknown() AnotherEnum {
 	return anotherEnumUnknown
 }
 
-func (anotherEnumPicker) Success() AnotherEnum {
+func (*anotherEnumPicker) Success() AnotherEnum {
 	return anotherEnumSuccess
 }
 
-func (anotherEnumPicker) Failed() AnotherEnum {
+func (*anotherEnumPicker) Failed() AnotherEnum {
 	return anotherEnumFailed
 }
 
@@ -105,7 +105,7 @@ func (e AnotherEnum) Name() string {
 	return e.name
 }
 
-func (anotherEnumPicker) ByIndex(index uint8) AnotherEnum {
+func (*anotherEnumPicker) ByIndex(index uint8) AnotherEnum {
 	switch index {
 
 	case 0:
@@ -122,7 +122,7 @@ func (anotherEnumPicker) ByIndex(index uint8) AnotherEnum {
 	}
 }
 
-func (anotherEnumPicker) ByName(name string) AnotherEnum {
+func (*anotherEnumPicker) ByName(name string) AnotherEnum {
 	switch name {
 
 	case "unknown":

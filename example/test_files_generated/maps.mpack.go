@@ -1,7 +1,7 @@
 package test_files
 
-import "github.com/messagepack-schema/go/runtime/msgpack"
 import "bytes"
+import "github.com/messagepack-schema/go/runtime/msgpack"
 
 type MapTest struct {
 	A1  map[string]bool

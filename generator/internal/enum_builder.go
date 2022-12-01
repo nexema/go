@@ -28,7 +28,7 @@ func (b *Builder) generateEnum(t *SchemaTypeDefinition) (sourceCode string, err 
 	sb.WriteString(fmt.Sprintf(`type %s struct {}%s`, pickerName, "\n"))
 
 	// create enum picker instance
-	sb.WriteString(fmt.Sprintf(`var %[1]sPicker %[2]s = %[2]s{}%s`, t.Name, pickerName, "\n"))
+	sb.WriteString(fmt.Sprintf(`var %[1]sPicker *%[2]s = &%[2]s{}%s`, t.Name, pickerName, "\n"))
 
 	// write each field as enum a value
 	stmts := make([]string, len(t.Fields))
@@ -41,7 +41,7 @@ func (b *Builder) generateEnum(t *SchemaTypeDefinition) (sourceCode string, err 
 	for i, field := range t.Fields {
 		stmts[i] = fmt.Sprintf(
 			`
-			func (%s) %[2]s() %s {
+			func (*%s) %[2]s() %s {
 				return %s%[2]s
 			}
 		`, pickerName, strcase.ToCamel(field.Name), t.Name, lowerCamel)
@@ -75,7 +75,7 @@ func (b *Builder) generateEnum(t *SchemaTypeDefinition) (sourceCode string, err 
 
 	sb.WriteString(fmt.Sprintf(
 		`
-	func (%s) ByIndex(index uint8) %s {
+	func (*%s) ByIndex(index uint8) %s {
 		switch index {
 			%s
 		default:
@@ -95,7 +95,7 @@ func (b *Builder) generateEnum(t *SchemaTypeDefinition) (sourceCode string, err 
 
 	sb.WriteString(fmt.Sprintf(
 		`
-	func (%s) ByName(name string) %s {
+	func (*%s) ByName(name string) %s {
 		switch name {
 			%s
 		default:

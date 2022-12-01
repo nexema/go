@@ -9,25 +9,25 @@ type EnumType struct {
 
 type enumTypePicker struct{}
 
-var EnumTypePicker enumTypePicker = enumTypePicker{}
+var EnumTypePicker *enumTypePicker = &enumTypePicker{}
 var enumTypeUnknown EnumType = EnumType{index: 0, name: "unknown"}
 var enumTypeValue EnumType = EnumType{index: 1, name: "value"}
 var enumTypeSecond EnumType = EnumType{index: 2, name: "second"}
 var enumTypeRandom1 EnumType = EnumType{index: 3, name: "random1"}
 
-func (enumTypePicker) Unknown() EnumType {
+func (*enumTypePicker) Unknown() EnumType {
 	return enumTypeUnknown
 }
 
-func (enumTypePicker) Value() EnumType {
+func (*enumTypePicker) Value() EnumType {
 	return enumTypeValue
 }
 
-func (enumTypePicker) Second() EnumType {
+func (*enumTypePicker) Second() EnumType {
 	return enumTypeSecond
 }
 
-func (enumTypePicker) Random1() EnumType {
+func (*enumTypePicker) Random1() EnumType {
 	return enumTypeRandom1
 }
 
@@ -39,7 +39,7 @@ func (e EnumType) Name() string {
 	return e.name
 }
 
-func (enumTypePicker) ByIndex(index uint8) EnumType {
+func (*enumTypePicker) ByIndex(index uint8) EnumType {
 	switch index {
 
 	case 0:
@@ -59,7 +59,7 @@ func (enumTypePicker) ByIndex(index uint8) EnumType {
 	}
 }
 
-func (enumTypePicker) ByName(name string) EnumType {
+func (*enumTypePicker) ByName(name string) EnumType {
 	switch name {
 
 	case "unknown":

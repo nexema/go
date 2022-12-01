@@ -8,7 +8,6 @@ const listPrimitive = "list"
 const mapPrimitive = "map"
 const customPrimitive = "custom"
 const enumModifier = "enum"
-const structModifier = "struct"
 
 var primitiveMapper map[string]string = map[string]string{
 	"boolean": "bool",
@@ -24,6 +23,39 @@ var primitiveMapper map[string]string = map[string]string{
 	"float32": "float32",
 	"float64": "float64",
 	"binary":  "[]byte",
+}
+
+var encoderMapper map[string]string = map[string]string{
+	"boolean":  "EncodeBool",
+	"string":   "EncodeString",
+	"uint8":    "EncodeUint8",
+	"uint16":   "EncodeUint16",
+	"uint32":   "EncodeUint32",
+	"uint64":   "EncodeUint64",
+	"int8":     "EncodeInt8",
+	"int16":    "EncodeInt16",
+	"int32":    "EncodeInt32",
+	"int64":    "EncodeInt64",
+	"float32":  "EncodeFloat32",
+	"float64":  "EncodeFloat64",
+	"binary":   "EncodeBytes",
+	"nullable": "EncodeNullable",
+}
+
+var decoderMapper map[string]string = map[string]string{
+	"boolean": "DecodeBool",
+	"string":  "DecodeString",
+	"uint8":   "DecodeUint8",
+	"uint16":  "DecodeUint16",
+	"uint32":  "DecodeUint32",
+	"uint64":  "DecodeUint64",
+	"int8":    "DecodeInt8",
+	"int16":   "DecodeInt16",
+	"int32":   "DecodeInt32",
+	"int64":   "DecodeInt64",
+	"float32": "DecodeFloat32",
+	"float64": "DecodeFloat64",
+	"binary":  "DecodeBytes",
 }
 
 func (b *Builder) GetGoType(field SchemaFieldType, referencePkg string) string {
@@ -65,172 +97,6 @@ func (b *Builder) GetGoType(field SchemaFieldType, referencePkg string) string {
 		return primitiveMapper[field.Primitive]
 	}
 }
-
-var encoderMapper map[string]string = map[string]string{
-	"boolean":  "EncodeBool",
-	"string":   "EncodeString",
-	"uint8":    "EncodeUint8",
-	"uint16":   "EncodeUint16",
-	"uint32":   "EncodeUint32",
-	"uint64":   "EncodeUint64",
-	"int8":     "EncodeInt8",
-	"int16":    "EncodeInt16",
-	"int32":    "EncodeInt32",
-	"int64":    "EncodeInt64",
-	"float32":  "EncodeFloat32",
-	"float64":  "EncodeFloat64",
-	"binary":   "EncodeBytes",
-	"nullable": "EncodeNullable",
-}
-
-var decoderMapper map[string]string = map[string]string{
-	"boolean": "DecodeBool",
-	"string":  "DecodeString",
-	"uint8":   "DecodeUint8",
-	"uint16":  "DecodeUint16",
-	"uint32":  "DecodeUint32",
-	"uint64":  "DecodeUint64",
-	"int8":    "DecodeInt8",
-	"int16":   "DecodeInt16",
-	"int32":   "DecodeInt32",
-	"int64":   "DecodeInt64",
-	"float32": "DecodeFloat32",
-	"float64": "DecodeFloat64",
-	"binary":  "DecodeBytes",
-}
-
-// func (b *Builder) WriteField(t SchemaFieldType, referencePkg string) string {
-// 	return b.WritePrimitive(t.Primitive, t.Nullable, t.TypeArguments, t.ImportId, referencePkg)
-// }
-
-// func (b *Builder) WritePrimitive(t string, nullable bool, arguments []SchemaFieldType, importId string, referencePkg string) string {
-// 	switch t {
-// 	case "string":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(String())
-// 		} else {
-// 			stmt.String()
-// 		}
-
-// 	case "int8":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Int8())
-// 		} else {
-// 			stmt.Int8()
-// 		}
-
-// 	case "int16":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Int16())
-// 		} else {
-// 			stmt.Int16()
-// 		}
-
-// 	case "int32":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Int32())
-// 		} else {
-// 			stmt.Int32()
-// 		}
-
-// 	case "int64":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Int64())
-// 		} else {
-// 			stmt.Int64()
-// 		}
-
-// 	case "uint8":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Uint8())
-// 		} else {
-// 			stmt.Uint8()
-// 		}
-
-// 	case "uint16":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Uint16())
-// 		} else {
-// 			stmt.Uint16()
-// 		}
-
-// 	case "uint32":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Uint32())
-// 		} else {
-// 			stmt.Uint32()
-// 		}
-
-// 	case "uint64":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Uint64())
-// 		} else {
-// 			stmt.Uint64()
-// 		}
-
-// 	case "boolean":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Bool())
-// 		} else {
-// 			stmt.Bool()
-// 		}
-
-// 	case "float32":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Float32())
-// 		} else {
-// 			stmt.Float32()
-// 		}
-
-// 	case "float64":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Float64())
-// 		} else {
-// 			stmt.Float64()
-// 		}
-
-// 	case "binary":
-// 		if nullable {
-// 			stmt.Qual(runtimeImport, "Nullable").Types(Index().Byte())
-// 		} else {
-// 			stmt.Index().Byte()
-// 		}
-
-// 	case "list":
-// 		arrType := arguments[0].Primitive
-// 		if arguments[0].Nullable {
-// 			b.WritePrimitive(stmt.Index(), arrType, true, nil, importId, referencePkg)
-// 		} else {
-// 			b.WritePrimitive(stmt.Index(), arrType, false, nil, importId, referencePkg)
-// 		}
-
-// 	case "map":
-// 		keyType := arguments[0].Primitive
-// 		valueType := arguments[1].Primitive
-// 		if arguments[1].Nullable {
-// 			b.WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, true, nil, importId, referencePkg)
-// 		} else {
-// 			b.WritePrimitive(stmt.Map(primitiveMapper[keyType]), valueType, false, nil, importId, referencePkg)
-// 		}
-
-// 	case "custom":
-// 		importType, ok := (*b.typeRegistry)[importId]
-// 		if !ok {
-// 			panic(fmt.Sprintf("type with id %s not found in registry", importId))
-// 		}
-
-// 		samePkg := importType.ImportPath == referencePkg
-// 		if nullable {
-
-// 		} else {
-// 			if samePkg {
-// 				stmt.Id(importType.Definition.Name)
-// 			} else {
-// 				stmt.Qual(importType.ImportPath, importType.Definition.Name)
-// 			}
-// 		}
-// 	}
-// }
 
 func (b *Builder) WriteEncodeField(field *TypeFieldDefinition) string {
 	if field.Type.Primitive == listPrimitive {
@@ -596,4 +462,13 @@ func (b *Builder) WriteDecodeField(field *TypeFieldDefinition, pkg string) strin
 			`, field.GoName, decoderMapper[field.Type.Primitive])
 		}
 	}
+}
+
+func MapArray[I any, O any](in []I, mapper func(v I) O) []O {
+	out := make([]O, len(in))
+	for i, v := range in {
+		out[i] = mapper(v)
+	}
+
+	return out
 }
