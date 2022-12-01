@@ -22,10 +22,6 @@ func TestCreateUnion(t *testing.T) {
 	require.False(t, u.IsSet())
 }
 
-func ClearUnion(u *MyUnion) {
-	u.Clear()
-}
-
 type MyUnion struct {
 	value      interface{}
 	fieldIndex int
