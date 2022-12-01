@@ -1,10 +1,11 @@
 package internal
 
 import (
-	"bytes"
 	"fmt"
+	"go/format"
 	"os"
 	"path/filepath"
+	"strings"
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/iancoleman/strcase"
@@ -78,12 +79,17 @@ func (b *Builder) generateNode(node DeclarationNode) error {
 }
 
 func (b *Builder) generateFile(fd *FileDeclaration) (code string, err error) {
-	file := NewFile(filepath.Base(b.packageName))
+	pkgDeclaration := filepath.Base(b.packageName)
+	stringBuilder := new(strings.Builder)
+	stringBuilder.WriteString(fmt.Sprintf("package %s\n", pkgDeclaration))
+	stringBuilder.WriteString(fmt.Sprintf("import \"%s\"\n", "github.com/messagepack-schema/go/runtime"))
+	stringBuilder.WriteString(fmt.Sprintf("import \"%s\"\n", "github.com/messagepack-schema/go/runtime/msgpack"))
+	stringBuilder.WriteString(fmt.Sprintf("import \"%s\"\n", "bytes"))
 
 	for _, t := range fd.Types {
 		switch t.Modifier {
 		case "struct":
-			err := b.generateStruct(t, file)
+			err := b.generateStruct(t, stringBuilder)
 			if err != nil {
 				return "", err
 			}
@@ -92,163 +98,158 @@ func (b *Builder) generateFile(fd *FileDeclaration) (code string, err error) {
 			break
 
 		case "enum":
-			err := b.generateEnum(t, file)
-			if err != nil {
-				return "", err
-			}
+			// err := b.generateEnum(t, file)
+			// if err != nil {
+			// 	return "", err
+			// }
 
 		default:
 			return "", fmt.Errorf("unknown type modifier %s", t.Modifier)
 		}
 	}
 
-	buf := new(bytes.Buffer)
-	err = file.Render(buf)
+	raw := stringBuilder.String()
+	fmt.Printf("raw: %v\n", raw)
+
+	buf, err := format.Source([]byte(raw))
 	if err != nil {
-		fmt.Println("Printing file:::::")
-
-		fmt.Printf("%#v\n", file)
-
-		fmt.Println("========================")
-
 		return "", err
 	}
 
-	return buf.String(), nil
+	return string(buf), nil
 }
 
-func (b *Builder) generateStruct(t *SchemaTypeDefinition, file *File) error {
+func (b *Builder) generateStruct(t *SchemaTypeDefinition, builder *strings.Builder) error {
 
-	pkgPath := (*b.typeRegistry)[t.Id].ImportPath
+	// pkgPath := (*b.typeRegistry)[t.Id].ImportPath
 
 	// Create fields
-	fields := make([]Code, len(t.Fields))
+	fields := make([]string, len(t.Fields))
 	for i, field := range t.Fields {
-		stmt := Id(field.GoName)
-
-		b.WriteField(stmt, field.Type, pkgPath)
-
-		fields[i] = stmt
+		fields[i] = fmt.Sprintf("%s %s", field.GoName, GetGoType(field.Type))
 	}
 
-	// Write fields
-	file.Type().Id(t.Name).Struct(fields...)
+	// write struct
+	builder.WriteString(fmt.Sprintf("type %s struct {%s}", t.Name, strings.Join(fields, "\n")))
+
+	b.writeSerializeMethod(builder, t)
 
 	// Write Serialize method
-	b.writeSerializeMethod(file, t)
+	// b.writeSerializeMethod(file, t)
 
-	// Write MustSerialize method
-	writeMustSerializeMethod(file, t)
+	// // Write MustSerialize method
+	// writeMustSerializeMethod(file, t)
 
-	// Write MergeFrom method
-	b.writeMergeFromMethod(file, t, pkgPath)
+	// // Write MergeFrom method
+	// b.writeMergeFromMethod(file, t, pkgPath)
 
-	// Write MergeUsing method
-	writeMergeUsing(file, t)
-
-	return nil
-}
-
-func (b *Builder) generateEnum(t *SchemaTypeDefinition, file *File) error {
-
-	// Create Enum struct
-	file.Type().Id(t.Name).Struct(
-		Id("index").Uint8(),
-		Id("name").String(),
-	)
-
-	lowerCamel := strcase.ToLowerCamel(t.Name)
-	pickerName := fmt.Sprintf("%sPicker", lowerCamel)
-
-	// create enum picker struct
-	file.Type().Id(pickerName).Struct()
-
-	// create enum picker instance
-	file.Var().Id(fmt.Sprintf("%sPicker", t.Name)).Id(pickerName).Op("=").Id(pickerName).Block()
-
-	//write each item in enum
-	for _, field := range t.Fields {
-		file.Var().Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name))).Id(t.Name).Op("=").Id(t.Name).Values(Dict{
-			Id("index"): Lit(field.Index),
-			Id("name"):  Lit(field.Name),
-		})
-	}
-
-	// Write Picker method for each field
-	for _, field := range t.Fields {
-		file.Func().Params(Id(pickerName)).Id(strcase.ToCamel(field.Name)).Params().Params(Id(t.Name)).Block(
-			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
-		)
-	}
-
-	// Write Index() method
-	file.Func().Params(Id("e").Id(t.Name)).Id("Index").Params().Params(Uint8()).Block(
-		Return(Id("e").Dot("index")),
-	)
-
-	// Write Name() method
-	file.Func().Params(Id("e").Id(t.Name)).Id("Name").Params().Params(String()).Block(
-		Return(Id("e").Dot("name")),
-	)
-
-	// Write ByIndex method
-	byIndexStmts := make([]Code, 0)
-	for _, field := range t.Fields {
-		byIndexStmts = append(byIndexStmts, Case(
-			Lit(field.Index),
-		).Block(
-			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
-		))
-	}
-
-	byIndexStmts = append(byIndexStmts, Default().Block(
-		Panic(Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("%s with index %%v not found", t.Name)), Id("index"))),
-	))
-
-	file.Func().Params(Id(pickerName)).Id("ByIndex").Params(Id("index").Uint8()).Params(Id(t.Name)).Block(
-		Switch(Id("index")).Block(byIndexStmts...),
-	)
-
-	byNameStmts := make([]Code, 0)
-	for _, field := range t.Fields {
-		byNameStmts = append(byNameStmts, Case(
-			Lit(field.Name),
-		).Block(
-			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
-		))
-	}
-
-	byNameStmts = append(byNameStmts, Default().Block(
-		Panic(Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("%s with name %%v not found", t.Name)), Id("name"))),
-	))
-
-	file.Func().Params(Id(pickerName)).Id("ByName").Params(Id("name").String()).Params(Id(t.Name)).Block(
-		Switch(Id("name")).Block(byNameStmts...),
-	)
+	// // Write MergeUsing method
+	// writeMergeUsing(file, t)
 
 	return nil
 }
 
-func (b *Builder) writeSerializeMethod(file *File, t *SchemaTypeDefinition) {
-	body := []Code{
-		Id("buf").Op(":=").Id("new").Params(Qual("bytes", "Buffer")),
-		Id("writer").Op(":=").Qual("github.com/messagepack-schema/go/runtime/msgpack", "NewEncoder").Params(Id("buf")),
-		Var().Id("err").Id("error"),
+// func (b *Builder) generateEnum(t *SchemaTypeDefinition, file *File) error {
+
+// 	// Create Enum struct
+// 	file.Type().Id(t.Name).Struct(
+// 		Id("index").Uint8(),
+// 		Id("name").String(),
+// 	)
+
+// 	lowerCamel := strcase.ToLowerCamel(t.Name)
+// 	pickerName := fmt.Sprintf("%sPicker", lowerCamel)
+
+// 	// create enum picker struct
+// 	file.Type().Id(pickerName).Struct()
+
+// 	// create enum picker instance
+// 	file.Var().Id(fmt.Sprintf("%sPicker", t.Name)).Id(pickerName).Op("=").Id(pickerName).Block()
+
+// 	//write each item in enum
+// 	for _, field := range t.Fields {
+// 		file.Var().Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name))).Id(t.Name).Op("=").Id(t.Name).Values(Dict{
+// 			Id("index"): Lit(field.Index),
+// 			Id("name"):  Lit(field.Name),
+// 		})
+// 	}
+
+// 	// Write Picker method for each field
+// 	for _, field := range t.Fields {
+// 		file.Func().Params(Id(pickerName)).Id(strcase.ToCamel(field.Name)).Params().Params(Id(t.Name)).Block(
+// 			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
+// 		)
+// 	}
+
+// 	// Write Index() method
+// 	file.Func().Params(Id("e").Id(t.Name)).Id("Index").Params().Params(Uint8()).Block(
+// 		Return(Id("e").Dot("index")),
+// 	)
+
+// 	// Write Name() method
+// 	file.Func().Params(Id("e").Id(t.Name)).Id("Name").Params().Params(String()).Block(
+// 		Return(Id("e").Dot("name")),
+// 	)
+
+// 	// Write ByIndex method
+// 	byIndexStmts := make([]Code, 0)
+// 	for _, field := range t.Fields {
+// 		byIndexStmts = append(byIndexStmts, Case(
+// 			Lit(field.Index),
+// 		).Block(
+// 			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
+// 		))
+// 	}
+
+// 	byIndexStmts = append(byIndexStmts, Default().Block(
+// 		Panic(Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("%s with index %%v not found", t.Name)), Id("index"))),
+// 	))
+
+// 	file.Func().Params(Id(pickerName)).Id("ByIndex").Params(Id("index").Uint8()).Params(Id(t.Name)).Block(
+// 		Switch(Id("index")).Block(byIndexStmts...),
+// 	)
+
+// 	byNameStmts := make([]Code, 0)
+// 	for _, field := range t.Fields {
+// 		byNameStmts = append(byNameStmts, Case(
+// 			Lit(field.Name),
+// 		).Block(
+// 			Return(Id(fmt.Sprintf("%s%s", lowerCamel, strcase.ToCamel(field.Name)))),
+// 		))
+// 	}
+
+// 	byNameStmts = append(byNameStmts, Default().Block(
+// 		Panic(Qual("fmt", "Sprintf").Call(Lit(fmt.Sprintf("%s with name %%v not found", t.Name)), Id("name"))),
+// 	))
+
+// 	file.Func().Params(Id(pickerName)).Id("ByName").Params(Id("name").String()).Params(Id(t.Name)).Block(
+// 		Switch(Id("name")).Block(byNameStmts...),
+// 	)
+
+// 	return nil
+// }
+
+func (b *Builder) writeSerializeMethod(sb *strings.Builder, t *SchemaTypeDefinition) {
+
+	stmts := make([]string, len(t.Fields))
+	for i, field := range t.Fields {
+		stmts[i] = b.WriteEncodeField(field)
 	}
 
-	for _, field := range t.Fields {
-		stmts := b.WriteEncodeField(field)
-		for _, stmt := range stmts {
-			body = append(body, stmt)
-		}
-	}
+	body := fmt.Sprintf(
+		`
+func (u *%s) Serialize() ([]byte, error) {
+	buf := new(bytes.Buffer)
+	writer := msgpack.NewEncoder(buf)
+	var err error
 
-	// append return
-	body = append(body, Return().List(Id("buf").Dot("Bytes").Call(), Nil()))
+	%s
 
-	file.Func().Params(
-		Id("u").Op("*").Id(t.Name), //receiver
-	).Id("Serialize").Params().Params(Index().Byte(), Error()).Block(body...)
+	return buf.Bytes(), nil
+}%s`, t.Name, strings.Join(stmts, "\n"), "\n")
+
+	sb.WriteString(body)
+
 }
 
 func writeMustSerializeMethod(file *File, t *SchemaTypeDefinition) {
@@ -264,27 +265,27 @@ func writeMustSerializeMethod(file *File, t *SchemaTypeDefinition) {
 	)
 }
 
-func (b *Builder) writeMergeFromMethod(file *File, t *SchemaTypeDefinition, pkgName string) {
-	body := []Code{
-		Id("reader").Op(":=").Qual("bytes", "NewBuffer").Call(Id("buffer")),
-		Id("decoder").Op(":=").Qual("github.com/messagepack-schema/go/runtime/msgpack", "NewDecoder").Params(Id("reader")),
-		Var().Id("err").Id("error"),
-	}
+// func (b *Builder) writeMergeFromMethod(file *File, t *SchemaTypeDefinition, pkgName string) {
+// 	body := []Code{
+// 		Id("reader").Op(":=").Qual("bytes", "NewBuffer").Call(Id("buffer")),
+// 		Id("decoder").Op(":=").Qual("github.com/messagepack-schema/go/runtime/msgpack", "NewDecoder").Params(Id("reader")),
+// 		Var().Id("err").Id("error"),
+// 	}
 
-	for _, field := range t.Fields {
-		stmts := b.WriteDecodeField(field, pkgName)
-		for _, stmt := range stmts {
-			body = append(body, stmt)
-		}
-	}
+// 	for _, field := range t.Fields {
+// 		stmts := b.WriteDecodeField(field, pkgName)
+// 		for _, stmt := range stmts {
+// 			body = append(body, stmt)
+// 		}
+// 	}
 
-	// append return
-	body = append(body, Return(Nil()))
+// 	// append return
+// 	body = append(body, Return(Nil()))
 
-	file.Func().Params(
-		Id("u").Op("*").Id(t.Name), //receiver
-	).Id("MergeFrom").Params(Id("buffer").Index().Byte()).Params(Error()).Block(body...)
-}
+// 	file.Func().Params(
+// 		Id("u").Op("*").Id(t.Name), //receiver
+// 	).Id("MergeFrom").Params(Id("buffer").Index().Byte()).Params(Error()).Block(body...)
+// }
 
 func writeMergeUsing(file *File, t *SchemaTypeDefinition) {
 	body := []Code{}
