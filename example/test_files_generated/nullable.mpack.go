@@ -194,3 +194,264 @@ func (u *Nullables) Serialize() ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
+
+func (u *Nullables) MustSerialize() []byte {
+	buf, err := u.Serialize()
+	if err != nil {
+		panic(err)
+	}
+
+	return buf
+}
+
+func (u *Nullables) MergeFrom(buffer []byte) error {
+	reader := bytes.NewBuffer(buffer)
+	decoder := msgpack.NewDecoder(reader)
+	var err error
+	var isNextNil bool
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A1 = runtime.NewNull[bool]()
+	} else {
+		value, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.A1 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A2 = runtime.NewNull[string]()
+	} else {
+		value, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.A2 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A3 = runtime.NewNull[uint8]()
+	} else {
+		value, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.A3 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A4 = runtime.NewNull[uint16]()
+	} else {
+		value, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.A4 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A5 = runtime.NewNull[uint32]()
+	} else {
+		value, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.A5 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A6 = runtime.NewNull[uint64]()
+	} else {
+		value, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.A6 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A7 = runtime.NewNull[int8]()
+	} else {
+		value, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.A7 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A8 = runtime.NewNull[int16]()
+	} else {
+		value, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.A8 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A9 = runtime.NewNull[int32]()
+	} else {
+		value, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.A9 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A10 = runtime.NewNull[int64]()
+	} else {
+		value, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.A10 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A11 = runtime.NewNull[float32]()
+	} else {
+		value, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.A11 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A12 = runtime.NewNull[float64]()
+	} else {
+		value, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.A12 = runtime.NewNullable(value)
+	}
+
+	isNextNil, err = decoder.IsNextNil()
+	if err != nil {
+		return err
+	}
+
+	if isNextNil {
+		u.A13 = runtime.NewNull[[]byte]()
+	} else {
+		value, err := decoder.DecodeBytes()
+		if err != nil {
+			return err
+		}
+
+		u.A13 = runtime.NewNullable(value)
+	}
+
+	A14Len, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.A14 = make([]runtime.Nullable[bool], A14Len)
+	for i := 0; i < A14Len; i++ {
+		value, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.A14[i] = runtime.NewNullable(value)
+	}
+
+	A15Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A15 = make(map[string]runtime.Nullable[float32])
+	for i := 0; i < A15Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.A15[k] = runtime.NewNullable(v)
+	}
+
+	return nil
+}

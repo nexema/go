@@ -1,6 +1,5 @@
 package test_files
 
-import "github.com/messagepack-schema/go/runtime"
 import "github.com/messagepack-schema/go/runtime/msgpack"
 import "bytes"
 
@@ -247,4 +246,242 @@ func (u *AllTypes) Serialize() ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func (u *AllTypes) MustSerialize() []byte {
+	buf, err := u.Serialize()
+	if err != nil {
+		panic(err)
+	}
+
+	return buf
+}
+
+func (u *AllTypes) MergeFrom(buffer []byte) error {
+	reader := bytes.NewBuffer(buffer)
+	decoder := msgpack.NewDecoder(reader)
+	var err error
+
+	u.A, err = decoder.DecodeBool()
+	if err != nil {
+		return err
+	}
+
+	u.B, err = decoder.DecodeString()
+	if err != nil {
+		return err
+	}
+
+	u.C, err = decoder.DecodeUint8()
+	if err != nil {
+		return err
+	}
+
+	u.D, err = decoder.DecodeUint16()
+	if err != nil {
+		return err
+	}
+
+	u.E, err = decoder.DecodeUint32()
+	if err != nil {
+		return err
+	}
+
+	u.F, err = decoder.DecodeUint64()
+	if err != nil {
+		return err
+	}
+
+	u.G, err = decoder.DecodeInt8()
+	if err != nil {
+		return err
+	}
+
+	u.H, err = decoder.DecodeInt16()
+	if err != nil {
+		return err
+	}
+
+	u.I, err = decoder.DecodeInt32()
+	if err != nil {
+		return err
+	}
+
+	u.J, err = decoder.DecodeInt64()
+	if err != nil {
+		return err
+	}
+
+	u.K, err = decoder.DecodeFloat32()
+	if err != nil {
+		return err
+	}
+
+	u.L, err = decoder.DecodeFloat64()
+	if err != nil {
+		return err
+	}
+
+	u.M, err = decoder.DecodeBytes()
+	if err != nil {
+		return err
+	}
+
+	NLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.N = make([]bool, NLen)
+	for i := 0; i < NLen; i++ {
+		u.N[i], err = decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+	}
+
+	OLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.O = make([]string, OLen)
+	for i := 0; i < OLen; i++ {
+		u.O[i], err = decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+	}
+
+	PLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.P = make([]uint8, PLen)
+	for i := 0; i < PLen; i++ {
+		u.P[i], err = decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+	}
+
+	QLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.Q = make([]uint16, QLen)
+	for i := 0; i < QLen; i++ {
+		u.Q[i], err = decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+	}
+
+	RLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.R = make([]uint32, RLen)
+	for i := 0; i < RLen; i++ {
+		u.R[i], err = decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+	}
+
+	SLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.S = make([]uint64, SLen)
+	for i := 0; i < SLen; i++ {
+		u.S[i], err = decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+	}
+
+	TLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.T = make([]int8, TLen)
+	for i := 0; i < TLen; i++ {
+		u.T[i], err = decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+	}
+
+	ULen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.U = make([]int16, ULen)
+	for i := 0; i < ULen; i++ {
+		u.U[i], err = decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+	}
+
+	VLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.V = make([]int32, VLen)
+	for i := 0; i < VLen; i++ {
+		u.V[i], err = decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+	}
+
+	WLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.W = make([]int64, WLen)
+	for i := 0; i < WLen; i++ {
+		u.W[i], err = decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+	}
+
+	XLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.X = make([]float32, XLen)
+	for i := 0; i < XLen; i++ {
+		u.X[i], err = decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+	}
+
+	YLen, err := decoder.DecodeArrayLen()
+	if err != nil {
+		return err
+	}
+
+	u.Y = make([]float64, YLen)
+	for i := 0; i < YLen; i++ {
+		u.Y[i], err = decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

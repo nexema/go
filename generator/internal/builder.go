@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/format"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -12,10 +13,17 @@ import (
 )
 
 type Builder struct {
-	input        *GenerateInput
-	packageName  string
-	files        map[string]string
-	typeRegistry *TypeRegistry
+	input          *GenerateInput
+	packagePath    string
+	packageName    string
+	files          map[string]string
+	typeRegistry   *TypeRegistry
+	currentContext *generationContext
+}
+
+type generationContext struct {
+	fileId  string
+	imports map[string]string
 }
 
 func NewBuilder(input *GenerateInput) *Builder {
@@ -25,8 +33,9 @@ func NewBuilder(input *GenerateInput) *Builder {
 		typeRegistry: NewTypeRegistry(),
 	}
 
-	builder.packageName = input.Options["packageName"].(string)
-	builder.typeRegistry.Fill(input.RootPackage, builder.packageName, input.Output)
+	builder.packagePath = input.Options["packageName"].(string)
+	builder.packageName = path.Base(builder.packagePath)
+	builder.typeRegistry.Fill(input.RootPackage, builder.packagePath, input.Output)
 	builder.sanitize()
 
 	return builder
@@ -78,21 +87,27 @@ func (b *Builder) generateNode(node DeclarationNode) error {
 	return nil
 }
 
-func (b *Builder) generateFile(fd *FileDeclaration) (code string, err error) {
-	pkgDeclaration := filepath.Base(b.packageName)
+func (b *Builder) generateFile(fd *FileDeclaration) (sourceCode string, err error) {
+
+	b.newGenerationContext(fd.Id)
+
+	pkgDeclaration := filepath.Base(b.packagePath)
 	stringBuilder := new(strings.Builder)
 	stringBuilder.WriteString(fmt.Sprintf("package %s\n", pkgDeclaration))
-	stringBuilder.WriteString(fmt.Sprintf("import \"%s\"\n", "github.com/messagepack-schema/go/runtime"))
-	stringBuilder.WriteString(fmt.Sprintf("import \"%s\"\n", "github.com/messagepack-schema/go/runtime/msgpack"))
-	stringBuilder.WriteString(fmt.Sprintf("import \"%s\"\n", "bytes"))
 
-	for _, t := range fd.Types {
+	// generate types
+	typesSourceCode := make([]string, len(fd.Types))
+	for i, t := range fd.Types {
 		switch t.Modifier {
 		case "struct":
-			err := b.generateStruct(t, stringBuilder)
+			sourceCode, err := b.generateStruct(t)
 			if err != nil {
 				return "", err
 			}
+
+			typesSourceCode[i] = sourceCode
+			b.currentContext.MustImport("github.com/messagepack-schema/go/runtime/msgpack")
+			b.currentContext.MustImport("bytes")
 
 		case "union":
 			break
@@ -108,9 +123,23 @@ func (b *Builder) generateFile(fd *FileDeclaration) (code string, err error) {
 		}
 	}
 
+	// write imports
+	for importName, importAlias := range b.currentContext.imports {
+		if importAlias != "" {
+			stringBuilder.WriteString(fmt.Sprintf("import %s \"%s\"\n", importAlias, importName))
+		} else {
+			stringBuilder.WriteString(fmt.Sprintf("import \"%s\"\n", importName))
+		}
+	}
+
+	// write types
+	stringBuilder.WriteString(strings.Join(typesSourceCode, "\n"))
+
+	// "compile" stringBuilder
 	raw := stringBuilder.String()
 	fmt.Printf("raw: %v\n", raw)
 
+	// format source code
 	buf, err := format.Source([]byte(raw))
 	if err != nil {
 		return "", err
@@ -119,34 +148,26 @@ func (b *Builder) generateFile(fd *FileDeclaration) (code string, err error) {
 	return string(buf), nil
 }
 
-func (b *Builder) generateStruct(t *SchemaTypeDefinition, builder *strings.Builder) error {
+func (b *Builder) generateStruct(t *SchemaTypeDefinition) (sourceCode string, err error) {
 
-	// pkgPath := (*b.typeRegistry)[t.Id].ImportPath
+	pkgPath := (*b.typeRegistry)[t.Id].ImportPath
+	sb := new(strings.Builder)
 
 	// Create fields
 	fields := make([]string, len(t.Fields))
 	for i, field := range t.Fields {
-		fields[i] = fmt.Sprintf("%s %s", field.GoName, GetGoType(field.Type))
+		fields[i] = fmt.Sprintf("%s %s", field.GoName, b.GetGoType(field.Type, pkgPath))
 	}
 
 	// write struct
-	builder.WriteString(fmt.Sprintf("type %s struct {%s}", t.Name, strings.Join(fields, "\n")))
+	sb.WriteString(fmt.Sprintf("type %s struct {%s}", t.Name, strings.Join(fields, "\n")))
 
-	b.writeSerializeMethod(builder, t)
+	b.writeSerializeMethod(sb, t)
+	b.writeMustSerializeMethod(sb, t)
+	b.writeMergeFromMethod(sb, t, pkgPath)
+	// b.writeMergeUsing(sb, t)
 
-	// Write Serialize method
-	// b.writeSerializeMethod(file, t)
-
-	// // Write MustSerialize method
-	// writeMustSerializeMethod(file, t)
-
-	// // Write MergeFrom method
-	// b.writeMergeFromMethod(file, t, pkgPath)
-
-	// // Write MergeUsing method
-	// writeMergeUsing(file, t)
-
-	return nil
+	return sb.String(), nil
 }
 
 // func (b *Builder) generateEnum(t *SchemaTypeDefinition, file *File) error {
@@ -252,40 +273,50 @@ func (u *%s) Serialize() ([]byte, error) {
 
 }
 
-func writeMustSerializeMethod(file *File, t *SchemaTypeDefinition) {
-	file.Func().Params(
-		Id("u").Op("*").Id(t.Name), //receiver
-	).Id("MustSerialize").Params().Index().Byte().Block(
-		List(Id("buf"), Id("err")).Op(":=").Id("u").Dot("Serialize").Call(),
-		If(Id("err").Op("!=").Nil()).Block(
-			Panic(Id("err")),
-		),
+func (b *Builder) writeMustSerializeMethod(sb *strings.Builder, t *SchemaTypeDefinition) {
+	sb.WriteString(fmt.Sprintf(
+		`
+	func (u *%s) MustSerialize() []byte {
+		buf, err := u.Serialize()
+		if err != nil {
+			panic(err)
+		}
 
-		Return(Id("buf")),
-	)
+		return buf
+	}%s
+	`, t.Name, "\n"))
 }
 
-// func (b *Builder) writeMergeFromMethod(file *File, t *SchemaTypeDefinition, pkgName string) {
-// 	body := []Code{
-// 		Id("reader").Op(":=").Qual("bytes", "NewBuffer").Call(Id("buffer")),
-// 		Id("decoder").Op(":=").Qual("github.com/messagepack-schema/go/runtime/msgpack", "NewDecoder").Params(Id("reader")),
-// 		Var().Id("err").Id("error"),
-// 	}
+func (b *Builder) writeMergeFromMethod(sb *strings.Builder, t *SchemaTypeDefinition, pkgName string) {
+	stmts := make([]string, len(t.Fields))
+	isAnyNullable := false
+	for i, field := range t.Fields {
+		stmts[i] = b.WriteDecodeField(field, pkgName)
+		if field.Type.Nullable {
+			isAnyNullable = true
+		}
+	}
 
-// 	for _, field := range t.Fields {
-// 		stmts := b.WriteDecodeField(field, pkgName)
-// 		for _, stmt := range stmts {
-// 			body = append(body, stmt)
-// 		}
-// 	}
+	var isNextNilStmt string
+	if isAnyNullable {
+		isNextNilStmt = "var isNextNil bool"
+	}
 
-// 	// append return
-// 	body = append(body, Return(Nil()))
+	body := fmt.Sprintf(
+		`
+		func (u *%s) MergeFrom(buffer []byte) error {
+			reader := bytes.NewBuffer(buffer)
+			decoder := msgpack.NewDecoder(reader)
+			var err error
+			%s
+			%s
 
-// 	file.Func().Params(
-// 		Id("u").Op("*").Id(t.Name), //receiver
-// 	).Id("MergeFrom").Params(Id("buffer").Index().Byte()).Params(Error()).Block(body...)
-// }
+			return nil
+		}%s
+	`, t.Name, isNextNilStmt, strings.Join(stmts, "\n"), "\n")
+
+	sb.WriteString(body)
+}
 
 func writeMergeUsing(file *File, t *SchemaTypeDefinition) {
 	body := []Code{}
@@ -318,5 +349,26 @@ func (b *Builder) sanitizePkg(t DeclarationNode) {
 				}
 			}
 		}
+	}
+}
+
+func (b *Builder) newGenerationContext(fileId string) {
+	b.currentContext = &generationContext{
+		fileId:  fileId,
+		imports: make(map[string]string),
+	}
+}
+
+func (b *generationContext) MustImport(importName string) {
+	_, ok := b.imports[importName]
+	if !ok {
+		b.imports[importName] = ""
+	}
+}
+
+func (b *generationContext) MustImportAs(importName string, alias string) {
+	_, ok := b.imports[importName]
+	if !ok {
+		b.imports[importName] = alias
 	}
 }

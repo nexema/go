@@ -1,6 +1,5 @@
 package test_files
 
-import "github.com/messagepack-schema/go/runtime"
 import "github.com/messagepack-schema/go/runtime/msgpack"
 import "bytes"
 
@@ -2389,4 +2388,2661 @@ func (u *MapTest) Serialize() ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+func (u *MapTest) MustSerialize() []byte {
+	buf, err := u.Serialize()
+	if err != nil {
+		panic(err)
+	}
+
+	return buf
+}
+
+func (u *MapTest) MergeFrom(buffer []byte) error {
+	reader := bytes.NewBuffer(buffer)
+	decoder := msgpack.NewDecoder(reader)
+	var err error
+
+	A1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A1 = make(map[string]bool)
+	for i := 0; i < A1Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.A1[k] = v
+	}
+
+	A2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A2 = make(map[string]string)
+	for i := 0; i < A2Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.A2[k] = v
+	}
+
+	A3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A3 = make(map[string]uint8)
+	for i := 0; i < A3Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.A3[k] = v
+	}
+
+	A4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A4 = make(map[string]uint16)
+	for i := 0; i < A4Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.A4[k] = v
+	}
+
+	A5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A5 = make(map[string]uint32)
+	for i := 0; i < A5Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.A5[k] = v
+	}
+
+	A6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A6 = make(map[string]uint64)
+	for i := 0; i < A6Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.A6[k] = v
+	}
+
+	A7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A7 = make(map[string]int8)
+	for i := 0; i < A7Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.A7[k] = v
+	}
+
+	A8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A8 = make(map[string]int16)
+	for i := 0; i < A8Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.A8[k] = v
+	}
+
+	A9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A9 = make(map[string]int32)
+	for i := 0; i < A9Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.A9[k] = v
+	}
+
+	A10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A10 = make(map[string]int64)
+	for i := 0; i < A10Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.A10[k] = v
+	}
+
+	A11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A11 = make(map[string]float32)
+	for i := 0; i < A11Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.A11[k] = v
+	}
+
+	A12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.A12 = make(map[string]float64)
+	for i := 0; i < A12Len; i++ {
+		k, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.A12[k] = v
+	}
+
+	B1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B1 = make(map[uint8]bool)
+	for i := 0; i < B1Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.B1[k] = v
+	}
+
+	B2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B2 = make(map[uint8]string)
+	for i := 0; i < B2Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.B2[k] = v
+	}
+
+	B3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B3 = make(map[uint8]uint8)
+	for i := 0; i < B3Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.B3[k] = v
+	}
+
+	B4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B4 = make(map[uint8]uint16)
+	for i := 0; i < B4Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.B4[k] = v
+	}
+
+	B5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B5 = make(map[uint8]uint32)
+	for i := 0; i < B5Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.B5[k] = v
+	}
+
+	B6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B6 = make(map[uint8]uint64)
+	for i := 0; i < B6Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.B6[k] = v
+	}
+
+	B7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B7 = make(map[uint8]int8)
+	for i := 0; i < B7Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.B7[k] = v
+	}
+
+	B8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B8 = make(map[uint8]int16)
+	for i := 0; i < B8Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.B8[k] = v
+	}
+
+	B9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B9 = make(map[uint8]int32)
+	for i := 0; i < B9Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.B9[k] = v
+	}
+
+	B10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B10 = make(map[uint8]int64)
+	for i := 0; i < B10Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.B10[k] = v
+	}
+
+	B11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B11 = make(map[uint8]float32)
+	for i := 0; i < B11Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.B11[k] = v
+	}
+
+	B12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.B12 = make(map[uint8]float64)
+	for i := 0; i < B12Len; i++ {
+		k, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.B12[k] = v
+	}
+
+	C1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C1 = make(map[uint16]bool)
+	for i := 0; i < C1Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.C1[k] = v
+	}
+
+	C2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C2 = make(map[uint16]string)
+	for i := 0; i < C2Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.C2[k] = v
+	}
+
+	C3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C3 = make(map[uint16]uint8)
+	for i := 0; i < C3Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.C3[k] = v
+	}
+
+	C4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C4 = make(map[uint16]uint16)
+	for i := 0; i < C4Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.C4[k] = v
+	}
+
+	C5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C5 = make(map[uint16]uint32)
+	for i := 0; i < C5Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.C5[k] = v
+	}
+
+	C6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C6 = make(map[uint16]uint64)
+	for i := 0; i < C6Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.C6[k] = v
+	}
+
+	C7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C7 = make(map[uint16]int8)
+	for i := 0; i < C7Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.C7[k] = v
+	}
+
+	C8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C8 = make(map[uint16]int16)
+	for i := 0; i < C8Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.C8[k] = v
+	}
+
+	C9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C9 = make(map[uint16]int32)
+	for i := 0; i < C9Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.C9[k] = v
+	}
+
+	C10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C10 = make(map[uint16]int64)
+	for i := 0; i < C10Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.C10[k] = v
+	}
+
+	C11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C11 = make(map[uint16]float32)
+	for i := 0; i < C11Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.C11[k] = v
+	}
+
+	C12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.C12 = make(map[uint16]float64)
+	for i := 0; i < C12Len; i++ {
+		k, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.C12[k] = v
+	}
+
+	D1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D1 = make(map[uint32]bool)
+	for i := 0; i < D1Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.D1[k] = v
+	}
+
+	D2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D2 = make(map[uint32]string)
+	for i := 0; i < D2Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.D2[k] = v
+	}
+
+	D3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D3 = make(map[uint32]uint8)
+	for i := 0; i < D3Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.D3[k] = v
+	}
+
+	D4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D4 = make(map[uint32]uint16)
+	for i := 0; i < D4Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.D4[k] = v
+	}
+
+	D5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D5 = make(map[uint32]uint32)
+	for i := 0; i < D5Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.D5[k] = v
+	}
+
+	D6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D6 = make(map[uint32]uint64)
+	for i := 0; i < D6Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.D6[k] = v
+	}
+
+	D7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D7 = make(map[uint32]int8)
+	for i := 0; i < D7Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.D7[k] = v
+	}
+
+	D8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D8 = make(map[uint32]int16)
+	for i := 0; i < D8Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.D8[k] = v
+	}
+
+	D9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D9 = make(map[uint32]int32)
+	for i := 0; i < D9Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.D9[k] = v
+	}
+
+	D10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D10 = make(map[uint32]int64)
+	for i := 0; i < D10Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.D10[k] = v
+	}
+
+	D11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D11 = make(map[uint32]float32)
+	for i := 0; i < D11Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.D11[k] = v
+	}
+
+	D12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.D12 = make(map[uint32]float64)
+	for i := 0; i < D12Len; i++ {
+		k, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.D12[k] = v
+	}
+
+	E1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E1 = make(map[uint64]bool)
+	for i := 0; i < E1Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.E1[k] = v
+	}
+
+	E2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E2 = make(map[uint64]string)
+	for i := 0; i < E2Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.E2[k] = v
+	}
+
+	E3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E3 = make(map[uint64]uint8)
+	for i := 0; i < E3Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.E3[k] = v
+	}
+
+	E4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E4 = make(map[uint64]uint16)
+	for i := 0; i < E4Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.E4[k] = v
+	}
+
+	E5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E5 = make(map[uint64]uint32)
+	for i := 0; i < E5Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.E5[k] = v
+	}
+
+	E6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E6 = make(map[uint64]uint64)
+	for i := 0; i < E6Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.E6[k] = v
+	}
+
+	E7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E7 = make(map[uint64]int8)
+	for i := 0; i < E7Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.E7[k] = v
+	}
+
+	E8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E8 = make(map[uint64]int16)
+	for i := 0; i < E8Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.E8[k] = v
+	}
+
+	E9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E9 = make(map[uint64]int32)
+	for i := 0; i < E9Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.E9[k] = v
+	}
+
+	E10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E10 = make(map[uint64]int64)
+	for i := 0; i < E10Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.E10[k] = v
+	}
+
+	E11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E11 = make(map[uint64]float32)
+	for i := 0; i < E11Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.E11[k] = v
+	}
+
+	E12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.E12 = make(map[uint64]float64)
+	for i := 0; i < E12Len; i++ {
+		k, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.E12[k] = v
+	}
+
+	F1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F1 = make(map[int8]bool)
+	for i := 0; i < F1Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.F1[k] = v
+	}
+
+	F2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F2 = make(map[int8]string)
+	for i := 0; i < F2Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.F2[k] = v
+	}
+
+	F3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F3 = make(map[int8]uint8)
+	for i := 0; i < F3Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.F3[k] = v
+	}
+
+	F4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F4 = make(map[int8]uint16)
+	for i := 0; i < F4Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.F4[k] = v
+	}
+
+	F5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F5 = make(map[int8]uint32)
+	for i := 0; i < F5Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.F5[k] = v
+	}
+
+	F6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F6 = make(map[int8]uint64)
+	for i := 0; i < F6Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.F6[k] = v
+	}
+
+	F7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F7 = make(map[int8]int8)
+	for i := 0; i < F7Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.F7[k] = v
+	}
+
+	F8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F8 = make(map[int8]int16)
+	for i := 0; i < F8Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.F8[k] = v
+	}
+
+	F9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F9 = make(map[int8]int32)
+	for i := 0; i < F9Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.F9[k] = v
+	}
+
+	F10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F10 = make(map[int8]int64)
+	for i := 0; i < F10Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.F10[k] = v
+	}
+
+	F11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F11 = make(map[int8]float32)
+	for i := 0; i < F11Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.F11[k] = v
+	}
+
+	F12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.F12 = make(map[int8]float64)
+	for i := 0; i < F12Len; i++ {
+		k, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.F12[k] = v
+	}
+
+	G1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G1 = make(map[int16]bool)
+	for i := 0; i < G1Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.G1[k] = v
+	}
+
+	G2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G2 = make(map[int16]string)
+	for i := 0; i < G2Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.G2[k] = v
+	}
+
+	G3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G3 = make(map[int16]uint8)
+	for i := 0; i < G3Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.G3[k] = v
+	}
+
+	G4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G4 = make(map[int16]uint16)
+	for i := 0; i < G4Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.G4[k] = v
+	}
+
+	G5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G5 = make(map[int16]uint32)
+	for i := 0; i < G5Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.G5[k] = v
+	}
+
+	G6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G6 = make(map[int16]uint64)
+	for i := 0; i < G6Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.G6[k] = v
+	}
+
+	G7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G7 = make(map[int16]int8)
+	for i := 0; i < G7Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.G7[k] = v
+	}
+
+	G8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G8 = make(map[int16]int16)
+	for i := 0; i < G8Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.G8[k] = v
+	}
+
+	G9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G9 = make(map[int16]int32)
+	for i := 0; i < G9Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.G9[k] = v
+	}
+
+	G10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G10 = make(map[int16]int64)
+	for i := 0; i < G10Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.G10[k] = v
+	}
+
+	G11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G11 = make(map[int16]float32)
+	for i := 0; i < G11Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.G11[k] = v
+	}
+
+	G12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.G12 = make(map[int16]float64)
+	for i := 0; i < G12Len; i++ {
+		k, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.G12[k] = v
+	}
+
+	H1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H1 = make(map[int32]bool)
+	for i := 0; i < H1Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.H1[k] = v
+	}
+
+	H2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H2 = make(map[int32]string)
+	for i := 0; i < H2Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.H2[k] = v
+	}
+
+	H3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H3 = make(map[int32]uint8)
+	for i := 0; i < H3Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.H3[k] = v
+	}
+
+	H4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H4 = make(map[int32]uint16)
+	for i := 0; i < H4Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.H4[k] = v
+	}
+
+	H5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H5 = make(map[int32]uint32)
+	for i := 0; i < H5Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.H5[k] = v
+	}
+
+	H6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H6 = make(map[int32]uint64)
+	for i := 0; i < H6Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.H6[k] = v
+	}
+
+	H7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H7 = make(map[int32]int8)
+	for i := 0; i < H7Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.H7[k] = v
+	}
+
+	H8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H8 = make(map[int32]int16)
+	for i := 0; i < H8Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.H8[k] = v
+	}
+
+	H9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H9 = make(map[int32]int32)
+	for i := 0; i < H9Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.H9[k] = v
+	}
+
+	H10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H10 = make(map[int32]int64)
+	for i := 0; i < H10Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.H10[k] = v
+	}
+
+	H11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H11 = make(map[int32]float32)
+	for i := 0; i < H11Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.H11[k] = v
+	}
+
+	H12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.H12 = make(map[int32]float64)
+	for i := 0; i < H12Len; i++ {
+		k, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.H12[k] = v
+	}
+
+	I1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I1 = make(map[int64]bool)
+	for i := 0; i < I1Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.I1[k] = v
+	}
+
+	I2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I2 = make(map[int64]string)
+	for i := 0; i < I2Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.I2[k] = v
+	}
+
+	I3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I3 = make(map[int64]uint8)
+	for i := 0; i < I3Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.I3[k] = v
+	}
+
+	I4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I4 = make(map[int64]uint16)
+	for i := 0; i < I4Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.I4[k] = v
+	}
+
+	I5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I5 = make(map[int64]uint32)
+	for i := 0; i < I5Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.I5[k] = v
+	}
+
+	I6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I6 = make(map[int64]uint64)
+	for i := 0; i < I6Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.I6[k] = v
+	}
+
+	I7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I7 = make(map[int64]int8)
+	for i := 0; i < I7Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.I7[k] = v
+	}
+
+	I8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I8 = make(map[int64]int16)
+	for i := 0; i < I8Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.I8[k] = v
+	}
+
+	I9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I9 = make(map[int64]int32)
+	for i := 0; i < I9Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.I9[k] = v
+	}
+
+	I10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I10 = make(map[int64]int64)
+	for i := 0; i < I10Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.I10[k] = v
+	}
+
+	I11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I11 = make(map[int64]float32)
+	for i := 0; i < I11Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.I11[k] = v
+	}
+
+	I12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.I12 = make(map[int64]float64)
+	for i := 0; i < I12Len; i++ {
+		k, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.I12[k] = v
+	}
+
+	J1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J1 = make(map[float32]bool)
+	for i := 0; i < J1Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.J1[k] = v
+	}
+
+	J2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J2 = make(map[float32]string)
+	for i := 0; i < J2Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.J2[k] = v
+	}
+
+	J3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J3 = make(map[float32]uint8)
+	for i := 0; i < J3Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.J3[k] = v
+	}
+
+	J4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J4 = make(map[float32]uint16)
+	for i := 0; i < J4Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.J4[k] = v
+	}
+
+	J5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J5 = make(map[float32]uint32)
+	for i := 0; i < J5Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.J5[k] = v
+	}
+
+	J6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J6 = make(map[float32]uint64)
+	for i := 0; i < J6Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.J6[k] = v
+	}
+
+	J7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J7 = make(map[float32]int8)
+	for i := 0; i < J7Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.J7[k] = v
+	}
+
+	J8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J8 = make(map[float32]int16)
+	for i := 0; i < J8Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.J8[k] = v
+	}
+
+	J9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J9 = make(map[float32]int32)
+	for i := 0; i < J9Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.J9[k] = v
+	}
+
+	J10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J10 = make(map[float32]int64)
+	for i := 0; i < J10Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.J10[k] = v
+	}
+
+	J11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J11 = make(map[float32]float32)
+	for i := 0; i < J11Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.J11[k] = v
+	}
+
+	J12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.J12 = make(map[float32]float64)
+	for i := 0; i < J12Len; i++ {
+		k, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.J12[k] = v
+	}
+
+	K1Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K1 = make(map[float64]bool)
+	for i := 0; i < K1Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.K1[k] = v
+	}
+
+	K2Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K2 = make(map[float64]string)
+	for i := 0; i < K2Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+
+		u.K2[k] = v
+	}
+
+	K3Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K3 = make(map[float64]uint8)
+	for i := 0; i < K3Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint8()
+		if err != nil {
+			return err
+		}
+
+		u.K3[k] = v
+	}
+
+	K4Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K4 = make(map[float64]uint16)
+	for i := 0; i < K4Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint16()
+		if err != nil {
+			return err
+		}
+
+		u.K4[k] = v
+	}
+
+	K5Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K5 = make(map[float64]uint32)
+	for i := 0; i < K5Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint32()
+		if err != nil {
+			return err
+		}
+
+		u.K5[k] = v
+	}
+
+	K6Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K6 = make(map[float64]uint64)
+	for i := 0; i < K6Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeUint64()
+		if err != nil {
+			return err
+		}
+
+		u.K6[k] = v
+	}
+
+	K7Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K7 = make(map[float64]int8)
+	for i := 0; i < K7Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt8()
+		if err != nil {
+			return err
+		}
+
+		u.K7[k] = v
+	}
+
+	K8Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K8 = make(map[float64]int16)
+	for i := 0; i < K8Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt16()
+		if err != nil {
+			return err
+		}
+
+		u.K8[k] = v
+	}
+
+	K9Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K9 = make(map[float64]int32)
+	for i := 0; i < K9Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt32()
+		if err != nil {
+			return err
+		}
+
+		u.K9[k] = v
+	}
+
+	K10Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K10 = make(map[float64]int64)
+	for i := 0; i < K10Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeInt64()
+		if err != nil {
+			return err
+		}
+
+		u.K10[k] = v
+	}
+
+	K11Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K11 = make(map[float64]float32)
+	for i := 0; i < K11Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat32()
+		if err != nil {
+			return err
+		}
+
+		u.K11[k] = v
+	}
+
+	K12Len, err := decoder.DecodeMapLen()
+	if err != nil {
+		return err
+	}
+
+	u.K12 = make(map[float64]float64)
+	for i := 0; i < K12Len; i++ {
+		k, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		v, err := decoder.DecodeFloat64()
+		if err != nil {
+			return err
+		}
+
+		u.K12[k] = v
+	}
+
+	return nil
 }
