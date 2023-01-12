@@ -7,8 +7,5 @@ const (
 )
 
 const (
-	MSB    uint64 = 0x80
-	REST   uint64 = 0x7F
-	MSBALL uint64 = ^REST
-	INT    uint64 = 2147483648
+	MaxVarintLen64 = 10
 )

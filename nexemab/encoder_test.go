@@ -10,18 +10,18 @@ import (
 
 func TestEncodeBool(t *testing.T) {
 	encoder := NewEncoder()
-	encoder.encodeBool(true)
+	encoder.EncodeBool(true)
 	require.Equal(t, []byte{BoolTrue}, encoder.Close())
 
 	encoder = NewEncoder()
-	encoder.encodeBool(false)
+	encoder.EncodeBool(false)
 	require.Equal(t, []byte{BoolFalse}, encoder.Close())
 
 	encoder = NewEncoder()
-	encoder.encodeBool(true)
-	encoder.encodeBool(true)
-	encoder.encodeBool(false)
-	encoder.encodeBool(true)
+	encoder.EncodeBool(true)
+	encoder.EncodeBool(true)
+	encoder.EncodeBool(false)
+	encoder.EncodeBool(true)
 	require.Equal(t, []byte{BoolTrue, BoolTrue, BoolFalse, BoolTrue}, encoder.Close())
 }
 
@@ -34,7 +34,7 @@ func TestEncodeString(t *testing.T) {
 	hwLen := int64(len(hw))
 
 	encoder = NewEncoder()
-	encoder.encodeVarint(hwLen)
+	encoder.EncodeVarint(hwLen)
 	testBuf := make([]byte, 0)
 	testBuf = append(testBuf, encoder.Close()...)
 	testBuf = append(testBuf, []byte(hw)...)
@@ -93,7 +93,7 @@ func TestEncodeUvarint(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprint(tc.input), func(t *testing.T) {
 			encoder := NewEncoder()
-			encoder.encodeUvarint(tc.input)
+			encoder.EncodeUvarint(tc.input)
 			got := encoder.Close()
 			require.Equal(t, tc.want, got)
 		})
@@ -138,7 +138,7 @@ func TestEncodeVarint(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprint(tc.input), func(t *testing.T) {
 			encoder := NewEncoder()
-			encoder.encodeVarint(tc.input)
+			encoder.EncodeVarint(tc.input)
 			got := encoder.Close()
 			require.Equal(t, tc.want, got)
 		})
