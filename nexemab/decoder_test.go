@@ -137,7 +137,7 @@ func TestDecodeString(t *testing.T) {
 }
 
 func TestDecodeNull(t *testing.T) {
-	decoder := NewDecoder(bytes.NewBuffer([]byte{Null, Null}))
+	decoder := NewDecoder(bytes.NewBuffer([]byte{null, null}))
 	err := decoder.DecodeNull()
 	require.Nil(t, err)
 

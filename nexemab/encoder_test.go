@@ -12,18 +12,18 @@ import (
 func TestEncodeBool(t *testing.T) {
 	encoder := NewEncoder()
 	encoder.EncodeBool(true)
-	require.Equal(t, []byte{BoolTrue}, encoder.Close())
+	require.Equal(t, []byte{boolTrue}, encoder.Close())
 
 	encoder = NewEncoder()
 	encoder.EncodeBool(false)
-	require.Equal(t, []byte{BoolFalse}, encoder.Close())
+	require.Equal(t, []byte{boolFalse}, encoder.Close())
 
 	encoder = NewEncoder()
 	encoder.EncodeBool(true)
 	encoder.EncodeBool(true)
 	encoder.EncodeBool(false)
 	encoder.EncodeBool(true)
-	require.Equal(t, []byte{BoolTrue, BoolTrue, BoolFalse, BoolTrue}, encoder.Close())
+	require.Equal(t, []byte{boolTrue, boolTrue, boolFalse, boolTrue}, encoder.Close())
 }
 
 func TestEncodeString(t *testing.T) {
@@ -189,6 +189,33 @@ func TestEncode(t *testing.T) {
 	requires(decoder.DecodeUint64()).toBe(t, 111112321412414)
 	requires(decoder.DecodeVarint()).toBe(t, 999844)
 	requires(decoder.DecodeUvarint()).toBe(t, 812)
+}
+
+func BenchmarkEncode(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		encoder := NewEncoder()
+		encoder.EncodeBool(true)
+		encoder.EncodeBool(false)
+		encoder.EncodeBool(true)
+		encoder.EncodeBinary([]byte{5, 255, 98})
+		encoder.EncodeFloat32(32.433)
+		encoder.EncodeFloat64(1543.0998990)
+		encoder.EncodeNull()
+		encoder.EncodeInt8(-11)
+		encoder.EncodeUint8(2)
+		encoder.EncodeInt16(-2555)
+		encoder.EncodeUint16(12222)
+		encoder.EncodeInt32(-487574930)
+		encoder.EncodeUint32(3413241124)
+		encoder.EncodeInt64(-112414)
+		encoder.EncodeUint64(111112321412414)
+		encoder.EncodeVarint(999844)
+		encoder.EncodeUvarint(812)
+		encoder.EncodeNull()
+		encoder.EncodeString("hello world")
+		encoder.EncodeVarint(3333)
+		encoder.Close()
+	}
 }
 
 type requeriment[T any] struct {

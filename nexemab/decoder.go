@@ -39,7 +39,7 @@ func (d *Decoder) IsNextNull() bool {
 		return false
 	}
 
-	return buf[0] == Null
+	return buf[0] == null
 }
 
 func (d *Decoder) DecodeBool() (bool, error) {
@@ -48,7 +48,7 @@ func (d *Decoder) DecodeBool() (bool, error) {
 		return false, err
 	}
 
-	return b == BoolTrue, nil
+	return b == boolTrue, nil
 }
 
 func (d *Decoder) DecodeString() (string, error) {
@@ -99,11 +99,11 @@ func (d *Decoder) DecodeUvarint() (uint64, error) {
 			return 0, nil
 		}
 
-		if i == MaxVarintLen64 {
+		if i == maxVarintLen {
 			return 0, errors.New("overflow")
 		}
 		if b < 0x80 {
-			if i == MaxVarintLen64-1 && b > 1 {
+			if i == maxVarintLen-1 && b > 1 {
 				return 0, errors.New("overflow")
 			}
 			return x | uint64(b)<<s, nil

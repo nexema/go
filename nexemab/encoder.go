@@ -23,14 +23,14 @@ func NewEncoder(cap ...int) *Encoder {
 
 func (e *Encoder) EncodeBool(v bool) {
 	if v {
-		e.buf.WriteByte(BoolTrue)
+		e.buf.WriteByte(boolTrue)
 	} else {
-		e.buf.WriteByte(BoolFalse)
+		e.buf.WriteByte(boolFalse)
 	}
 }
 
 func (e *Encoder) EncodeNull() {
-	e.buf.WriteByte(Null)
+	e.buf.WriteByte(null)
 }
 
 func (e *Encoder) EncodeString(input string) {
@@ -95,7 +95,6 @@ func (e *Encoder) EncodeInt64(v int64) {
 }
 
 func (e *Encoder) EncodeUvarint(v uint64) {
-	// code internally used by binary.PutUvarint, but modified to write directly to the underlying buffer
 	i := 0
 	for v >= 0x80 {
 		e.buf.WriteByte(byte(v) | 0x80)

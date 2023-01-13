@@ -1,11 +1,11 @@
 package nexemab
 
 const (
-	Null      byte = 0xc0
-	BoolTrue  byte = 0x01
-	BoolFalse byte = 0x00
+	null      byte = 0xc0
+	boolTrue  byte = 0x01
+	boolFalse byte = 0x00
 )
 
 const (
-	MaxVarintLen64 = 10
+	maxVarintLen = 10
 )

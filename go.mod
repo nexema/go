@@ -1,4 +1,4 @@
-module github.com/messagepack-schema/go
+module github.com/nexema/go
 
 go 1.19
 
