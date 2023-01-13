@@ -33,24 +33,47 @@ func TestEnsure(t *testing.T) {
 	_ = result
 }
 
+var value = []byte("hello world this is only a test")
+var valueLen = len(value)
+
 func BenchmarkBuffer(b *testing.B) {
-	buffer := NewBuffer(BufferConfig{Capacity: 5, InitialBufferSize: 10})
+	buffer := NewBuffer(BufferConfig{Capacity: 5, InitialBufferSize: 300})
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		buffer.Write([]byte("this is m"))
-		buffer.Write([]byte("hello world this is only a test"))
+		// buffer.Write([]byte("this is m"))
+		buffer.Write(value)
+		buffer.Write(value)
+		buffer.Write(value)
+		buffer.Reset()
 	}
 
-	buffer.Bytes()
 }
 
-func BenchmarkGoBuffer(b *testing.B) {
+func BenchmarkBufferGo(b *testing.B) {
 	buffer := new(bytes.Buffer)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		buffer.Write([]byte("this is m"))
-		buffer.Write([]byte("hello world this is only a test"))
+		buffer.Write(value)
+		buffer.Write(value)
+		buffer.Write(value)
+		buffer.Reset()
 	}
 
-	buffer.Bytes()
+}
+
+func BenchmarkBufCopy(b *testing.B) {
+	initialBuffer := []byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}
+	for i := 0; i < b.N; i++ {
+		newBuffer := make([]byte, 10, 50)
+		copy(newBuffer, initialBuffer)
+	}
+}
+
+func BenchmarkBufAppend(b *testing.B) {
+	initialBuffer := []byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'}
+	for i := 0; i < b.N; i++ {
+		newBuffer := make([]byte, 0, 50)
+		newBuffer = append(newBuffer, initialBuffer...)
+		_ = newBuffer
+	}
 }
