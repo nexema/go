@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"math"
 )
 
 // Decoder provides methods to decode a nexema binary input.
@@ -66,6 +67,22 @@ func (d *Decoder) DecodeString() (string, error) {
 	return string(buf), nil
 }
 
+func (d *Decoder) DecodeBinary() ([]byte, error) {
+	// Read binary length
+	bufLen, err := d.DecodeVarint()
+	if err != nil {
+		return nil, err
+	}
+
+	buf := make([]byte, bufLen)
+	_, err = d.r.Read(buf)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
+}
+
 func (d *Decoder) DecodeUvarint() (uint64, error) {
 
 	// code taken from binary.Uvarint but modified to read from underlying buffer
@@ -83,8 +100,6 @@ func (d *Decoder) DecodeUvarint() (uint64, error) {
 		}
 
 		if i == MaxVarintLen64 {
-			// Catch byte reads past MaxVarintLen64.
-			// See issue https://golang.org/issues/41185
 			return 0, errors.New("overflow")
 		}
 		if b < 0x80 {
@@ -173,4 +188,20 @@ func (d *Decoder) DecodeUint64() (uint64, error) {
 func (d *Decoder) DecodeInt64() (int64, error) {
 	v, err := d.DecodeUint64()
 	return int64(v), err
+}
+
+func (d *Decoder) DecodeFloat32() (float32, error) {
+	v, err := d.DecodeUint32()
+	if err != nil {
+		return 0, err
+	}
+	return math.Float32frombits(v), err
+}
+
+func (d *Decoder) DecodeFloat64() (float64, error) {
+	v, err := d.DecodeUint64()
+	if err != nil {
+		return 0, err
+	}
+	return math.Float64frombits(v), err
 }

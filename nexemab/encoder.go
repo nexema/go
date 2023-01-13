@@ -33,7 +33,7 @@ func (e *Encoder) EncodeNull() {
 	e.buf.WriteByte(Null)
 }
 
-func (e *Encoder) encodeString(input string) {
+func (e *Encoder) EncodeString(input string) {
 	// todo: found a better, performant safe way of doing this
 	inputLen := len(input)
 	buf := *(*[]byte)(unsafe.Pointer(&struct {

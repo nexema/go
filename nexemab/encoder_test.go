@@ -1,6 +1,7 @@
 package nexemab
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"testing"
@@ -28,7 +29,7 @@ func TestEncodeBool(t *testing.T) {
 func TestEncodeString(t *testing.T) {
 	encoder := NewEncoder()
 	const hw = "hello world"
-	encoder.encodeString(hw)
+	encoder.EncodeString(hw)
 	outBuf := encoder.Close()
 
 	hwLen := int64(len(hw))
@@ -143,4 +144,63 @@ func TestEncodeVarint(t *testing.T) {
 			require.Equal(t, tc.want, got)
 		})
 	}
+}
+
+func TestEncode(t *testing.T) {
+	encoder := NewEncoder()
+	encoder.EncodeBool(true)
+	encoder.EncodeBool(false)
+	encoder.EncodeBool(true)
+	encoder.EncodeBinary([]byte{5, 255, 98})
+	encoder.EncodeFloat32(32.433)
+	encoder.EncodeFloat64(1543.0998990)
+	encoder.EncodeNull()
+	encoder.EncodeInt8(-11)
+	encoder.EncodeUint8(2)
+	encoder.EncodeInt16(-2555)
+	encoder.EncodeUint16(12222)
+	encoder.EncodeInt32(-487574930)
+	encoder.EncodeUint32(3413241124)
+	encoder.EncodeInt64(-112414)
+	encoder.EncodeUint64(111112321412414)
+	encoder.EncodeVarint(999844)
+	encoder.EncodeUvarint(812)
+	encoder.EncodeNull()
+	encoder.EncodeString("hello world")
+	encoder.EncodeVarint(3333)
+	buffer := encoder.Close()
+
+	decoder := NewDecoder(bytes.NewBuffer(buffer))
+	requires(decoder.DecodeBool()).toBe(t, true)
+	requires(decoder.DecodeBool()).toBe(t, false)
+	requires(decoder.DecodeBool()).toBe(t, true)
+	requires(decoder.DecodeBinary()).toBe(t, []byte{5, 255, 98})
+	requires(decoder.DecodeFloat32()).toBe(t, 32.433)
+	requires(decoder.DecodeFloat64()).toBe(t, 1543.0998990)
+	require.True(t, decoder.IsNextNull())
+	require.Nil(t, decoder.DecodeNull()) // consume nil
+	requires(decoder.DecodeInt8()).toBe(t, -11)
+	requires(decoder.DecodeUint8()).toBe(t, 2)
+	requires(decoder.DecodeInt16()).toBe(t, -2555)
+	requires(decoder.DecodeUint16()).toBe(t, 12222)
+	requires(decoder.DecodeInt32()).toBe(t, -487574930)
+	requires(decoder.DecodeUint32()).toBe(t, 3413241124)
+	requires(decoder.DecodeInt64()).toBe(t, -112414)
+	requires(decoder.DecodeUint64()).toBe(t, 111112321412414)
+	requires(decoder.DecodeVarint()).toBe(t, 999844)
+	requires(decoder.DecodeUvarint()).toBe(t, 812)
+}
+
+type requeriment[T any] struct {
+	given T
+	err   error
+}
+
+func requires[T any](given T, err error) *requeriment[T] {
+	return &requeriment[T]{given: given, err: err}
+}
+
+func (r *requeriment[T]) toBe(t *testing.T, want T) {
+	require.Nil(t, r.err)
+	require.Equal(t, want, r.given)
 }
