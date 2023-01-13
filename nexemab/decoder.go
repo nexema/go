@@ -205,3 +205,25 @@ func (d *Decoder) DecodeFloat64() (float64, error) {
 	}
 	return math.Float64frombits(v), err
 }
+
+// BeginDecodeArray reads two bytes, the byte that represents its an array and its length.
+// Returns the array length
+func (d *Decoder) BeginDecodeArray() (int64, error) {
+	_, err := d.r.ReadByte()
+	if err != nil {
+		return 0, err
+	}
+
+	return d.DecodeVarint()
+}
+
+// BeginDecodeMap reads two bytes, the byte that represents its a map and its length.
+// Returns the map length
+func (d *Decoder) BeginDecodeMap() (int64, error) {
+	_, err := d.r.ReadByte()
+	if err != nil {
+		return 0, err
+	}
+
+	return d.DecodeVarint()
+}

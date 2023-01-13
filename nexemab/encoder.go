@@ -1,24 +1,26 @@
 package nexemab
 
 import (
-	"bytes"
 	"math"
 	"unsafe"
+
+	"github.com/nexema/go/buffer"
 )
 
 type Encoder struct {
-	buf *bytes.Buffer
+	buf buffer.Buffer
 }
 
 func NewEncoder(cap ...int) *Encoder {
-	capacity := 24
-	if len(cap) > 0 {
-		capacity = cap[0]
-	}
+	// capacity := 24
+	// if len(cap) > 0 {
+	// 	capacity = cap[0]
+	// }
 
 	// todo: accept initial buffer size to avoid unneccessary grows
-	buffer := make([]byte, 0, capacity)
-	return &Encoder{buf: bytes.NewBuffer(buffer)}
+	// buffer := make([]byte, 0, capacity)c
+	// return &Encoder{buf: new(buffer.Buffer)}
+	return &Encoder{}
 }
 
 func (e *Encoder) EncodeBool(v bool) {
@@ -129,6 +131,17 @@ func (e *Encoder) EncodeBinary(buffer []byte) {
 	e.buf.Write(buffer)
 }
 
+// BeginArray writes a byte that represents that the next value will be an array, followed by its length.
+func (e *Encoder) BeginArray(length int64) {
+	e.buf.WriteByte(arrayBegin)
+	e.EncodeVarint(length)
+}
+
+// BeginMap writes a byte that represents that the next value will be a map, followed by its length.
+func (e *Encoder) BeginMap(length int64) {
+	e.buf.WriteByte(mapBegin)
+	e.EncodeVarint(length)
+}
 func (e *Encoder) Close() []byte {
 	return e.buf.Bytes()
 }

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func BenchmarkEncode(b *testing.B) {
+func BenchmarkEncodeJsonN(b *testing.B) {
 	encoder := NewEncoder()
 	b.ResetTimer()
 
@@ -26,9 +26,9 @@ func BenchmarkEncode(b *testing.B) {
 		encoder.WriteFloat64(123123.213124)
 		encoder.WriteArrayEnd()
 		encoder.WriteObjEnd()
+		_ = encoder.String()
+		// _ = result
 
-		result := encoder.String()
-		_ = result
 	}
 }
 
