@@ -11,7 +11,7 @@ type Encoder struct {
 	buf buffer.Buffer
 }
 
-func NewEncoder(cap ...int) *Encoder {
+func NewEncoder(buffer buffer.Buffer, cap ...int) *Encoder {
 	// capacity := 24
 	// if len(cap) > 0 {
 	// 	capacity = cap[0]
@@ -20,7 +20,7 @@ func NewEncoder(cap ...int) *Encoder {
 	// todo: accept initial buffer size to avoid unneccessary grows
 	// buffer := make([]byte, 0, capacity)c
 	// return &Encoder{buf: new(buffer.Buffer)}
-	return &Encoder{}
+	return &Encoder{buf: buffer}
 }
 
 func (e *Encoder) EncodeBool(v bool) {

@@ -34,12 +34,18 @@ func (d *Decoder) DecodeNull() error {
 
 // IsNextNull returns true if the next byte to decode represents NULL
 func (d *Decoder) IsNextNull() bool {
-	buf, err := d.r.Peek(1)
+	v, err := d.r.ReadByte()
 	if err != nil {
 		return false
 	}
 
-	return buf[0] == null
+	if v == null {
+		return true
+	}
+
+	// unread
+	d.r.UnreadByte()
+	return false
 }
 
 func (d *Decoder) DecodeBool() (bool, error) {

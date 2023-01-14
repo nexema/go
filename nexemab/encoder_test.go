@@ -6,19 +6,20 @@ import (
 	"math"
 	"testing"
 
+	"github.com/nexema/go/buffer"
 	"github.com/stretchr/testify/require"
 )
 
 func TestEncodeBool(t *testing.T) {
-	encoder := NewEncoder()
+	encoder := NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeBool(true)
 	require.Equal(t, []byte{boolTrue}, encoder.Close())
 
-	encoder = NewEncoder()
+	encoder = NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeBool(false)
 	require.Equal(t, []byte{boolFalse}, encoder.Close())
 
-	encoder = NewEncoder()
+	encoder = NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeBool(true)
 	encoder.EncodeBool(true)
 	encoder.EncodeBool(false)
@@ -27,14 +28,14 @@ func TestEncodeBool(t *testing.T) {
 }
 
 func TestEncodeString(t *testing.T) {
-	encoder := NewEncoder()
+	encoder := NewEncoder(buffer.NewBytesBuffer())
 	const hw = "hello world"
 	encoder.EncodeString(hw)
 	outBuf := encoder.Close()
 
 	hwLen := int64(len(hw))
 
-	encoder = NewEncoder()
+	encoder = NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeVarint(hwLen)
 	testBuf := make([]byte, 0)
 	testBuf = append(testBuf, encoder.Close()...)
@@ -93,7 +94,7 @@ func TestEncodeUvarint(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(fmt.Sprint(tc.input), func(t *testing.T) {
-			encoder := NewEncoder()
+			encoder := NewEncoder(buffer.NewBytesBuffer())
 			encoder.EncodeUvarint(tc.input)
 			got := encoder.Close()
 			require.Equal(t, tc.want, got)
@@ -138,7 +139,7 @@ func TestEncodeVarint(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(fmt.Sprint(tc.input), func(t *testing.T) {
-			encoder := NewEncoder()
+			encoder := NewEncoder(buffer.NewBytesBuffer())
 			encoder.EncodeVarint(tc.input)
 			got := encoder.Close()
 			require.Equal(t, tc.want, got)
@@ -147,7 +148,7 @@ func TestEncodeVarint(t *testing.T) {
 }
 
 func TestEncode(t *testing.T) {
-	encoder := NewEncoder()
+	encoder := NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeBool(true)
 	encoder.EncodeBool(false)
 	encoder.EncodeBool(true)
@@ -193,7 +194,7 @@ func TestEncode(t *testing.T) {
 
 func BenchmarkEncode(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		encoder := NewEncoder()
+		encoder := NewEncoder(buffer.NewBytesBuffer())
 		encoder.EncodeBool(true)
 		encoder.EncodeBool(false)
 		encoder.EncodeBool(true)
