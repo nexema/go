@@ -1,71 +1,37 @@
 package runtime
 
-import (
-	"bytes"
-	"encoding/json"
-)
-
+// Nullable represents T but allowing to set it as "null"
 type Nullable[T any] struct {
 	Value *T
 }
 
-func (n *Nullable[T]) GetValue() T {
-	return *n.Value
-}
-
-func NewNullable[T any](value T) Nullable[T] {
-	return Nullable[T]{
-		Value: &value,
-	}
-}
-
+// NewNull creates a new Nullable[T] without a value
 func NewNull[T any]() Nullable[T] {
 	return Nullable[T]{}
 }
 
-func (n *Nullable[T]) SetValue(value T) {
-	n.Value = &value
+// NewNullalbe creates a new Nullable[T] setting its value
+// to the pointer of v
+func NewNullable[T any](v T) Nullable[T] {
+	return Nullable[T]{Value: &v}
 }
 
-func (n *Nullable[T]) HasValue() bool {
-	return n.Value != nil
-}
-
-func (n *Nullable[T]) Clear() {
-	n.Value = nil
-}
-
-func (n *Nullable[T]) ValueOrDefault() *T {
+// ValueOrZero returns a zero value of T if its null, otherwise, its actual value.
+func (n *Nullable[T]) ValueOrZero() T {
 	if n.Value == nil {
 		var zero T
-		return &zero
+		return zero
 	}
 
-	return n.Value
+	return *n.Value
 }
 
-var jsonNullValue = []byte{110, 117, 108, 108}
-
-func (n Nullable[T]) MarshalJSON() ([]byte, error) {
-	if n.Value == nil {
-		return jsonNullValue, nil
-	}
-
-	return json.Marshal(n.Value)
+// IsNull returns true if the current nullable does not have a value
+func (n *Nullable[T]) IsNull() bool {
+	return n.Value == nil
 }
 
-func (n *Nullable[T]) UnmarshalJSON(data []byte) error {
-	if bytes.Equal(data, jsonNullValue) {
-		n.Value = nil
-		return nil
-	}
-
-	var value T
-	err := json.Unmarshal(data, &value)
-	if err != nil {
-		return err
-	}
-
-	n.Value = &value
-	return nil
+// SetValues sets the value of the nullable
+func (n *Nullable[T]) SetValue(v T) {
+	n.Value = &v
 }
