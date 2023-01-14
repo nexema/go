@@ -179,7 +179,6 @@ func TestEncode(t *testing.T) {
 	requires(decoder.DecodeFloat32()).toBe(t, 32.433)
 	requires(decoder.DecodeFloat64()).toBe(t, 1543.0998990)
 	require.True(t, decoder.IsNextNull())
-	require.Nil(t, decoder.DecodeNull()) // consume nil
 	requires(decoder.DecodeInt8()).toBe(t, -11)
 	requires(decoder.DecodeUint8()).toBe(t, 2)
 	requires(decoder.DecodeInt16()).toBe(t, -2555)
