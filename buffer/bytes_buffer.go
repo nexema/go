@@ -3,27 +3,27 @@ package buffer
 import "bytes"
 
 // Implements the Buffer interface using an underlying bytes.Buffer
-type BytesBuffer struct {
+type bytesBuffer struct {
 	buf *bytes.Buffer
 }
 
-func NewBytesBuffer() *BytesBuffer {
-	return &BytesBuffer{buf: new(bytes.Buffer)}
+func NewBytesBuffer() *bytesBuffer {
+	return &bytesBuffer{buf: new(bytes.Buffer)}
 }
 
-func (bb *BytesBuffer) WriteByte(v byte) error {
+func (bb *bytesBuffer) WriteByte(v byte) error {
 	return bb.buf.WriteByte(v)
 }
 
-func (bb *BytesBuffer) Write(v []byte) error {
+func (bb *bytesBuffer) Write(v []byte) error {
 	_, err := bb.buf.Write(v)
 	return err
 }
 
-func (bb *BytesBuffer) Bytes() []byte {
+func (bb *bytesBuffer) Bytes() []byte {
 	return bb.buf.Bytes()
 }
 
-func (bb *BytesBuffer) Reset() {
+func (bb *bytesBuffer) Reset() {
 	bb.buf.Reset()
 }
