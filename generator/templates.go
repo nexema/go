@@ -123,9 +123,19 @@ func (u *{{.TypeName}}) CurrentValue() interface{} {
 	return u.value
 }
 
-func (u *{{.TypeName}}) MergeFrom(buffer []byte) error {
-	return nil
+{{range .Fields}}
+func (*{{$.LowerName}}Builder) {{.FieldName}}(value {{getTypeName .FieldDef}}) *{{$.TypeName}} {
+	return &{{$.TypeName}}{
+		value:      value,
+		fieldIndex: {{.FieldIndex}},
+	}
 }
+
+func (u *{{$.TypeName}}) Set{{.FieldName}}(value {{getTypeName .FieldDef}}) {
+	u.value = value
+	u.fieldIndex = {{.FieldIndex}}
+}
+{{end}}
 
 func (u *{{.TypeName}}) MergeUsing(other *{{.TypeName}}) error {
 	u.fieldIndex = other.fieldIndex
@@ -140,34 +150,70 @@ func (u *{{.TypeName}}) Clone() *{{.TypeName}} {
 	}
 }
 
-{{range .Fields}}
-func (*{{$.LowerName}}Builder) {{.FieldName}}(value {{getTypeName .FieldDef}}) *{{$.TypeName}} {
-	return &{{$.TypeName}}{
-		value:      value,
-		fieldIndex: {{.FieldIndex}},
+func (u *{{.TypeName}}) Encode() ([]byte, error) {
+	encoder := runtime.GetEncoder()
+	encoder.EncodeVarint(u.fieldIndex)
+	switch u.fieldIndex {
+	{{range .Fields}}
+	case {{.FieldIndex}}:
+		{{getEncoder .FieldDef}}
+	{{end}}
 	}
+
+	return encoder.TakeBytes(), nil
 }
 
-func (u *{{$.TypeName}}) Set{{.FieldName}}(value {{getTypeName .FieldDef}}) {
-	u.value = value
-	u.fieldIndex = {{.FieldIndex}}
+func (u *{{.TypeName}}) MustEncode() []byte {
+	bytes, err := u.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	return bytes
 }
-{{end}}
+
+func (u *{{.TypeName}}) Decode(reader io.Reader) error {
+	decoder := runtime.GetDecoder(reader)
+	var err error
+	u.fieldIndex, err = decoder.DecodeVarint()
+	if err != nil {
+		return err
+	}
+
+	switch fieldIndex {
+	case -1:
+		u.value = nil
+
+	{{range .Fields}}
+	case {{.FieldIndex}}:
+		{{getDecoder .FieldDef}}
+	{{end}}
+	}
+	
+	return nil
+}
+
+func (u *{{.TypeName}}) MustDecode(reader io.Reader) {
+	err := u.Decode(reader)
+	if err != nil {
+		panic(err)
+	}
+}
 `
 
 var enumTemplate, structTemplate, unionTemplate *template.Template
 
 func init() {
-	enumTemplate = parseTemplate("enum", enumTemplateString)
-	structTemplate = parseTemplateWithFunc("struct", structTemplateString, template.FuncMap{
-		"getEncoder":  getEncoderForTypeFunc,
+	funcMap := template.FuncMap{
+		"getEncoder":  getEncoderForFieldFunc,
+		"getDecoder":  getDecoderForFieldFunc,
 		"getTypeName": getTypeNameFunc,
-	})
+	}
 
-	unionTemplate = parseTemplateWithFunc("union", unionTemplateString, template.FuncMap{
-		"getEncoder":  getEncoderForTypeFunc,
-		"getTypeName": getTypeNameFunc,
-	})
+	enumTemplate = parseTemplate("enum", enumTemplateString)
+	structTemplate = parseTemplateWithFunc("struct", structTemplateString, funcMap)
+
+	unionTemplate = parseTemplateWithFunc("union", unionTemplateString, funcMap)
 }
 
 func parseTemplate(name, content string) *template.Template {

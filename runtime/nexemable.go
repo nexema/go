@@ -1,15 +1,15 @@
 package runtime
 
+import "io"
+
 // Nexemable interface provides methods to serialize and deserialize an struct to/from
 // nexemab. Any struct which implements this interface becomes a Nexemable type.
 type Nexemable interface {
 	Encode() ([]byte, error)
 	MustEncode() []byte
 
-	Decode(buffer []byte) error
-	MustDecode(buffer []byte)
-
-	MergeFrom(buffer []byte) error
+	Decode(reader io.Reader) error
+	MustDecode(reader io.Reader)
 	MergeUsing(other Nexemable) error
 
 	Clone() Nexemable

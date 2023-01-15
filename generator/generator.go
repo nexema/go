@@ -21,6 +21,7 @@ const (
 const (
 	runtimeImport string = "github.com/nexema/go/runtime"
 	fmtImport     string = "fmt"
+	ioImport      string = "io"
 )
 
 const (
@@ -100,14 +101,16 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 	// generate each type
 	for _, t := range f.Types {
 		var err error
-		/*if t.Modifier == modifierEnum {
+		if t.Modifier == modifierEnum {
 			g.addImport(fmtImport)
 			err = g.generateEnum(&t)
 		} else if t.Modifier == modifierStruct {
 			g.addImport(runtimeImport)
+			g.addImport(ioImport)
 			err = g.generateStruct(&t, pkgName)
-		} else */if t.Modifier == modifierUnion {
+		} else if t.Modifier == modifierUnion {
 			g.addImport(runtimeImport)
+			g.addImport(ioImport)
 			err = g.generateUnion(&t, pkgName)
 		}
 

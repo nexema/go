@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"io"
 	"sync"
 
 	"github.com/nexema/go/buffer"
@@ -19,4 +20,9 @@ func GetEncoder() *nexemab.Encoder {
 	enc.Reset()
 
 	return enc
+}
+
+// GetDecoder retrieves a nexemab.Decoder instance
+func GetDecoder(reader io.Reader) *nexemab.Decoder {
+	return nexemab.NewDecoder(reader)
 }

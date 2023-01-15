@@ -7,16 +7,21 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func getEncoderForTypeFunc(fieldName, typeName, typeId string) string {
-	switch typeName {
-	case "string", "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "bool", "binary":
-		method := encodeTypeMapper[typeName]
-		return fmt.Sprintf(`encoder.%s(u.%s);`, method, fieldName)
+func getEncoderForFieldFunc(field *NexemaTypeFieldDefinition) string {
+	switch t := field.Type.(type) {
+	case NexemaPrimitiveValueType:
+		switch t.Primitive {
+		case "string", "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "bool", "binary":
+			method := encodeTypeMapper[t.Primitive]
+			return fmt.Sprintf(`encoder.%s(u.%s);`, method, strcase.ToCamel(field.Name))
 
-	case "list":
-	case "map":
-	default:
-		typeDef := defaultGenerator.typeMapping[typeId].TypeDef // typeName here is the typeId
+		case "list":
+		case "map":
+		}
+
+	case NexemaTypeValueType:
+		typeDef := defaultGenerator.typeMapping[t.TypeId].TypeDef // typeName here is the typeId
+		fieldName := strcase.ToCamel(field.Name)
 
 		// enums encode their index
 		if typeDef.Modifier == modifierEnum {
@@ -28,7 +33,49 @@ func getEncoderForTypeFunc(fieldName, typeName, typeId string) string {
 				return nil, err
 			}
 			encoder.EncodeBinary(%[1]sBytes)
-			`, strcase.ToLowerCamel(fieldName), fieldName)
+			`, strcase.ToLowerCamel(field.Name), fieldName)
+		}
+	}
+
+	return ""
+}
+
+func getDecoderForFieldFunc(field *NexemaTypeFieldDefinition) string {
+	fieldName := strcase.ToCamel(field.Name) // go field's name
+	switch t := field.Type.(type) {
+	case NexemaPrimitiveValueType:
+		switch t.Primitive {
+		case "string", "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "bool", "binary":
+			method := decodeTypeMapper[t.Primitive]
+			return fmt.Sprintf(`u.%s, err = decoder.%s(); if err != nil {return err}`, fieldName, method)
+
+		case "list":
+		case "map":
+		}
+
+	case NexemaTypeValueType:
+		typeDef := defaultGenerator.typeMapping[t.TypeId].TypeDef // typeName here is the typeId
+
+		// enums decode their index
+		if typeDef.Modifier == modifierEnum {
+			return fmt.Sprintf(`%[1]sEnumIndex, err := decoder.DecodeUint8();
+			if err != nil {
+				return err
+			}
+
+			u.%[2]s = %[3]sPicker.ByIndex(%[1]sEnumIndex)
+			`, strcase.ToLowerCamel(field.Name), fieldName, typeDef.Name)
+		} else { // struct and union must decode itself as binary
+			return fmt.Sprintf(`
+			%[1]sBytes, err := decoder.DecodeBinary(); 
+			if err != nil {
+				return nil, err
+			}
+			err = u.%[2]s.Decode(%[1]sBytes)
+			if err != nil {
+				return err
+			}
+			`, strcase.ToLowerCamel(field.Name), fieldName)
 		}
 	}
 
