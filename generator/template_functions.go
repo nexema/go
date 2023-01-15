@@ -7,15 +7,43 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
+// toNullableEncoder takes a normalEncoder (ex: encoder.EncodeString(u.MyString)) and a flag isNullable.
+// If isNullable is true, then it will convert normalEncoder to the following syntax:
+//
+//	if u.MyString.IsNull() {
+//		encoder.EncodeNull()
+//	} else {
+//		myStringValue := *u.MyString.Value
+//		encoder.EncodeString(myStringValue)
+//	}
+func toNullableEncoder(normalEncoder string, isNullable bool) string {
+	return ""
+}
+
 func getEncoderForFieldFunc(field *NexemaTypeFieldDefinition) string {
+	fieldName := strcase.ToCamel(field.Name) // Go field's name
 	switch t := field.Type.(type) {
 	case NexemaPrimitiveValueType:
 		switch t.Primitive {
 		case "string", "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64", "bool", "binary":
 			method := encodeTypeMapper[t.Primitive]
-			return fmt.Sprintf(`encoder.%s(u.%s);`, method, strcase.ToCamel(field.Name))
+			if t.Nullable {
+				return fmt.Sprintf(`if u.%[1]s.IsNull() {
+					encoder.EncodeNull()
+				} else {
+					%[2]s := *u.%[1]s.Value
+					encoder.%[3]s(%[2]s)
+				}`, fieldName, strcase.ToLowerCamel(field.Name), method)
+			} else {
+				return fmt.Sprintf(`encoder.%s(u.%s);`, method, fieldName)
+			}
 
 		case "list":
+			// typeArgument := t.TypeArguments[0]
+			return fmt.Sprintf(`
+			
+			`)
+
 		case "map":
 		}
 

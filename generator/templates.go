@@ -63,7 +63,7 @@ func (u *{{.TypeName}}) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
 	var err error
 	{{range .Fields}}
-	{{getEncoder .Name .TypeName .TypeId}}
+	{{getEncoder .FieldDef}}
 	{{end}}
 
 	return encoder.TakeBytes(), nil
