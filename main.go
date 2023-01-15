@@ -1,22 +1,21 @@
 package main
 
 import (
-	"time"
-
-	"github.com/nexema/go/nexemaj"
+	"bufio"
+	"os"
+	"strings"
 )
 
 func main() {
-	now := time.Now()
+	reader := bufio.NewReader(os.Stdin)
+	writer := bufio.NewWriter(os.Stdout)
+	content, err := reader.ReadString('\n')
+	if err != nil {
+		println(err.Error())
+		return
+	}
 
-	encoder := nexemaj.NewEncoder()
-	encoder.WriteObjStart()
-	encoder.WriteStringKey("hello world")
-	// encoder.WriteInt64(123123)
-	encoder.WriteFloat64(123123.213124)
-	encoder.WriteObjEnd()
-
-	diff := time.Since(now)
-	println(encoder.String())
-	println("it took ", diff.Milliseconds(), " ns")
+	content = strings.TrimSpace(content)
+	writer.WriteString("ok\n")
+	writer.Flush()
 }

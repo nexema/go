@@ -11,7 +11,7 @@ type Encoder struct {
 	buf buffer.Buffer
 }
 
-func NewEncoder(buffer buffer.Buffer, cap ...int) *Encoder {
+func NewEncoder(buffer buffer.Buffer) *Encoder {
 	// capacity := 24
 	// if len(cap) > 0 {
 	// 	capacity = cap[0]
@@ -142,6 +142,13 @@ func (e *Encoder) BeginMap(length int64) {
 	e.buf.WriteByte(mapBegin)
 	e.EncodeVarint(length)
 }
-func (e *Encoder) Close() []byte {
+
+// TakeBytes return a representation of the current encoder
+func (e *Encoder) TakeBytes() []byte {
 	return e.buf.Bytes()
+}
+
+// Reset resets the current underlying buffer keeping memory
+func (e *Encoder) Reset() {
+	e.buf.Reset()
 }
