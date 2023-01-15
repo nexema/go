@@ -2,6 +2,7 @@ package generator
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/iancoleman/strcase"
 )
@@ -32,4 +33,51 @@ func getEncoderForTypeFunc(fieldName, typeName, typeId string) string {
 	}
 
 	return ""
+}
+
+func getTypeNameFunc(field *NexemaTypeFieldDefinition) string {
+	return nexemaTypeToGoType(field.Type)
+}
+
+func nexemaTypeToGoType(v NexemaValueType) string {
+	switch t := v.(type) {
+	case NexemaPrimitiveValueType:
+		switch t.Primitive {
+		case "list":
+			goType := nexemaTypeToGoType(t.TypeArguments[0])
+			return fmt.Sprintf("[]%s", goType)
+
+		case "map":
+			keyArgument := nexemaTypeToGoType(t.TypeArguments[0])
+			valueArgument := nexemaTypeToGoType(t.TypeArguments[1])
+
+			return fmt.Sprintf("map[%s]%s", keyArgument, valueArgument)
+		default:
+			if t.Nullable {
+				return fmt.Sprintf("runtime.Nullable[%s]", t.Primitive)
+			}
+
+			return t.Primitive
+		}
+
+	case NexemaTypeValueType:
+		typeDef := defaultGenerator.typeMapping[t.TypeId]
+		typeName := ""
+		// check if should add import
+		if typeDef.PackageName != defaultGenerator.currentPkg {
+			defaultGenerator.addImport(typeDef.ImportPath)
+			typeName = fmt.Sprintf("%s.%s", filepath.Base(typeDef.ImportPath), typeDef.TypeDef.Name)
+		} else {
+			typeName = typeDef.TypeDef.Name
+		}
+
+		if t.Nullable {
+			return fmt.Sprintf("runtime.Nullable[%s]", typeName)
+		} else {
+			return typeName
+		}
+
+	default:
+		panic("unknown field type")
+	}
 }

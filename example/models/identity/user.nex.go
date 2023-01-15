@@ -1,121 +1,82 @@
 package identity
 
 import (
-	"github.com/example/models"
 	"github.com/nexema/go/runtime"
 )
 
-type User struct {
-	Id string
-
-	Name string
-
-	SelectedColor models.Colors
-
-	Account CustomerAccount
+type Account struct {
+	value      interface{}
+	fieldIndex int64
 }
 
-func (u *User) Encode() ([]byte, error) {
-	encoder := runtime.GetEncoder()
-	var err error
+type AccountWhichField int8
 
-	encoder.EncodeString(u.Id)
+const (
+	Account_NotSet AccountWhichField = -1
 
-	encoder.EncodeString(u.Name)
+	Account_Admin AccountWhichField = 0
 
-	encoder.EncodeUint8(u.SelectedColor.Index())
+	Account_Customer AccountWhichField = 1
+)
 
-	accountBytes, err := u.Account.Encode()
-	if err != nil {
-		return nil, err
-	}
-	encoder.EncodeBinary(accountBytes)
+type accountBuilder struct{}
 
-	return encoder.TakeBytes(), nil
+var AccountBuilder *accountBuilder = &accountBuilder{}
+
+func (u *Account) IsSet() bool {
+	return u.fieldIndex != -1
 }
 
-func (u *User) MustEncode() []byte {
-	bytes, err := u.Encode()
-	if err != nil {
-		panic(err)
-	}
-
-	return bytes
+func (u *Account) Clear() {
+	u.value = nil
+	u.fieldIndex = -1
 }
 
-func (u *User) Decode(buffer []byte) error {
+func (u *Account) WhichField() AccountWhichField {
+	return AccountWhichField(u.fieldIndex)
+}
+
+func (u *Account) CurrentValue() interface{} {
+	return u.value
+}
+
+func (u *Account) MergeFrom(buffer []byte) error {
 	return nil
 }
 
-func (u *User) MustDecode(buffer []byte) {
-	err := u.Decode(buffer)
-	if err != nil {
-		panic(err)
-	}
-}
-
-type AdminAccount struct {
-	Active bool
-}
-
-func (u *AdminAccount) Encode() ([]byte, error) {
-	encoder := runtime.GetEncoder()
-	var err error
-
-	encoder.EncodeBool(u.Active)
-
-	return encoder.TakeBytes(), nil
-}
-
-func (u *AdminAccount) MustEncode() []byte {
-	bytes, err := u.Encode()
-	if err != nil {
-		panic(err)
-	}
-
-	return bytes
-}
-
-func (u *AdminAccount) Decode(buffer []byte) error {
+func (u *Account) MergeUsing(other *Account) error {
+	u.fieldIndex = other.fieldIndex
+	u.value = other.value
 	return nil
 }
 
-func (u *AdminAccount) MustDecode(buffer []byte) {
-	err := u.Decode(buffer)
-	if err != nil {
-		panic(err)
+func (u *Account) Clone() *Account {
+	return &Account{
+		fieldIndex: u.fieldIndex,
+		value:      u.value,
 	}
 }
 
-type CustomerAccount struct {
-	Age uint8
-}
-
-func (u *CustomerAccount) Encode() ([]byte, error) {
-	encoder := runtime.GetEncoder()
-	var err error
-
-	encoder.EncodeUint8(u.Age)
-
-	return encoder.TakeBytes(), nil
-}
-
-func (u *CustomerAccount) MustEncode() []byte {
-	bytes, err := u.Encode()
-	if err != nil {
-		panic(err)
+func (*accountBuilder) Admin(value CustomerAccount) *Account {
+	return &Account{
+		value:      value,
+		fieldIndex: 0,
 	}
-
-	return bytes
 }
 
-func (u *CustomerAccount) Decode(buffer []byte) error {
-	return nil
+func (u *Account) SetAdmin(value CustomerAccount) {
+	u.value = value
+	u.fieldIndex = 0
 }
 
-func (u *CustomerAccount) MustDecode(buffer []byte) {
-	err := u.Decode(buffer)
-	if err != nil {
-		panic(err)
+func (*accountBuilder) Customer(value CustomerAccount) *Account {
+	return &Account{
+		value:      value,
+		fieldIndex: 1,
 	}
+}
+
+func (u *Account) SetCustomer(value CustomerAccount) {
+	u.value = value
+	u.fieldIndex = 1
 }

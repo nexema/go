@@ -55,7 +55,7 @@ func ({{.LowerTypeName}}Picker) ByName(name string) {{.TypeName}} {
 
 const structTemplateString = `type {{.TypeName}} struct {
 {{range .Fields}}
-{{.Name}} {{.ImportTypeName}}
+{{.Name}} {{getTypeName .FieldDef}}
 {{end}}
 }
 
@@ -90,12 +90,83 @@ func (u *{{.TypeName}}) MustDecode(buffer []byte) {
 }
 `
 
-var enumTemplate, structTemplate *template.Template
+const unionTemplateString = `type {{.TypeName}} struct {
+	value interface{}
+	fieldIndex int64
+}
+
+type {{.TypeName}}WhichField int8
+const (
+	{{.TypeName}}_NotSet {{.TypeName}}WhichField = -1
+	{{range .Fields}}
+	{{$.TypeName}}_{{.FieldName}} {{$.TypeName}}WhichField = {{.FieldIndex}}
+	{{end}}
+)
+
+type {{.LowerName}}Builder struct{}
+var {{.TypeName}}Builder *{{.LowerName}}Builder = &{{.LowerName}}Builder{}
+
+func (u *{{.TypeName}}) IsSet() bool {
+	return u.fieldIndex != -1
+}
+
+func (u *{{.TypeName}}) Clear() {
+	u.value = nil
+	u.fieldIndex = -1
+}
+
+func (u *{{.TypeName}}) WhichField() {{.TypeName}}WhichField {
+	return {{.TypeName}}WhichField(u.fieldIndex)
+}
+
+func (u *{{.TypeName}}) CurrentValue() interface{} {
+	return u.value
+}
+
+func (u *{{.TypeName}}) MergeFrom(buffer []byte) error {
+	return nil
+}
+
+func (u *{{.TypeName}}) MergeUsing(other *{{.TypeName}}) error {
+	u.fieldIndex = other.fieldIndex
+	u.value = other.value
+	return nil
+}
+
+func (u *{{.TypeName}}) Clone() *{{.TypeName}} {
+	return &{{.TypeName}}{
+		fieldIndex: u.fieldIndex,
+		value:      u.value,
+	}
+}
+
+{{range .Fields}}
+func (*{{$.LowerName}}Builder) {{.FieldName}}(value {{getTypeName .FieldDef}}) *{{$.TypeName}} {
+	return &{{$.TypeName}}{
+		value:      value,
+		fieldIndex: {{.FieldIndex}},
+	}
+}
+
+func (u *{{$.TypeName}}) Set{{.FieldName}}(value {{getTypeName .FieldDef}}) {
+	u.value = value
+	u.fieldIndex = {{.FieldIndex}}
+}
+{{end}}
+`
+
+var enumTemplate, structTemplate, unionTemplate *template.Template
 
 func init() {
 	enumTemplate = parseTemplate("enum", enumTemplateString)
 	structTemplate = parseTemplateWithFunc("struct", structTemplateString, template.FuncMap{
-		"getEncoder": getEncoderForTypeFunc,
+		"getEncoder":  getEncoderForTypeFunc,
+		"getTypeName": getTypeNameFunc,
+	})
+
+	unionTemplate = parseTemplateWithFunc("union", unionTemplateString, template.FuncMap{
+		"getEncoder":  getEncoderForTypeFunc,
+		"getTypeName": getTypeNameFunc,
 	})
 }
 

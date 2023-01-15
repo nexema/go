@@ -23,4 +23,19 @@ type StructFieldTemplateData struct {
 	TypeName       string
 	ImportTypeName string // the same as TypeName but with import e.x: models.User
 	TypeId         string
+	FieldDef       *NexemaTypeFieldDefinition
+}
+
+type UnionTemplateData struct {
+	TypeName  string
+	LowerName string
+	Fields    []UnionFieldTemplateData
+}
+
+type UnionFieldTemplateData struct {
+	FieldName      string
+	FieldIndex     int64
+	ImportTypeName string // the same as TypeName but with import e.x: models.User
+	TypeId         string
+	FieldDef       *NexemaTypeFieldDefinition
 }

@@ -8,4 +8,9 @@ type Nexemable interface {
 
 	Decode(buffer []byte) error
 	MustDecode(buffer []byte)
+
+	MergeFrom(buffer []byte) error
+	MergeUsing(other Nexemable) error
+
+	Clone() Nexemable
 }
