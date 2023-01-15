@@ -17,13 +17,17 @@ func TestGenerate(t *testing.T) {
 		ModuleName: "github.com/example",
 	})
 	result, err := generator.Generate(buf)
+	if err != nil {
+		println(err.Error())
+	}
+
 	require.Nil(t, err)
 	require.NotNil(t, result)
 
 	os.RemoveAll("example/models")
 
 	for _, gen := range result {
-		path := fmt.Sprintf("%s.go", gen.Path)
+		path := fmt.Sprintf("%s.txt", gen.Path)
 		err := os.MkdirAll(filepath.Dir(path), os.ModePerm)
 		require.Nil(t, err)
 

@@ -4,6 +4,26 @@ import (
 	"html/template"
 )
 
+const fieldEncoderTemplateString = `
+{{if .ValueType.IsList}}
+	encoder.BeginArray(int64(len(u.{{.FieldName}})))
+	for _, value := range u.{{.FieldName}} {
+		{{template "encodePrimitive" (index .ValueType.TypeArguments 0)}}
+	}
+
+{{else if .ValueType.IsEnum}}
+	encoder.EncodeUint8(u.{{.FieldName}}.Index())
+{{else if .ValueType.IsMap}}
+	encoder.BeginMap(int64(len(u.{{.FieldName}})))
+{{else if .ValueType.IsPrimitive}}
+	{{template "encodePrimitive" .ValueType}}
+{{else if .ValueType.IsType}}
+	encoder.EncodeNull()
+{{end}}
+`
+
+const encodePrimitiveTemplateString = `encoder.Encode{{capitalizeFirst .ImportTypeName}}(value)`
+
 const enumTemplateString = `type {{.TypeName}} struct {
 	index uint8
 	name  string
@@ -55,7 +75,7 @@ func ({{.LowerTypeName}}Picker) ByName(name string) {{.TypeName}} {
 
 const structTemplateString = `type {{.TypeName}} struct {
 {{range .Fields}}
-{{.Name}} {{getTypeName .FieldDef}}
+
 {{end}}
 }
 
@@ -63,7 +83,16 @@ func (u *{{.TypeName}}) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
 	var err error
 	{{range .Fields}}
-	{{getEncoder .FieldDef}}
+	{{if .ValueType.IsNullable}}
+		if u.{{.FieldName}}.IsNull() {
+			u.EncodeNull()
+		} else {
+			{{.LowerFieldName}} := *u.{{.FieldName}}.Value
+			{{template "fieldEncoder" .}}
+		}
+	{{else}}
+		{{template "fieldEncoder" .}}
+	{{end}}
 	{{end}}
 
 	return encoder.TakeBytes(), nil
@@ -201,19 +230,27 @@ func (u *{{.TypeName}}) MustDecode(reader io.Reader) {
 }
 `
 
-var enumTemplate, structTemplate, unionTemplate *template.Template
+var enumTemplate, structTemplate, unionTemplate, fieldEncoder, primitiveEncoder *template.Template
 
 func init() {
 	funcMap := template.FuncMap{
-		"getEncoder":  getEncoderForFieldFunc,
-		"getDecoder":  getDecoderForFieldFunc,
-		"getTypeName": getTypeNameFunc,
+		"getEncoder":      getEncoderForFieldFunc,
+		"getDecoder":      getDecoderForFieldFunc,
+		"getTypeName":     getTypeNameFunc,
+		"capitalizeFirst": capitalizeFirstFunc,
 	}
+	fieldEncoder = parseTemplateWithFunc("fieldEncoder", fieldEncoderTemplateString, funcMap)
+	primitiveEncoder = parseTemplateWithFunc("encodePrimitive", encodePrimitiveTemplateString, funcMap)
+	// fieldEncoder, _ = fieldEncoder.New("encodePrimitive").Funcs(funcMap).Parse(encodePrimitiveTemplateString)
 
 	enumTemplate = parseTemplate("enum", enumTemplateString)
 	structTemplate = parseTemplateWithFunc("struct", structTemplateString, funcMap)
-
 	unionTemplate = parseTemplateWithFunc("union", unionTemplateString, funcMap)
+
+	structTemplate, _ = structTemplate.AddParseTree("fieldEncoder", fieldEncoder.Tree)
+	structTemplate, _ = structTemplate.AddParseTree("encodePrimitive", primitiveEncoder.Tree)
+	// structTemplate, _ = structTemplate.New("fieldEncoder").Parse(fieldEncoderTemplateString)
+	// structTemplate.New("encodePrimitive").Parse(encodePrimitiveTemplateString)
 }
 
 func parseTemplate(name, content string) *template.Template {

@@ -101,18 +101,18 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 	// generate each type
 	for _, t := range f.Types {
 		var err error
-		if t.Modifier == modifierEnum {
+		/*if t.Modifier == modifierEnum {
 			g.addImport(fmtImport)
 			err = g.generateEnum(&t)
-		} else if t.Modifier == modifierStruct {
+		} else */if t.Modifier == modifierStruct {
 			g.addImport(runtimeImport)
 			g.addImport(ioImport)
 			err = g.generateStruct(&t, pkgName)
-		} else if t.Modifier == modifierUnion {
+		} /*else if t.Modifier == modifierUnion {
 			g.addImport(runtimeImport)
 			g.addImport(ioImport)
 			err = g.generateUnion(&t, pkgName)
-		}
+		}*/
 
 		if err != nil {
 			return nil, err
@@ -162,39 +162,17 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 func (g *Generator) generateStruct(t *NexemaTypeDefinition, pkgName string) error {
 	data := StructTemplateData{
 		TypeName: strcase.ToCamel(t.Name),
-		Fields: mapArray(t.Fields, func(field NexemaTypeFieldDefinition) StructFieldTemplateData {
-			var typeName, importTypeName, typeId string
-			switch t := field.Type.(type) {
-			case NexemaPrimitiveValueType:
-				typeName = t.Primitive
-				importTypeName = typeName
-
-			case NexemaTypeValueType:
-				typeDef := g.typeMapping[t.TypeId]
-				typeName = typeDef.TypeDef.Name
-				typeId = t.TypeId
-
-				// check if should add import
-				if typeDef.PackageName != pkgName {
-					g.addImport(typeDef.ImportPath)
-					importTypeName = fmt.Sprintf("%s.%s", filepath.Base(typeDef.ImportPath), typeName)
-				} else {
-					importTypeName = typeName
-				}
-			}
-
-			return StructFieldTemplateData{
-				Name:           strcase.ToCamel(field.Name),
-				Index:          field.Index,
-				TypeName:       typeName,
-				ImportTypeName: importTypeName,
-				TypeId:         typeId,
-				FieldDef:       &field,
+		Fields: mapArray(t.Fields, func(field NexemaTypeFieldDefinition) TypeFieldTemplateData {
+			return TypeFieldTemplateData{
+				FieldName:      strcase.ToCamel(field.Name),
+				LowerFieldName: strcase.ToLowerCamel(field.Name),
+				FieldIndex:     field.Index,
+				ValueType:      nexemaTypeFieldDefinitionToTemplateData(field.Type),
 			}
 		}),
 	}
 
-	return structTemplate.Execute(g.sw.sb, data)
+	return structTemplate.ExecuteTemplate(g.sw.sb, "struct", data)
 }
 
 func (g *Generator) generateUnion(t *NexemaTypeDefinition, pkgName string) error {

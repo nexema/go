@@ -1,0 +1,130 @@
+package identity
+
+import (
+	"github.com/example/models"
+	"github.com/nexema/go/runtime"
+	"io"
+)
+
+type User struct {
+}
+
+func (u *User) Encode() ([]byte, error) {
+	encoder := runtime.GetEncoder()
+	var err error
+
+	encoder.EncodeString(value)
+
+	encoder.EncodeString(value)
+
+	encoder.EncodeUint8(u.SelectedColor.Index())
+
+	if u.Account.IsNull() {
+		u.EncodeNull()
+	} else {
+		account := *u.Account.Value
+
+		encoder.EncodeNull()
+
+	}
+
+	encoder.BeginArray(int64(len(u.Tags)))
+	for _, value := range u.Tags {
+		encoder.EncodeString(value)
+	}
+
+	encoder.BeginMap(int64(len(u.Claims)))
+
+	return encoder.TakeBytes(), nil
+}
+
+func (u *User) MustEncode() []byte {
+	bytes, err := u.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	return bytes
+}
+
+func (u *User) Decode(buffer []byte) error {
+	return nil
+}
+
+func (u *User) MustDecode(buffer []byte) {
+	err := u.Decode(buffer)
+	if err != nil {
+		panic(err)
+	}
+}
+
+type AdminAccount struct {
+}
+
+func (u *AdminAccount) Encode() ([]byte, error) {
+	encoder := runtime.GetEncoder()
+	var err error
+
+	encoder.EncodeBool(value)
+
+	return encoder.TakeBytes(), nil
+}
+
+func (u *AdminAccount) MustEncode() []byte {
+	bytes, err := u.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	return bytes
+}
+
+func (u *AdminAccount) Decode(buffer []byte) error {
+	return nil
+}
+
+func (u *AdminAccount) MustDecode(buffer []byte) {
+	err := u.Decode(buffer)
+	if err != nil {
+		panic(err)
+	}
+}
+
+type CustomerAccount struct {
+}
+
+func (u *CustomerAccount) Encode() ([]byte, error) {
+	encoder := runtime.GetEncoder()
+	var err error
+
+	if u.Age.IsNull() {
+		u.EncodeNull()
+	} else {
+		age := *u.Age.Value
+
+		encoder.EncodeUint8(value)
+
+	}
+
+	return encoder.TakeBytes(), nil
+}
+
+func (u *CustomerAccount) MustEncode() []byte {
+	bytes, err := u.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	return bytes
+}
+
+func (u *CustomerAccount) Decode(buffer []byte) error {
+	return nil
+}
+
+func (u *CustomerAccount) MustDecode(buffer []byte) {
+	err := u.Decode(buffer)
+	if err != nil {
+		panic(err)
+	}
+}

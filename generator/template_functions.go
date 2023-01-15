@@ -3,6 +3,7 @@ package generator
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/iancoleman/strcase"
 )
@@ -18,6 +19,10 @@ import (
 //	}
 func toNullableEncoder(normalEncoder string, isNullable bool) string {
 	return ""
+}
+
+func capitalizeFirstFunc(v string) string {
+	return strings.ToUpper(string(v[0])) + v[1:]
 }
 
 func getEncoderForFieldFunc(field *NexemaTypeFieldDefinition) string {

@@ -13,32 +13,32 @@ import (
 func TestEncodeBool(t *testing.T) {
 	encoder := NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeBool(true)
-	require.Equal(t, []byte{boolTrue}, encoder.Close())
+	require.Equal(t, []byte{boolTrue}, encoder.TakeBytes())
 
 	encoder = NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeBool(false)
-	require.Equal(t, []byte{boolFalse}, encoder.Close())
+	require.Equal(t, []byte{boolFalse}, encoder.TakeBytes())
 
 	encoder = NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeBool(true)
 	encoder.EncodeBool(true)
 	encoder.EncodeBool(false)
 	encoder.EncodeBool(true)
-	require.Equal(t, []byte{boolTrue, boolTrue, boolFalse, boolTrue}, encoder.Close())
+	require.Equal(t, []byte{boolTrue, boolTrue, boolFalse, boolTrue}, encoder.TakeBytes())
 }
 
 func TestEncodeString(t *testing.T) {
 	encoder := NewEncoder(buffer.NewBytesBuffer())
 	const hw = "hello world"
 	encoder.EncodeString(hw)
-	outBuf := encoder.Close()
+	outBuf := encoder.TakeBytes()
 
 	hwLen := int64(len(hw))
 
 	encoder = NewEncoder(buffer.NewBytesBuffer())
 	encoder.EncodeVarint(hwLen)
 	testBuf := make([]byte, 0)
-	testBuf = append(testBuf, encoder.Close()...)
+	testBuf = append(testBuf, encoder.TakeBytes()...)
 	testBuf = append(testBuf, []byte(hw)...)
 	require.Equal(t, testBuf, outBuf)
 
@@ -50,7 +50,7 @@ func TestEncodeString(t *testing.T) {
 	// s := b.String()
 	// encoder = NewEncoder()
 	// encoder.encodeString(s)
-	// require.Equal(t, []byte(s), encoder.Close())
+	// require.Equal(t, []byte(s), encoder.TakeBytes())
 }
 
 func TestEncodeUvarint(t *testing.T) {
@@ -96,7 +96,7 @@ func TestEncodeUvarint(t *testing.T) {
 		t.Run(fmt.Sprint(tc.input), func(t *testing.T) {
 			encoder := NewEncoder(buffer.NewBytesBuffer())
 			encoder.EncodeUvarint(tc.input)
-			got := encoder.Close()
+			got := encoder.TakeBytes()
 			require.Equal(t, tc.want, got)
 		})
 	}
@@ -141,7 +141,7 @@ func TestEncodeVarint(t *testing.T) {
 		t.Run(fmt.Sprint(tc.input), func(t *testing.T) {
 			encoder := NewEncoder(buffer.NewBytesBuffer())
 			encoder.EncodeVarint(tc.input)
-			got := encoder.Close()
+			got := encoder.TakeBytes()
 			require.Equal(t, tc.want, got)
 		})
 	}
@@ -169,7 +169,7 @@ func TestEncode(t *testing.T) {
 	encoder.EncodeNull()
 	encoder.EncodeString("hello world")
 	encoder.EncodeVarint(3333)
-	buffer := encoder.Close()
+	buffer := encoder.TakeBytes()
 
 	decoder := NewDecoder(bytes.NewBuffer(buffer))
 	requires(decoder.DecodeBool()).toBe(t, true)
@@ -214,7 +214,7 @@ func BenchmarkEncode(b *testing.B) {
 		encoder.EncodeNull()
 		encoder.EncodeString("hello world")
 		encoder.EncodeVarint(3333)
-		encoder.Close()
+		encoder.TakeBytes()
 	}
 }
 
