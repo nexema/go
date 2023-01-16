@@ -9,7 +9,15 @@ const rawFieldEncoderTemplateString = `
 {{if .ValueType.IsList}}
 	encoder.BeginArray(int64(len(u.{{.FieldName}})))
 	for _, value := range u.{{.FieldName}} {
+		{{if .ValueType.IsNullable}}
+		if value.IsNull() {
+			encoder.EncodeNull()
+		} else {
+			{{template "encodePrimitive" (index .ValueType.TypeArguments 0)}}(*value.Value)
+		}
+		{{else}}
 		{{template "encodePrimitive" (index .ValueType.TypeArguments 0)}}(value)
+		{{end}}
 	}
 
 {{else if .ValueType.IsEnum}}
@@ -18,7 +26,16 @@ const rawFieldEncoderTemplateString = `
 	encoder.BeginMap(int64(len(u.{{.FieldName}})))
 	for key, value := range u.{{.FieldName}} {
 		{{template "encodePrimitive" (index .ValueType.TypeArguments 0)}}(key)
+		
+		{{if (index .ValueType.TypeArguments 1).IsNullable}}
+		if value.IsNull() {
+			encoder.EncodeNull()
+		} else {
+			{{template "encodePrimitive" (index .ValueType.TypeArguments 1)}}(*value.Value)
+		}
+		{{else}}
 		{{template "encodePrimitive" (index .ValueType.TypeArguments 1)}}(value)
+		{{end}}
 	}
 {{else if .ValueType.IsPrimitive}}
 	{{template "encodePrimitive" .ValueType}}(u.{{.FieldName}})
@@ -314,7 +331,7 @@ func (u {{.TypeName}}) MustDecode(reader io.Reader) {
 }
 `
 
-var enumTemplate, structTemplate, unionTemplate, fieldEncoder, fieldDecoder, rawFieldEncoder, rawFieldDecoder, primitiveEncoder, primitiveDecoder, fieldDeclarationTemplate *template.Template
+var enumTemplate, structTemplate, unionTemplate, rawFieldEncoder, rawFieldDecoder, primitiveEncoder, primitiveDecoder, fieldDeclarationTemplate *template.Template
 
 func init() {
 	funcMap := template.FuncMap{

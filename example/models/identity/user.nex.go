@@ -40,13 +40,21 @@ func (u *User) Encode() ([]byte, error) {
 
 	encoder.BeginArray(int64(len(u.Tags)))
 	for _, value := range u.Tags {
+
 		encoder.EncodeString(value)
+
 	}
 
 	encoder.BeginMap(int64(len(u.Claims)))
 	for key, value := range u.Claims {
 		encoder.EncodeString(key)
-		encoder.EncodeString(value)
+
+		if value.IsNull() {
+			encoder.EncodeNull()
+		} else {
+			encoder.EncodeString(*value.Value)
+		}
+
 	}
 
 	return encoder.TakeBytes(), nil
