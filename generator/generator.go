@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"go/format"
 	"go/scanner"
+	"os"
 	"path/filepath"
 
 	"github.com/iancoleman/strcase"
@@ -22,6 +23,7 @@ const (
 	runtimeImport string = "github.com/nexema/go/runtime"
 	fmtImport     string = "fmt"
 	ioImport      string = "io"
+	bytesImport   string = "bytes"
 )
 
 const (
@@ -107,10 +109,12 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 		} else if t.Modifier == modifierStruct {
 			g.addImport(runtimeImport)
 			g.addImport(ioImport)
+			g.addImport(bytesImport)
 			err = g.generateStruct(&t, pkgName)
 		} else if t.Modifier == modifierUnion {
 			g.addImport(runtimeImport)
 			g.addImport(ioImport)
+			g.addImport(bytesImport)
 			err = g.generateUnion(&t, pkgName)
 		}
 
@@ -148,6 +152,7 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 		// dump while debugging
 		fmt.Println("DUMPING ==============")
 		fmt.Println(string(buffer))
+		os.WriteFile("dump.txt", buffer, os.ModePerm)
 
 		errs := err.(scanner.ErrorList)
 		return nil, errors.New(errs.Error())

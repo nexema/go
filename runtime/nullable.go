@@ -40,3 +40,9 @@ func (n *Nullable[T]) SetValue(v T) {
 func (n *Nullable[T]) Clear() {
 	n.Value = nil
 }
+
+// NullableList is just a shortcut for runtime.Nullable[[]T] to avoid verbosity
+type NullableList[T any] Nullable[[]T]
+
+// NullableListArgument is just a shortcut for runtime.NullableList[runtime.Nullable[T]]
+type NullableListArgument[T any] NullableList[Nullable[T]]

@@ -11,6 +11,7 @@ type Nexemable interface {
 	Decode(reader io.Reader) error
 	MustDecode(reader io.Reader)
 	MergeUsing(other Nexemable) error
+	MergeFrom(buffer []byte) error
 
 	Clone() Nexemable
 }
