@@ -8,17 +8,12 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-// toNullableEncoder takes a normalEncoder (ex: encoder.EncodeString(u.MyString)) and a flag isNullable.
-// If isNullable is true, then it will convert normalEncoder to the following syntax:
-//
-//	if u.MyString.IsNull() {
-//		encoder.EncodeNull()
-//	} else {
-//		myStringValue := *u.MyString.Value
-//		encoder.EncodeString(myStringValue)
-//	}
-func toNullableEncoder(normalEncoder string, isNullable bool) string {
-	return ""
+func setNullableFunc(fieldDeclaration string, isNullable bool) string {
+	if isNullable {
+		return fmt.Sprintf(`runtime.Nullable[%s]`, fieldDeclaration)
+	} else {
+		return fieldDeclaration
+	}
 }
 
 func capitalizeFirstFunc(v string) string {

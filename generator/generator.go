@@ -101,18 +101,18 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 	// generate each type
 	for _, t := range f.Types {
 		var err error
-		/*if t.Modifier == modifierEnum {
+		if t.Modifier == modifierEnum {
 			g.addImport(fmtImport)
 			err = g.generateEnum(&t)
-		} else */if t.Modifier == modifierStruct {
+		} else if t.Modifier == modifierStruct {
 			g.addImport(runtimeImport)
 			g.addImport(ioImport)
 			err = g.generateStruct(&t, pkgName)
-		} /*else if t.Modifier == modifierUnion {
+		} else if t.Modifier == modifierUnion {
 			g.addImport(runtimeImport)
 			g.addImport(ioImport)
 			err = g.generateUnion(&t, pkgName)
-		}*/
+		}
 
 		if err != nil {
 			return nil, err
@@ -179,38 +179,17 @@ func (g *Generator) generateUnion(t *NexemaTypeDefinition, pkgName string) error
 	data := UnionTemplateData{
 		TypeName:  strcase.ToCamel(t.Name),
 		LowerName: strcase.ToLowerCamel(t.Name),
-		Fields: mapArray(t.Fields, func(field NexemaTypeFieldDefinition) UnionFieldTemplateData {
-			var typeName, importTypeName, typeId string
-			switch t := field.Type.(type) {
-			case NexemaPrimitiveValueType:
-				typeName = t.Primitive
-				importTypeName = typeName
-
-			case NexemaTypeValueType:
-				typeDef := g.typeMapping[t.TypeId]
-				typeName = typeDef.TypeDef.Name
-				typeId = t.TypeId
-
-				// check if should add import
-				if typeDef.PackageName != pkgName {
-					g.addImport(typeDef.ImportPath)
-					importTypeName = fmt.Sprintf("%s.%s", filepath.Base(typeDef.ImportPath), typeName)
-				} else {
-					importTypeName = typeName
-				}
-			}
-
-			return UnionFieldTemplateData{
+		Fields: mapArray(t.Fields, func(field NexemaTypeFieldDefinition) TypeFieldTemplateData {
+			return TypeFieldTemplateData{
 				FieldName:      strcase.ToCamel(field.Name),
+				LowerFieldName: strcase.ToLowerCamel(field.Name),
 				FieldIndex:     field.Index,
-				ImportTypeName: importTypeName,
-				TypeId:         typeId,
-				FieldDef:       &field,
+				ValueType:      nexemaTypeFieldDefinitionToTemplateData(field.Type),
 			}
 		}),
 	}
 
-	return unionTemplate.Execute(g.sw.sb, data)
+	return unionTemplate.ExecuteTemplate(g.sw.sb, "union", data)
 }
 
 func (g *Generator) generateEnum(t *NexemaTypeDefinition) error {

@@ -27,7 +27,7 @@ func TestGenerate(t *testing.T) {
 	os.RemoveAll("example/models")
 
 	for _, gen := range result {
-		path := fmt.Sprintf("%s.txt", gen.Path)
+		path := fmt.Sprintf("%s.go", gen.Path)
 		err := os.MkdirAll(filepath.Dir(path), os.ModePerm)
 		require.Nil(t, err)
 

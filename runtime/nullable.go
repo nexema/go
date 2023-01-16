@@ -35,3 +35,8 @@ func (n *Nullable[T]) IsNull() bool {
 func (n *Nullable[T]) SetValue(v T) {
 	n.Value = &v
 }
+
+// Clear clears the underlying value, setting it as null
+func (n *Nullable[T]) Clear() {
+	n.Value = nil
+}

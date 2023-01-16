@@ -17,6 +17,12 @@ type StructTemplateData struct {
 	Fields   []TypeFieldTemplateData
 }
 
+type UnionTemplateData struct {
+	TypeName  string
+	LowerName string
+	Fields    []TypeFieldTemplateData
+}
+
 type TypeFieldTemplateData struct {
 	FieldName      string // FieldName is field's name but in Go (CamelCase)
 	LowerFieldName string // LowerFieldName is field's name in Go, but lowerCamelCase
@@ -43,20 +49,6 @@ type StructFieldTemplateData struct {
 	Index          int64
 	TypeName       string
 	IsNullable     bool
-	ImportTypeName string // the same as TypeName but with import e.x: models.User
-	TypeId         string
-	FieldDef       *NexemaTypeFieldDefinition
-}
-
-type UnionTemplateData struct {
-	TypeName  string
-	LowerName string
-	Fields    []UnionFieldTemplateData
-}
-
-type UnionFieldTemplateData struct {
-	FieldName      string
-	FieldIndex     int64
 	ImportTypeName string // the same as TypeName but with import e.x: models.User
 	TypeId         string
 	FieldDef       *NexemaTypeFieldDefinition
