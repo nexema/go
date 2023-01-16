@@ -27,7 +27,7 @@ func (u *User) Encode() ([]byte, error) {
 	if u.Account.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		account := *u.Account.Value
+		value := *u.Account.Value
 
 		accountBytes, err := account.Encode()
 		if err != nil {
@@ -113,10 +113,12 @@ func (u User) Decode(reader io.Reader) error {
 
 	u.Tags = make([]string, tagsArrayLen)
 	for i := int64(0); i < tagsArrayLen; i++ {
+
 		u.Tags[i], err = decoder.DecodeString()
 		if err != nil {
 			return err
 		}
+
 	}
 
 	claimsMapLen, err := decoder.BeginDecodeMap()
@@ -131,12 +133,17 @@ func (u User) Decode(reader io.Reader) error {
 			return err
 		}
 
-		value, err := decoder.DecodeString()
-		if err != nil {
-			return err
+		if decoder.IsNextNull() {
+			u.Claims[key] = runtime.NewNull[string]()
+		} else {
+			value, err := decoder.DecodeString()
+			if err != nil {
+				return err
+			}
+
+			u.Claims[key] = runtime.NewNullable[string](value)
 		}
 
-		u.Claims[key] = value
 	}
 
 	return nil
@@ -355,9 +362,9 @@ func (u *CustomerAccount) Encode() ([]byte, error) {
 	if u.Age.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		age := *u.Age.Value
+		value := *u.Age.Value
 
-		encoder.EncodeUint8(u.Age)
+		encoder.EncodeUint8(value)
 
 	}
 
@@ -381,10 +388,13 @@ func (u CustomerAccount) Decode(reader io.Reader) error {
 		u.Age.Clear()
 	} else {
 
-		u.Age, err = decoder.DecodeUint8()
+		var value uint8
+		value, err = decoder.DecodeUint8()
 		if err != nil {
 			return err
 		}
+
+		u.Age.SetValue(value)
 
 	}
 

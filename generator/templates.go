@@ -38,7 +38,11 @@ const rawFieldEncoderTemplateString = `
 		{{end}}
 	}
 {{else if .ValueType.IsPrimitive}}
+	{{if .ValueType.IsNullable}}
+	{{template "encodePrimitive" .ValueType}}(value)
+	{{else}}
 	{{template "encodePrimitive" .ValueType}}(u.{{.FieldName}})
+	{{end}}
 {{else if .ValueType.IsType}}
 	{{.LowerFieldName}}Bytes, err := {{.LowerFieldName}}.Encode()
 	if err != nil {
@@ -58,10 +62,23 @@ const rawFieldDecoderTemplateString = `
 
 	u.{{.FieldName}} = make({{template "fieldDeclaration" .ValueType}}, {{.LowerFieldName}}ArrayLen)
 	for i := int64(0); i < {{.LowerFieldName}}ArrayLen; i++ {
+		{{if (index .ValueType.TypeArguments 0).IsNullable}}
+		if decoder.IsNextNull() {
+			u.{{.FieldName}}[i] = runtime.NewNull[{{(index .ValueType.TypeArguments 0).ImportTypeName}}}]()
+		} else {
+			{{.LowerFieldName}},err := {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
+			if err != nil {
+				return err
+			} 
+
+			u.{{.FieldName}}[i] = runtime.NewNullable[{{(index .ValueType.TypeArguments 0).ImportTypeName}}]({{.LowerFieldName}})
+		}
+		{{else}}
 		u.{{.FieldName}}[i],err = {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
 		if err != nil {
 			return err
 		} 
+		{{end}}
 	}
 
 {{else if .ValueType.IsEnum}}
@@ -84,18 +101,41 @@ const rawFieldDecoderTemplateString = `
 			return err
 		}
 		
+		{{if (index .ValueType.TypeArguments 1).IsNullable}}
+		if decoder.IsNextNull() {
+			u.{{.FieldName}}[key] = runtime.NewNull[{{(index .ValueType.TypeArguments 1).ImportTypeName}}]()
+		} else {
+			value, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 1)}}()
+			if err != nil {
+				return err
+			}
+
+			u.{{.FieldName}}[key] = runtime.NewNullable[{{(index .ValueType.TypeArguments 1).ImportTypeName}}](value)
+		}
+		{{else}}
 		value, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 1)}}()
 		if err != nil {
 			return err
 		}
 
 		u.{{.FieldName}}[key] = value
+		{{end}}
 	}
 {{else if .ValueType.IsPrimitive}}
+	{{if .ValueType.IsNullable}}
+	var value {{.ValueType.ImportTypeName}}
+	value, err = {{template "decodePrimitive" .ValueType}}()
+	if err != nil {
+		return err
+	}
+
+	u.{{.FieldName}}.SetValue(value)
+	{{else}}
 	u.{{.FieldName}}, err = {{template "decodePrimitive" .ValueType}}()
 	if err != nil {
 		return err
 	}
+	{{end}}
 {{else if .ValueType.IsType}}
 	{{.LowerFieldName}}Bytes, err := decoder.DecodeBinary()
 	if err != nil {
@@ -175,7 +215,7 @@ func (u *{{.TypeName}}) Encode() ([]byte, error) {
 		if u.{{.FieldName}}.IsNull() {
 			encoder.EncodeNull()
 		} else {
-			{{.LowerFieldName}} := *u.{{.FieldName}}.Value
+			value := *u.{{.FieldName}}.Value
 			{{template "rawFieldEncoder" .}}
 		}
 	{{else}}
