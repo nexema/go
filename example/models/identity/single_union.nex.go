@@ -154,7 +154,6 @@ func (u SingleUnion) Decode(reader io.Reader) error {
 
 		u.Field3 = make([]runtime.Nullable[string], field3ArrayLen)
 		for i := int64(0); i < field3ArrayLen; i++ {
-
 			if decoder.IsNextNull() {
 				u.Field3[i] = runtime.NewNull[string]()
 			} else {
@@ -165,7 +164,6 @@ func (u SingleUnion) Decode(reader io.Reader) error {
 
 				u.Field3[i] = runtime.NewNullable[string](field3)
 			}
-
 		}
 
 	}

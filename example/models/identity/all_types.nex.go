@@ -2,9 +2,10 @@ package identity
 
 import (
 	"bytes"
+	"io"
+
 	"github.com/example/models"
 	"github.com/nexema/go/runtime"
-	"io"
 )
 
 type NexemaPrimitives struct {
@@ -472,7 +473,7 @@ func (u NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyBinary.Clear()
 	} else {
 
-		var value binary
+		var value []byte
 		value, err = decoder.DecodeBinary()
 		if err != nil {
 			return err
@@ -517,13 +518,11 @@ func (u *NexemaList) Encode() ([]byte, error) {
 
 		encoder.BeginArray(int64(len(value)))
 		for _, element := range value {
-
 			if element.IsNull() {
 				encoder.EncodeNull()
 			} else {
 				encoder.EncodeString(*element.Value)
 			}
-
 		}
 
 	}
@@ -535,9 +534,7 @@ func (u *NexemaList) Encode() ([]byte, error) {
 
 		encoder.BeginArray(int64(len(value)))
 		for _, element := range value {
-
 			encoder.EncodeBinary(element)
-
 		}
 
 	}
@@ -549,13 +546,11 @@ func (u *NexemaList) Encode() ([]byte, error) {
 
 		encoder.BeginArray(int64(len(value)))
 		for _, element := range value {
-
 			if element.IsNull() {
 				encoder.EncodeNull()
 			} else {
 				encoder.EncodeBinary(*element.Value)
 			}
-
 		}
 
 	}
@@ -583,12 +578,10 @@ func (u NexemaList) Decode(reader io.Reader) error {
 
 	u.List1 = make([]string, list1ArrayLen)
 	for i := int64(0); i < list1ArrayLen; i++ {
-
 		u.List1[i], err = decoder.DecodeString()
 		if err != nil {
 			return err
 		}
-
 	}
 
 	list2ArrayLen, err := decoder.BeginDecodeArray()
@@ -598,12 +591,10 @@ func (u NexemaList) Decode(reader io.Reader) error {
 
 	u.List2 = make([][]byte, list2ArrayLen)
 	for i := int64(0); i < list2ArrayLen; i++ {
-
 		u.List2[i], err = decoder.DecodeBinary()
 		if err != nil {
 			return err
 		}
-
 	}
 
 	list3ArrayLen, err := decoder.BeginDecodeArray()
@@ -613,7 +604,6 @@ func (u NexemaList) Decode(reader io.Reader) error {
 
 	u.List3 = make([]runtime.Nullable[string], list3ArrayLen)
 	for i := int64(0); i < list3ArrayLen; i++ {
-
 		if decoder.IsNextNull() {
 			u.List3[i] = runtime.NewNull[string]()
 		} else {
@@ -624,7 +614,6 @@ func (u NexemaList) Decode(reader io.Reader) error {
 
 			u.List3[i] = runtime.NewNullable[string](list3)
 		}
-
 	}
 
 	if decoder.IsNextNull() {
@@ -636,20 +625,17 @@ func (u NexemaList) Decode(reader io.Reader) error {
 			return err
 		}
 
-		u.List4 = make(runtime.Nullable[[]runtime.Nullable[string]], list4ArrayLen)
+		u.List4.SetValue(make([]runtime.Nullable[string], list4ArrayLen))
 		for i := int64(0); i < list4ArrayLen; i++ {
-
 			if decoder.IsNextNull() {
-				u.List4[i] = runtime.NewNull[string]()
+				(*u.List4.Value)[i] = runtime.NewNull[string]()
 			} else {
 				list4, err := decoder.DecodeString()
 				if err != nil {
 					return err
 				}
-
-				u.List4[i] = runtime.NewNullable[string](list4)
+				(*u.List4.Value)[i] = runtime.NewNullable[string](list4)
 			}
-
 		}
 
 	}
@@ -663,14 +649,12 @@ func (u NexemaList) Decode(reader io.Reader) error {
 			return err
 		}
 
-		u.List5 = make(runtime.Nullable[[][]byte], list5ArrayLen)
+		u.List5.SetValue(make([][]byte, list5ArrayLen))
 		for i := int64(0); i < list5ArrayLen; i++ {
-
-			u.List5[i], err = decoder.DecodeBinary()
+			(*u.List5.Value)[i], err = decoder.DecodeBinary()
 			if err != nil {
 				return err
 			}
-
 		}
 
 	}
@@ -682,7 +666,6 @@ func (u NexemaList) Decode(reader io.Reader) error {
 
 	u.List6 = make([]runtime.Nullable[[]byte], list6ArrayLen)
 	for i := int64(0); i < list6ArrayLen; i++ {
-
 		if decoder.IsNextNull() {
 			u.List6[i] = runtime.NewNull[[]byte]()
 		} else {
@@ -693,7 +676,6 @@ func (u NexemaList) Decode(reader io.Reader) error {
 
 			u.List6[i] = runtime.NewNullable[[]byte](list6)
 		}
-
 	}
 
 	if decoder.IsNextNull() {
@@ -705,20 +687,17 @@ func (u NexemaList) Decode(reader io.Reader) error {
 			return err
 		}
 
-		u.List7 = make(runtime.Nullable[[]runtime.Nullable[[]byte]], list7ArrayLen)
+		u.List7.SetValue(make([]runtime.Nullable[[]byte], list7ArrayLen))
 		for i := int64(0); i < list7ArrayLen; i++ {
-
 			if decoder.IsNextNull() {
-				u.List7[i] = runtime.NewNull[[]byte]()
+				(*u.List7.Value)[i] = runtime.NewNull[[]byte]()
 			} else {
 				list7, err := decoder.DecodeBinary()
 				if err != nil {
 					return err
 				}
-
-				u.List7[i] = runtime.NewNullable[[]byte](list7)
+				(*u.List7.Value)[i] = runtime.NewNullable[[]byte](list7)
 			}
-
 		}
 
 	}
@@ -754,21 +733,17 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 	encoder.BeginMap(int64(len(u.Map0)))
 	for key, value := range u.Map0 {
 		encoder.EncodeString(key)
-
 		encoder.EncodeString(value)
-
 	}
 
 	encoder.BeginMap(int64(len(u.Map1)))
 	for key, value := range u.Map1 {
 		encoder.EncodeString(key)
-
 		if value.IsNull() {
 			encoder.EncodeNull()
 		} else {
 			encoder.EncodeString(*value.Value)
 		}
-
 	}
 
 	if u.Map2.IsNull() {
@@ -779,9 +754,7 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 		encoder.BeginMap(int64(len(u.Map2)))
 		for key, value := range u.Map2 {
 			encoder.EncodeString(key)
-
 			encoder.EncodeString(value)
-
 		}
 
 	}
@@ -794,13 +767,11 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 		encoder.BeginMap(int64(len(u.Map3)))
 		for key, value := range u.Map3 {
 			encoder.EncodeString(key)
-
 			if value.IsNull() {
 				encoder.EncodeNull()
 			} else {
 				encoder.EncodeString(*value.Value)
 			}
-
 		}
 
 	}
@@ -808,21 +779,17 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 	encoder.BeginMap(int64(len(u.Map4)))
 	for key, value := range u.Map4 {
 		encoder.EncodeString(key)
-
 		encoder.EncodeBinary(value)
-
 	}
 
 	encoder.BeginMap(int64(len(u.Map5)))
 	for key, value := range u.Map5 {
 		encoder.EncodeString(key)
-
 		if value.IsNull() {
 			encoder.EncodeNull()
 		} else {
 			encoder.EncodeBinary(*value.Value)
 		}
-
 	}
 
 	if u.Map6.IsNull() {
@@ -833,13 +800,11 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 		encoder.BeginMap(int64(len(u.Map6)))
 		for key, value := range u.Map6 {
 			encoder.EncodeString(key)
-
 			if value.IsNull() {
 				encoder.EncodeNull()
 			} else {
 				encoder.EncodeBinary(*value.Value)
 			}
-
 		}
 
 	}

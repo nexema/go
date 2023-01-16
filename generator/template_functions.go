@@ -21,6 +21,11 @@ func setNullableListFunc(fieldDeclaration string, isNullable bool) string {
 	}
 }
 
+// stripRuntimeNullableDecl strips from a declaration like runtime.Nullable[X] the runtime.Nullable[] part, leaving X alone
+func stripRuntimeNullableDeclFunc(declaration string) string {
+	return declaration[17 : len(declaration)-1]
+}
+
 func toGoTypeFunc(primitive string) string {
 	switch primitive {
 	case "binary":
