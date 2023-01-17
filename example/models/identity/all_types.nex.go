@@ -25,6 +25,51 @@ type NexemaPrimitives struct {
 	MyBinary  []byte
 }
 
+type NexemaPrimitivesBuilder struct {
+	MyString  string
+	MyBoolean bool
+	MyUint8   uint8
+	MyUint16  uint16
+	MyUint32  uint32
+	MyUint64  uint64
+	MyInt8    int8
+	MyInt16   int16
+	MyInt32   int32
+	MyInt64   int64
+	MyFloat32 float32
+	MyFloat64 float64
+	MyBinary  []byte
+}
+
+// NewNexemaPrimitives constructs a new instance of NexemaPrimitives.
+// Calling this takes the adventage of default values and other runtime checks
+func NewNexemaPrimitives(builder ...NexemaPrimitivesBuilder) *NexemaPrimitives {
+	if len(builder) > 1 {
+		panic("builder expects one argument")
+	}
+
+	var builderInst NexemaPrimitivesBuilder
+	if len(builder) == 1 {
+		builderInst = builder[0]
+	}
+
+	instance := &NexemaPrimitives{}
+	instance.MyString = builderInst.MyString
+	instance.MyBoolean = builderInst.MyBoolean
+	instance.MyUint8 = builderInst.MyUint8
+	instance.MyUint16 = builderInst.MyUint16
+	instance.MyUint32 = builderInst.MyUint32
+	instance.MyUint64 = builderInst.MyUint64
+	instance.MyInt8 = builderInst.MyInt8
+	instance.MyInt16 = builderInst.MyInt16
+	instance.MyInt32 = builderInst.MyInt32
+	instance.MyInt64 = builderInst.MyInt64
+	instance.MyFloat32 = builderInst.MyFloat32
+	instance.MyFloat64 = builderInst.MyFloat64
+	instance.MyBinary = builderInst.MyBinary
+	return instance
+}
+
 func (u *NexemaPrimitives) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
 
@@ -150,7 +195,7 @@ func (u *NexemaPrimitives) MustDecode(reader io.Reader) {
 	}
 }
 
-func (u NexemaPrimitives) String() string {
+func (u *NexemaPrimitives) String() string {
 	parts := make([]string, 13)
 	parts[0] = fmt.Sprintf("MyString: %v", u.MyString)
 	parts[1] = fmt.Sprintf("MyBoolean: %v", u.MyBoolean)
@@ -227,110 +272,142 @@ type NexemaNullablePrimitives struct {
 	MyBinary  runtime.Nullable[[]byte]
 }
 
+type NexemaNullablePrimitivesBuilder struct {
+	MyString  runtime.Nullable[string]
+	MyBoolean runtime.Nullable[bool]
+	MyUint8   runtime.Nullable[uint8]
+	MyUint16  runtime.Nullable[uint16]
+	MyUint32  runtime.Nullable[uint32]
+	MyUint64  runtime.Nullable[uint64]
+	MyInt8    runtime.Nullable[int8]
+	MyInt16   runtime.Nullable[int16]
+	MyInt32   runtime.Nullable[int32]
+	MyInt64   runtime.Nullable[int64]
+	MyFloat32 runtime.Nullable[float32]
+	MyFloat64 runtime.Nullable[float64]
+	MyBinary  runtime.Nullable[[]byte]
+}
+
+// NewNexemaNullablePrimitives constructs a new instance of NexemaNullablePrimitives.
+// Calling this takes the adventage of default values and other runtime checks
+func NewNexemaNullablePrimitives(builder ...NexemaNullablePrimitivesBuilder) *NexemaNullablePrimitives {
+	if len(builder) > 1 {
+		panic("builder expects one argument")
+	}
+
+	var builderInst NexemaNullablePrimitivesBuilder
+	if len(builder) == 1 {
+		builderInst = builder[0]
+	}
+
+	instance := &NexemaNullablePrimitives{}
+	instance.MyString = builderInst.MyString
+	instance.MyBoolean = builderInst.MyBoolean
+	instance.MyUint8 = builderInst.MyUint8
+	instance.MyUint16 = builderInst.MyUint16
+	instance.MyUint32 = builderInst.MyUint32
+	instance.MyUint64 = builderInst.MyUint64
+	instance.MyInt8 = builderInst.MyInt8
+	instance.MyInt16 = builderInst.MyInt16
+	instance.MyInt32 = builderInst.MyInt32
+	instance.MyInt64 = builderInst.MyInt64
+	instance.MyFloat32 = builderInst.MyFloat32
+	instance.MyFloat64 = builderInst.MyFloat64
+	instance.MyBinary = builderInst.MyBinary
+	return instance
+}
+
 func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
 	if u.MyString.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyString.Value
 
-		encoder.EncodeString(value)
+		encoder.EncodeString(*u.MyString.Value)
 
 	}
 	if u.MyBoolean.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyBoolean.Value
 
-		encoder.EncodeBool(value)
+		encoder.EncodeBool(*u.MyBoolean.Value)
 
 	}
 	if u.MyUint8.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyUint8.Value
 
-		encoder.EncodeUint8(value)
+		encoder.EncodeUint8(*u.MyUint8.Value)
 
 	}
 	if u.MyUint16.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyUint16.Value
 
-		encoder.EncodeUint16(value)
+		encoder.EncodeUint16(*u.MyUint16.Value)
 
 	}
 	if u.MyUint32.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyUint32.Value
 
-		encoder.EncodeUint32(value)
+		encoder.EncodeUint32(*u.MyUint32.Value)
 
 	}
 	if u.MyUint64.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyUint64.Value
 
-		encoder.EncodeUint64(value)
+		encoder.EncodeUint64(*u.MyUint64.Value)
 
 	}
 	if u.MyInt8.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyInt8.Value
 
-		encoder.EncodeInt8(value)
+		encoder.EncodeInt8(*u.MyInt8.Value)
 
 	}
 	if u.MyInt16.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyInt16.Value
 
-		encoder.EncodeInt16(value)
+		encoder.EncodeInt16(*u.MyInt16.Value)
 
 	}
 	if u.MyInt32.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyInt32.Value
 
-		encoder.EncodeInt32(value)
+		encoder.EncodeInt32(*u.MyInt32.Value)
 
 	}
 	if u.MyInt64.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyInt64.Value
 
-		encoder.EncodeInt64(value)
+		encoder.EncodeInt64(*u.MyInt64.Value)
 
 	}
 	if u.MyFloat32.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyFloat32.Value
 
-		encoder.EncodeFloat32(value)
+		encoder.EncodeFloat32(*u.MyFloat32.Value)
 
 	}
 	if u.MyFloat64.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyFloat64.Value
 
-		encoder.EncodeFloat64(value)
+		encoder.EncodeFloat64(*u.MyFloat64.Value)
 
 	}
 	if u.MyBinary.IsNull() {
 		encoder.EncodeNull()
 	} else {
-		value := *u.MyBinary.Value
 
-		encoder.EncodeBinary(value)
+		encoder.EncodeBinary(*u.MyBinary.Value)
 
 	}
 	return encoder.TakeBytes(), nil
@@ -532,7 +609,7 @@ func (u *NexemaNullablePrimitives) MustDecode(reader io.Reader) {
 	}
 }
 
-func (u NexemaNullablePrimitives) String() string {
+func (u *NexemaNullablePrimitives) String() string {
 	parts := make([]string, 13)
 	parts[0] = fmt.Sprintf("MyString: %v", u.MyString)
 	parts[1] = fmt.Sprintf("MyBoolean: %v", u.MyBoolean)
@@ -597,22 +674,62 @@ type NexemaList struct {
 	List1 []string
 	List2 [][]byte
 	List3 []runtime.Nullable[string]
-	List4 runtime.Nullable[[]runtime.Nullable[string]]
-	List5 runtime.Nullable[[][]byte]
+	List4 []runtime.Nullable[string]
+	List5 [][]byte
 	List6 []runtime.Nullable[[]byte]
-	List7 runtime.Nullable[[]runtime.Nullable[[]byte]]
+	List7 []runtime.Nullable[[]byte]
+}
+
+type NexemaListBuilder struct {
+	List1 []string
+	List2 [][]byte
+	List3 []runtime.Nullable[string]
+	List4 []runtime.Nullable[string]
+	List5 [][]byte
+	List6 []runtime.Nullable[[]byte]
+	List7 []runtime.Nullable[[]byte]
+}
+
+// NewNexemaList constructs a new instance of NexemaList.
+// Calling this takes the adventage of default values and other runtime checks
+func NewNexemaList(builder ...NexemaListBuilder) *NexemaList {
+	if len(builder) > 1 {
+		panic("builder expects one argument")
+	}
+
+	var builderInst NexemaListBuilder
+	if len(builder) == 1 {
+		builderInst = builder[0]
+	}
+
+	instance := &NexemaList{}
+	instance.List1 = builderInst.List1
+	instance.List2 = builderInst.List2
+	instance.List3 = builderInst.List3
+	instance.List4 = builderInst.List4
+	instance.List5 = builderInst.List5
+	instance.List6 = builderInst.List6
+	instance.List7 = builderInst.List7
+	return instance
 }
 
 func (u *NexemaList) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
-
-	if u.List4.IsNull() {
+	if u.List1 == nil {
+		return nil, fmt.Errorf("field List1 is null but its not marked as nullable")
+	}
+	if u.List2 == nil {
+		return nil, fmt.Errorf("field List2 is null but its not marked as nullable")
+	}
+	if u.List3 == nil {
+		return nil, fmt.Errorf("field List3 is null but its not marked as nullable")
+	}
+	if u.List4 == nil {
 		encoder.EncodeNull()
 	} else {
-		value := *u.List4.Value
 
-		encoder.BeginArray(int64(len(value)))
-		for _, element := range value {
+		encoder.BeginArray(int64(len(u.List4)))
+		for _, element := range u.List4 {
 			if element.IsNull() {
 				encoder.EncodeNull()
 			} else {
@@ -621,25 +738,25 @@ func (u *NexemaList) Encode() ([]byte, error) {
 		}
 
 	}
-	if u.List5.IsNull() {
+	if u.List5 == nil {
 		encoder.EncodeNull()
 	} else {
-		value := *u.List5.Value
 
-		encoder.BeginArray(int64(len(value)))
-		for _, element := range value {
+		encoder.BeginArray(int64(len(u.List5)))
+		for _, element := range u.List5 {
 			encoder.EncodeBinary(element)
 		}
 
 	}
-
-	if u.List7.IsNull() {
+	if u.List6 == nil {
+		return nil, fmt.Errorf("field List6 is null but its not marked as nullable")
+	}
+	if u.List7 == nil {
 		encoder.EncodeNull()
 	} else {
-		value := *u.List7.Value
 
-		encoder.BeginArray(int64(len(value)))
-		for _, element := range value {
+		encoder.BeginArray(int64(len(u.List7)))
+		for _, element := range u.List7 {
 			if element.IsNull() {
 				encoder.EncodeNull()
 			} else {
@@ -707,40 +824,39 @@ func (u *NexemaList) Decode(reader io.Reader) error {
 	}
 
 	if decoder.IsNextNull() {
-		u.List4.Clear()
+		u.List4 = nil
 	} else {
 
 		list4ArrayLen, err := decoder.BeginDecodeArray()
 		if err != nil {
 			return err
 		}
-
-		u.List4.SetValue(make([]runtime.Nullable[string], list4ArrayLen))
+		u.List4 = make([]runtime.Nullable[string], list4ArrayLen)
 		for i := int64(0); i < list4ArrayLen; i++ {
 			if decoder.IsNextNull() {
-				(*u.List4.Value)[i] = runtime.NewNull[string]()
+				u.List4[i] = runtime.NewNull[string]()
 			} else {
 				list4, err := decoder.DecodeString()
 				if err != nil {
 					return err
 				}
-				(*u.List4.Value)[i] = runtime.NewNullable(list4)
+
+				u.List4[i] = runtime.NewNullable(list4)
 			}
 		}
 
 	}
 	if decoder.IsNextNull() {
-		u.List5.Clear()
+		u.List5 = nil
 	} else {
 
 		list5ArrayLen, err := decoder.BeginDecodeArray()
 		if err != nil {
 			return err
 		}
-
-		u.List5.SetValue(make([][]byte, list5ArrayLen))
+		u.List5 = make([][]byte, list5ArrayLen)
 		for i := int64(0); i < list5ArrayLen; i++ {
-			(*u.List5.Value)[i], err = decoder.DecodeBinary()
+			u.List5[i], err = decoder.DecodeBinary()
 			if err != nil {
 				return err
 			}
@@ -767,24 +883,24 @@ func (u *NexemaList) Decode(reader io.Reader) error {
 	}
 
 	if decoder.IsNextNull() {
-		u.List7.Clear()
+		u.List7 = nil
 	} else {
 
 		list7ArrayLen, err := decoder.BeginDecodeArray()
 		if err != nil {
 			return err
 		}
-
-		u.List7.SetValue(make([]runtime.Nullable[[]byte], list7ArrayLen))
+		u.List7 = make([]runtime.Nullable[[]byte], list7ArrayLen)
 		for i := int64(0); i < list7ArrayLen; i++ {
 			if decoder.IsNextNull() {
-				(*u.List7.Value)[i] = runtime.NewNull[[]byte]()
+				u.List7[i] = runtime.NewNull[[]byte]()
 			} else {
 				list7, err := decoder.DecodeBinary()
 				if err != nil {
 					return err
 				}
-				(*u.List7.Value)[i] = runtime.NewNullable(list7)
+
+				u.List7[i] = runtime.NewNullable(list7)
 			}
 		}
 
@@ -804,7 +920,7 @@ func (u *NexemaList) MustDecode(reader io.Reader) {
 	}
 }
 
-func (u NexemaList) String() string {
+func (u *NexemaList) String() string {
 	parts := make([]string, 7)
 	parts[0] = fmt.Sprintf("List1: %v", u.List1)
 	parts[1] = fmt.Sprintf("List2: %v", u.List2)
@@ -817,6 +933,10 @@ func (u NexemaList) String() string {
 }
 
 func (u *NexemaList) Equals(other *NexemaList) bool {
+	if (u.List1 == nil) != (other.List1 == nil) {
+		return false
+	}
+
 	list1LenThis := len(u.List1)
 	list1LenOther := len(other.List1)
 	if list1LenThis != list1LenOther {
@@ -831,6 +951,10 @@ func (u *NexemaList) Equals(other *NexemaList) bool {
 			return false
 		}
 	}
+	if (u.List2 == nil) != (other.List2 == nil) {
+		return false
+	}
+
 	list2LenThis := len(u.List2)
 	list2LenOther := len(other.List2)
 	if list2LenThis != list2LenOther {
@@ -845,6 +969,10 @@ func (u *NexemaList) Equals(other *NexemaList) bool {
 			return false
 		}
 	}
+	if (u.List3 == nil) != (other.List3 == nil) {
+		return false
+	}
+
 	list3LenThis := len(u.List3)
 	list3LenOther := len(other.List3)
 	if list3LenThis != list3LenOther {
@@ -859,42 +987,46 @@ func (u *NexemaList) Equals(other *NexemaList) bool {
 			return false
 		}
 	}
-	if u.List4.IsNull() != other.List4.IsNull() {
+	if (u.List4 == nil) != (other.List4 == nil) {
 		return false
 	}
 
-	list4LenThis := len(*u.List4.Value)
-	list4LenOther := len(*other.List4.Value)
+	list4LenThis := len(u.List4)
+	list4LenOther := len(other.List4)
 	if list4LenThis != list4LenOther {
 		return false
 	}
 
 	for i := 0; i < list4LenThis; i++ {
-		a := (*u.List4.Value)[i]
-		b := (*other.List4.Value)[i]
+		a := u.List4[i]
+		b := other.List4[i]
 
 		if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
 			return false
 		}
 	}
-	if u.List5.IsNull() != other.List5.IsNull() {
+	if (u.List5 == nil) != (other.List5 == nil) {
 		return false
 	}
 
-	list5LenThis := len(*u.List5.Value)
-	list5LenOther := len(*other.List5.Value)
+	list5LenThis := len(u.List5)
+	list5LenOther := len(other.List5)
 	if list5LenThis != list5LenOther {
 		return false
 	}
 
 	for i := 0; i < list5LenThis; i++ {
-		a := (*u.List5.Value)[i]
-		b := (*other.List5.Value)[i]
+		a := u.List5[i]
+		b := other.List5[i]
 
 		if !bytes.Equal(a, b) {
 			return false
 		}
 	}
+	if (u.List6 == nil) != (other.List6 == nil) {
+		return false
+	}
+
 	list6LenThis := len(u.List6)
 	list6LenOther := len(other.List6)
 	if list6LenThis != list6LenOther {
@@ -909,19 +1041,19 @@ func (u *NexemaList) Equals(other *NexemaList) bool {
 			return false
 		}
 	}
-	if u.List7.IsNull() != other.List7.IsNull() {
+	if (u.List7 == nil) != (other.List7 == nil) {
 		return false
 	}
 
-	list7LenThis := len(*u.List7.Value)
-	list7LenOther := len(*other.List7.Value)
+	list7LenThis := len(u.List7)
+	list7LenOther := len(other.List7)
 	if list7LenThis != list7LenOther {
 		return false
 	}
 
 	for i := 0; i < list7LenThis; i++ {
-		a := (*u.List7.Value)[i]
-		b := (*other.List7.Value)[i]
+		a := u.List7[i]
+		b := other.List7[i]
 
 		if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
 			return false
@@ -933,51 +1065,69 @@ func (u *NexemaList) Equals(other *NexemaList) bool {
 type NexemaMap struct {
 	Map0 map[string]string
 	Map1 map[string]runtime.Nullable[string]
-	Map2 runtime.Nullable[map[string]string]
-	Map3 runtime.Nullable[map[string]runtime.Nullable[string]]
+	Map2 map[string]string
+	Map3 map[string]runtime.Nullable[string]
 	Map4 map[string][]byte
 	Map5 map[string]runtime.Nullable[[]byte]
-	Map6 runtime.Nullable[map[string]runtime.Nullable[[]byte]]
+	Map6 map[string]runtime.Nullable[[]byte]
+}
+
+type NexemaMapBuilder struct {
+	Map0 map[string]string
+	Map1 map[string]runtime.Nullable[string]
+	Map2 map[string]string
+	Map3 map[string]runtime.Nullable[string]
+	Map4 map[string][]byte
+	Map5 map[string]runtime.Nullable[[]byte]
+	Map6 map[string]runtime.Nullable[[]byte]
+}
+
+// NewNexemaMap constructs a new instance of NexemaMap.
+// Calling this takes the adventage of default values and other runtime checks
+func NewNexemaMap(builder ...NexemaMapBuilder) *NexemaMap {
+	if len(builder) > 1 {
+		panic("builder expects one argument")
+	}
+
+	var builderInst NexemaMapBuilder
+	if len(builder) == 1 {
+		builderInst = builder[0]
+	}
+
+	instance := &NexemaMap{}
+	instance.Map0 = builderInst.Map0
+	instance.Map1 = builderInst.Map1
+	instance.Map2 = builderInst.Map2
+	instance.Map3 = builderInst.Map3
+	instance.Map4 = builderInst.Map4
+	instance.Map5 = builderInst.Map5
+	instance.Map6 = builderInst.Map6
+	return instance
 }
 
 func (u *NexemaMap) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
-
-	encoder.BeginMap(int64(len(u.Map0)))
-	for key, value := range u.Map0 {
-		encoder.EncodeString(key)
-		encoder.EncodeString(value)
+	if u.Map0 == nil {
+		return nil, fmt.Errorf("field Map0 is null but its not marked as nullable")
 	}
-
-	encoder.BeginMap(int64(len(u.Map1)))
-	for key, value := range u.Map1 {
-		encoder.EncodeString(key)
-		if value.IsNull() {
-			encoder.EncodeNull()
-		} else {
-			encoder.EncodeString(*value.Value)
-		}
+	if u.Map1 == nil {
+		return nil, fmt.Errorf("field Map1 is null but its not marked as nullable")
 	}
-
-	if u.Map2.IsNull() {
+	if u.Map2 == nil {
 		encoder.EncodeNull()
 	} else {
-		value := *u.Map2.Value
 
-		encoder.BeginMap(int64(len(value)))
-		for key, value := range value {
+		for key, value := range u.Map2 {
 			encoder.EncodeString(key)
 			encoder.EncodeString(value)
 		}
 
 	}
-	if u.Map3.IsNull() {
+	if u.Map3 == nil {
 		encoder.EncodeNull()
 	} else {
-		value := *u.Map3.Value
 
-		encoder.BeginMap(int64(len(value)))
-		for key, value := range value {
+		for key, value := range u.Map3 {
 			encoder.EncodeString(key)
 			if value.IsNull() {
 				encoder.EncodeNull()
@@ -987,30 +1137,17 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 		}
 
 	}
-
-	encoder.BeginMap(int64(len(u.Map4)))
-	for key, value := range u.Map4 {
-		encoder.EncodeString(key)
-		encoder.EncodeBinary(value)
+	if u.Map4 == nil {
+		return nil, fmt.Errorf("field Map4 is null but its not marked as nullable")
 	}
-
-	encoder.BeginMap(int64(len(u.Map5)))
-	for key, value := range u.Map5 {
-		encoder.EncodeString(key)
-		if value.IsNull() {
-			encoder.EncodeNull()
-		} else {
-			encoder.EncodeBinary(*value.Value)
-		}
+	if u.Map5 == nil {
+		return nil, fmt.Errorf("field Map5 is null but its not marked as nullable")
 	}
-
-	if u.Map6.IsNull() {
+	if u.Map6 == nil {
 		encoder.EncodeNull()
 	} else {
-		value := *u.Map6.Value
 
-		encoder.BeginMap(int64(len(value)))
-		for key, value := range value {
+		for key, value := range u.Map6 {
 			encoder.EncodeString(key)
 			if value.IsNull() {
 				encoder.EncodeNull()
@@ -1040,6 +1177,7 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
+
 	u.Map0 = make(map[string]string, map0MapLen)
 	for i := int64(0); i < map0MapLen; i++ {
 		key, err := decoder.DecodeString()
@@ -1058,6 +1196,7 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
+
 	u.Map1 = make(map[string]runtime.Nullable[string], map1MapLen)
 	for i := int64(0); i < map1MapLen; i++ {
 		key, err := decoder.DecodeString()
@@ -1071,19 +1210,21 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 			if err != nil {
 				return err
 			}
+
 			u.Map1[key] = runtime.NewNullable(value)
 		}
 	}
 
 	if decoder.IsNextNull() {
-		u.Map2.Clear()
+		u.Map2 = nil
 	} else {
 
 		map2MapLen, err := decoder.BeginDecodeMap()
 		if err != nil {
 			return err
 		}
-		u.Map2.SetValue(make(map[string]string, map2MapLen))
+
+		u.Map2 = make(map[string]string, map2MapLen)
 		for i := int64(0); i < map2MapLen; i++ {
 			key, err := decoder.DecodeString()
 			if err != nil {
@@ -1094,33 +1235,34 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 				return err
 			}
 
-			(*u.Map2.Value)[key] = value
+			u.Map2[key] = value
 		}
 
 	}
 	if decoder.IsNextNull() {
-		u.Map3.Clear()
+		u.Map3 = nil
 	} else {
 
 		map3MapLen, err := decoder.BeginDecodeMap()
 		if err != nil {
 			return err
 		}
-		u.Map3.SetValue(make(map[string]runtime.Nullable[string], map3MapLen))
+
+		u.Map3 = make(map[string]runtime.Nullable[string], map3MapLen)
 		for i := int64(0); i < map3MapLen; i++ {
 			key, err := decoder.DecodeString()
 			if err != nil {
 				return err
 			}
 			if decoder.IsNextNull() {
-				(*u.Map3.Value)[key] = runtime.NewNull[string]()
+				u.Map3[key] = runtime.NewNull[string]()
 			} else {
 				value, err := decoder.DecodeString()
 				if err != nil {
 					return err
 				}
 
-				(*u.Map3.Value)[key] = runtime.NewNullable(value)
+				u.Map3[key] = runtime.NewNullable(value)
 			}
 		}
 
@@ -1130,6 +1272,7 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
+
 	u.Map4 = make(map[string][]byte, map4MapLen)
 	for i := int64(0); i < map4MapLen; i++ {
 		key, err := decoder.DecodeString()
@@ -1148,6 +1291,7 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
+
 	u.Map5 = make(map[string]runtime.Nullable[[]byte], map5MapLen)
 	for i := int64(0); i < map5MapLen; i++ {
 		key, err := decoder.DecodeString()
@@ -1161,33 +1305,35 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 			if err != nil {
 				return err
 			}
+
 			u.Map5[key] = runtime.NewNullable(value)
 		}
 	}
 
 	if decoder.IsNextNull() {
-		u.Map6.Clear()
+		u.Map6 = nil
 	} else {
 
 		map6MapLen, err := decoder.BeginDecodeMap()
 		if err != nil {
 			return err
 		}
-		u.Map6.SetValue(make(map[string]runtime.Nullable[[]byte], map6MapLen))
+
+		u.Map6 = make(map[string]runtime.Nullable[[]byte], map6MapLen)
 		for i := int64(0); i < map6MapLen; i++ {
 			key, err := decoder.DecodeString()
 			if err != nil {
 				return err
 			}
 			if decoder.IsNextNull() {
-				(*u.Map6.Value)[key] = runtime.NewNull[[]byte]()
+				u.Map6[key] = runtime.NewNull[[]byte]()
 			} else {
 				value, err := decoder.DecodeBinary()
 				if err != nil {
 					return err
 				}
 
-				(*u.Map6.Value)[key] = runtime.NewNullable(value)
+				u.Map6[key] = runtime.NewNullable(value)
 			}
 		}
 
@@ -1207,7 +1353,7 @@ func (u *NexemaMap) MustDecode(reader io.Reader) {
 	}
 }
 
-func (u NexemaMap) String() string {
+func (u *NexemaMap) String() string {
 	parts := make([]string, 7)
 	parts[0] = fmt.Sprintf("Map0: %v", u.Map0)
 	parts[1] = fmt.Sprintf("Map1: %v", u.Map1)
@@ -1220,12 +1366,183 @@ func (u NexemaMap) String() string {
 }
 
 func (u *NexemaMap) Equals(other *NexemaMap) bool {
+
+	if (u.Map0 == nil) != (other.Map0 == nil) {
+		return false
+	}
+
+	map0LenThis := len(u.Map0)
+	map0LenOther := len(other.Map0)
+	if map0LenThis != map0LenOther {
+		return false
+	}
+
+	for k, a := range u.Map0 {
+		b, ok := other.Map0[k]
+		if !ok {
+			return false
+		}
+
+		if a != b {
+			return false
+		}
+	}
+
+	if (u.Map1 == nil) != (other.Map1 == nil) {
+		return false
+	}
+
+	map1LenThis := len(u.Map1)
+	map1LenOther := len(other.Map1)
+	if map1LenThis != map1LenOther {
+		return false
+	}
+
+	for k, a := range u.Map1 {
+		b, ok := other.Map1[k]
+		if !ok {
+			return false
+		}
+
+		if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+			return false
+		}
+	}
+
+	if (u.Map2 == nil) != (other.Map2 == nil) {
+		return false
+	}
+
+	map2LenThis := len(u.Map2)
+	map2LenOther := len(other.Map2)
+	if map2LenThis != map2LenOther {
+		return false
+	}
+
+	for k, a := range u.Map2 {
+		b, ok := other.Map2[k]
+		if !ok {
+			return false
+		}
+
+		if a != b {
+			return false
+		}
+	}
+
+	if (u.Map3 == nil) != (other.Map3 == nil) {
+		return false
+	}
+
+	map3LenThis := len(u.Map3)
+	map3LenOther := len(other.Map3)
+	if map3LenThis != map3LenOther {
+		return false
+	}
+
+	for k, a := range u.Map3 {
+		b, ok := other.Map3[k]
+		if !ok {
+			return false
+		}
+
+		if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+			return false
+		}
+	}
+
+	if (u.Map4 == nil) != (other.Map4 == nil) {
+		return false
+	}
+
+	map4LenThis := len(u.Map4)
+	map4LenOther := len(other.Map4)
+	if map4LenThis != map4LenOther {
+		return false
+	}
+
+	for k, a := range u.Map4 {
+		b, ok := other.Map4[k]
+		if !ok {
+			return false
+		}
+
+		if !bytes.Equal(a, b) {
+			return false
+		}
+	}
+
+	if (u.Map5 == nil) != (other.Map5 == nil) {
+		return false
+	}
+
+	map5LenThis := len(u.Map5)
+	map5LenOther := len(other.Map5)
+	if map5LenThis != map5LenOther {
+		return false
+	}
+
+	for k, a := range u.Map5 {
+		b, ok := other.Map5[k]
+		if !ok {
+			return false
+		}
+
+		if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
+			return false
+		}
+	}
+
+	if (u.Map6 == nil) != (other.Map6 == nil) {
+		return false
+	}
+
+	map6LenThis := len(u.Map6)
+	map6LenOther := len(other.Map6)
+	if map6LenThis != map6LenOther {
+		return false
+	}
+
+	for k, a := range u.Map6 {
+		b, ok := other.Map6[k]
+		if !ok {
+			return false
+		}
+
+		if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
+			return false
+		}
+	}
 	return true
 }
 
+// This is my embedded type
 type EmbeddedType struct {
-	MyUnion SingleUnion
+	MyUnion *SingleUnion
 	MyEnum  models.Colors
+}
+
+type EmbeddedTypeBuilder struct {
+	MyUnion *SingleUnion
+	MyEnum  models.Colors
+}
+
+// NewEmbeddedType constructs a new instance of EmbeddedType.
+// Calling this takes the adventage of default values and other runtime checks
+func NewEmbeddedType(builder ...EmbeddedTypeBuilder) *EmbeddedType {
+	if len(builder) > 1 {
+		panic("builder expects one argument")
+	}
+
+	var builderInst EmbeddedTypeBuilder
+	if len(builder) == 1 {
+		builderInst = builder[0]
+	}
+
+	instance := &EmbeddedType{}
+	instance.MyUnion = builderInst.MyUnion
+	instance.MyEnum = builderInst.MyEnum
+	return instance
 }
 
 func (u *EmbeddedType) Encode() ([]byte, error) {
@@ -1288,7 +1605,7 @@ func (u *EmbeddedType) MustDecode(reader io.Reader) {
 	}
 }
 
-func (u EmbeddedType) String() string {
+func (u *EmbeddedType) String() string {
 	parts := make([]string, 2)
 	parts[0] = fmt.Sprintf("MyUnion: %v", u.MyUnion)
 	parts[1] = fmt.Sprintf("MyEnum: %v", u.MyEnum)
@@ -1301,6 +1618,370 @@ func (u *EmbeddedType) Equals(other *EmbeddedType) bool {
 	}
 	if u.MyEnum.Index() != other.MyEnum.Index() {
 		return false
+	}
+	return true
+}
+
+// Nexema type with fields that declare default values
+type NexemaDefaultType struct {
+	MyString       string
+	MyBool         bool
+	MyInt32        int32
+	MyFloat64      float64
+	MyList         []string
+	MyMap          map[string]bool
+	MyNullablemap  map[string]runtime.Nullable[bool]
+	MyNullablelist []runtime.Nullable[float64]
+}
+
+type NexemaDefaultTypeBuilder struct {
+	MyString       string
+	MyBool         bool
+	MyInt32        int32
+	MyFloat64      float64
+	MyList         []string
+	MyMap          map[string]bool
+	MyNullablemap  map[string]runtime.Nullable[bool]
+	MyNullablelist []runtime.Nullable[float64]
+}
+
+// NewNexemaDefaultType constructs a new instance of NexemaDefaultType.
+// Calling this takes the adventage of default values and other runtime checks
+func NewNexemaDefaultType(builder ...NexemaDefaultTypeBuilder) *NexemaDefaultType {
+	if len(builder) > 1 {
+		panic("builder expects one argument")
+	}
+
+	var builderInst NexemaDefaultTypeBuilder
+	if len(builder) == 1 {
+		builderInst = builder[0]
+	}
+
+	instance := &NexemaDefaultType{}
+	if len(builderInst.MyString) == 0 {
+		instance.MyString = "hola"
+	} else {
+		instance.MyString = builderInst.MyString
+	}
+	if true {
+		instance.MyBool = true
+	} else {
+		instance.MyBool = builderInst.MyBool
+	}
+	if builderInst.MyInt32 == 0 {
+		instance.MyInt32 = -2.314123e+06
+	} else {
+		instance.MyInt32 = builderInst.MyInt32
+	}
+	if builderInst.MyFloat64 == 0 {
+		instance.MyFloat64 = 2324
+	} else {
+		instance.MyFloat64 = builderInst.MyFloat64
+	}
+	if true {
+		instance.MyList = []string{"first", "second", "last"}
+	} else {
+		instance.MyList = builderInst.MyList
+	}
+	if true {
+		instance.MyMap = map[string]bool{"another": false, "key": true}
+	} else {
+		instance.MyMap = builderInst.MyMap
+	}
+	if true {
+		instance.MyNullablemap = map[string]runtime.Nullable[bool]{"a": runtime.NewNull[bool]()}
+	} else {
+		instance.MyNullablemap = builderInst.MyNullablemap
+	}
+	if true {
+		instance.MyNullablelist = []runtime.Nullable[float64]{runtime.NewNullable[float64](25), runtime.NewNull[float64](), runtime.NewNullable[float64](43.23)}
+	} else {
+		instance.MyNullablelist = builderInst.MyNullablelist
+	}
+	return instance
+}
+
+func (u *NexemaDefaultType) Encode() ([]byte, error) {
+	encoder := runtime.GetEncoder()
+
+	encoder.EncodeString(u.MyString)
+
+	encoder.EncodeBool(u.MyBool)
+
+	encoder.EncodeInt32(u.MyInt32)
+
+	encoder.EncodeFloat64(u.MyFloat64)
+
+	if u.MyList == nil {
+		return nil, fmt.Errorf("field MyList is null but its not marked as nullable")
+	}
+	if u.MyMap == nil {
+		return nil, fmt.Errorf("field MyMap is null but its not marked as nullable")
+	}
+	if u.MyNullablemap == nil {
+		encoder.EncodeNull()
+	} else {
+
+		for key, value := range u.MyNullablemap {
+			encoder.EncodeString(key)
+			if value.IsNull() {
+				encoder.EncodeNull()
+			} else {
+				encoder.EncodeBool(*value.Value)
+			}
+		}
+
+	}
+	if u.MyNullablelist == nil {
+		encoder.EncodeNull()
+	} else {
+
+		encoder.BeginArray(int64(len(u.MyNullablelist)))
+		for _, element := range u.MyNullablelist {
+			if element.IsNull() {
+				encoder.EncodeNull()
+			} else {
+				encoder.EncodeFloat64(*element.Value)
+			}
+		}
+
+	}
+	return encoder.TakeBytes(), nil
+}
+
+func (u *NexemaDefaultType) MustEncode() []byte {
+	bytes, err := u.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	return bytes
+}
+
+func (u *NexemaDefaultType) Decode(reader io.Reader) error {
+	decoder := runtime.GetDecoder(reader)
+	var err error
+
+	u.MyString, err = decoder.DecodeString()
+	if err != nil {
+		return err
+	}
+
+	u.MyBool, err = decoder.DecodeBool()
+	if err != nil {
+		return err
+	}
+
+	u.MyInt32, err = decoder.DecodeInt32()
+	if err != nil {
+		return err
+	}
+
+	u.MyFloat64, err = decoder.DecodeFloat64()
+	if err != nil {
+		return err
+	}
+
+	myListArrayLen, err := decoder.BeginDecodeArray()
+	if err != nil {
+		return err
+	}
+	u.MyList = make([]string, myListArrayLen)
+	for i := int64(0); i < myListArrayLen; i++ {
+		u.MyList[i], err = decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+	}
+
+	myMapMapLen, err := decoder.BeginDecodeMap()
+	if err != nil {
+		return err
+	}
+
+	u.MyMap = make(map[string]bool, myMapMapLen)
+	for i := int64(0); i < myMapMapLen; i++ {
+		key, err := decoder.DecodeString()
+		if err != nil {
+			return err
+		}
+		value, err := decoder.DecodeBool()
+		if err != nil {
+			return err
+		}
+
+		u.MyMap[key] = value
+	}
+
+	if decoder.IsNextNull() {
+		u.MyNullablemap = nil
+	} else {
+
+		myNullablemapMapLen, err := decoder.BeginDecodeMap()
+		if err != nil {
+			return err
+		}
+
+		u.MyNullablemap = make(map[string]runtime.Nullable[bool], myNullablemapMapLen)
+		for i := int64(0); i < myNullablemapMapLen; i++ {
+			key, err := decoder.DecodeString()
+			if err != nil {
+				return err
+			}
+			if decoder.IsNextNull() {
+				u.MyNullablemap[key] = runtime.NewNull[bool]()
+			} else {
+				value, err := decoder.DecodeBool()
+				if err != nil {
+					return err
+				}
+
+				u.MyNullablemap[key] = runtime.NewNullable(value)
+			}
+		}
+
+	}
+	if decoder.IsNextNull() {
+		u.MyNullablelist = nil
+	} else {
+
+		myNullablelistArrayLen, err := decoder.BeginDecodeArray()
+		if err != nil {
+			return err
+		}
+		u.MyNullablelist = make([]runtime.Nullable[float64], myNullablelistArrayLen)
+		for i := int64(0); i < myNullablelistArrayLen; i++ {
+			if decoder.IsNextNull() {
+				u.MyNullablelist[i] = runtime.NewNull[float64]()
+			} else {
+				myNullablelist, err := decoder.DecodeFloat64()
+				if err != nil {
+					return err
+				}
+
+				u.MyNullablelist[i] = runtime.NewNullable(myNullablelist)
+			}
+		}
+
+	}
+	return nil
+}
+
+func (u *NexemaDefaultType) MergeFrom(buffer []byte) error {
+	reader := bytes.NewBuffer(buffer)
+	return u.Decode(reader)
+}
+
+func (u *NexemaDefaultType) MustDecode(reader io.Reader) {
+	err := u.Decode(reader)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (u *NexemaDefaultType) String() string {
+	parts := make([]string, 8)
+	parts[0] = fmt.Sprintf("MyString: %v", u.MyString)
+	parts[1] = fmt.Sprintf("MyBool: %v", u.MyBool)
+	parts[2] = fmt.Sprintf("MyInt32: %v", u.MyInt32)
+	parts[3] = fmt.Sprintf("MyFloat64: %v", u.MyFloat64)
+	parts[4] = fmt.Sprintf("MyList: %v", u.MyList)
+	parts[5] = fmt.Sprintf("MyMap: %v", u.MyMap)
+	parts[6] = fmt.Sprintf("MyNullablemap: %v", u.MyNullablemap)
+	parts[7] = fmt.Sprintf("MyNullablelist: %v", u.MyNullablelist)
+	return fmt.Sprintf("NexemaDefaultType(%s)", strings.Join(parts, ", "))
+}
+
+func (u *NexemaDefaultType) Equals(other *NexemaDefaultType) bool {
+	if u.MyString != other.MyString {
+		return false
+	}
+	if u.MyBool != other.MyBool {
+		return false
+	}
+	if u.MyInt32 != other.MyInt32 {
+		return false
+	}
+	if u.MyFloat64 != other.MyFloat64 {
+		return false
+	}
+	if (u.MyList == nil) != (other.MyList == nil) {
+		return false
+	}
+
+	myListLenThis := len(u.MyList)
+	myListLenOther := len(other.MyList)
+	if myListLenThis != myListLenOther {
+		return false
+	}
+
+	for i := 0; i < myListLenThis; i++ {
+		a := u.MyList[i]
+		b := other.MyList[i]
+
+		if a != b {
+			return false
+		}
+	}
+
+	if (u.MyMap == nil) != (other.MyMap == nil) {
+		return false
+	}
+
+	myMapLenThis := len(u.MyMap)
+	myMapLenOther := len(other.MyMap)
+	if myMapLenThis != myMapLenOther {
+		return false
+	}
+
+	for k, a := range u.MyMap {
+		b, ok := other.MyMap[k]
+		if !ok {
+			return false
+		}
+
+		if a != b {
+			return false
+		}
+	}
+
+	if (u.MyNullablemap == nil) != (other.MyNullablemap == nil) {
+		return false
+	}
+
+	myNullablemapLenThis := len(u.MyNullablemap)
+	myNullablemapLenOther := len(other.MyNullablemap)
+	if myNullablemapLenThis != myNullablemapLenOther {
+		return false
+	}
+
+	for k, a := range u.MyNullablemap {
+		b, ok := other.MyNullablemap[k]
+		if !ok {
+			return false
+		}
+
+		if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+			return false
+		}
+	}
+	if (u.MyNullablelist == nil) != (other.MyNullablelist == nil) {
+		return false
+	}
+
+	myNullablelistLenThis := len(u.MyNullablelist)
+	myNullablelistLenOther := len(other.MyNullablelist)
+	if myNullablelistLenThis != myNullablelistLenOther {
+		return false
+	}
+
+	for i := 0; i < myNullablelistLenThis; i++ {
+		a := u.MyNullablelist[i]
+		b := other.MyNullablelist[i]
+
+		if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+			return false
+		}
 	}
 	return true
 }

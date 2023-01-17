@@ -4,6 +4,8 @@ type EnumTemplateData struct {
 	TypeName      string
 	LowerTypeName string
 	Fields        []EnumFieldTemplateData
+	Documentation []string
+	HasDocs       bool
 }
 
 type EnumFieldTemplateData struct {
@@ -13,22 +15,28 @@ type EnumFieldTemplateData struct {
 }
 
 type StructTemplateData struct {
-	TypeName string
-	Fields   []TypeFieldTemplateData
+	TypeName      string
+	Documentation []string
+	HasDocs       bool
+	Fields        []TypeFieldTemplateData
 }
 
 type UnionTemplateData struct {
-	TypeName  string
-	LowerName string
-	Fields    []TypeFieldTemplateData
+	TypeName      string
+	Documentation []string
+	HasDocs       bool
+	LowerName     string
+	Fields        []TypeFieldTemplateData
 }
 
 type TypeFieldTemplateData struct {
-	FieldName      string // FieldName is field's name but in Go (CamelCase)
-	LowerFieldName string // LowerFieldName is field's name in Go, but lowerCamelCase
-	FieldIndex     int64
-	IsFromUnion    bool
-	ValueType      TypeFieldValueKindTemplate
+	FieldName       string // FieldName is field's name but in Go (CamelCase)
+	LowerFieldName  string // LowerFieldName is field's name in Go, but lowerCamelCase
+	FieldIndex      int64
+	IsFromUnion     bool
+	ValueType       TypeFieldValueKindTemplate
+	DefaultValue    interface{}
+	HasDefaultValue bool
 }
 
 // TypeFieldValueKindTemplate contains information about the field's value type.
@@ -41,6 +49,7 @@ type TypeFieldValueKindTemplate struct {
 	IsPrimitive    bool
 	IsType         bool
 	ImportTypeName string // Field type's name but with import, if neccessary (ex: models.User)
+	IsNumeric      bool
 	TypeArguments  []TypeFieldValueKindTemplate
 }
 

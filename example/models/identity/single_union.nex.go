@@ -106,6 +106,15 @@ func (u *SingleUnion) Encode() ([]byte, error) {
 
 	case 2:
 
+		encoder.BeginArray(int64(len(u.value.([]runtime.Nullable[string]))))
+		for _, element := range u.value.([]runtime.Nullable[string]) {
+			if element.IsNull() {
+				encoder.EncodeNull()
+			} else {
+				encoder.EncodeString(*element.Value)
+			}
+		}
+
 	}
 
 	return encoder.TakeBytes(), nil
@@ -184,7 +193,7 @@ func (u *SingleUnion) MergeFrom(buffer []byte) error {
 	return u.Decode(reader)
 }
 
-func (u SingleUnion) String() string {
+func (u *SingleUnion) String() string {
 	value := "not-set"
 	if u.fieldIndex != -1 {
 		switch u.fieldIndex {
@@ -202,4 +211,8 @@ func (u SingleUnion) String() string {
 	}
 
 	return fmt.Sprintf("SingleUnion(%s)", value)
+}
+
+func (u *SingleUnion) Equals(other *SingleUnion) bool {
+	return false
 }

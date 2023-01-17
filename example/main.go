@@ -17,12 +17,15 @@ func main() {
 func printStruct() {
 	println("===========================")
 
-	primitives1 := identity.NexemaPrimitives{
+	primitives1 := &identity.NexemaPrimitives{
 		MyString:  "hello world",
 		MyBoolean: true,
 		MyFloat64: 98942.242,
 		MyInt64:   123131,
+		MyBinary:  []byte{0x5, 0x3, 0x2},
 	}
+
+	fmt.Println(primitives1)
 
 	primitives2 := identity.NexemaPrimitives{}
 	err := primitives2.MergeFrom(primitives1.MustEncode())
@@ -31,7 +34,23 @@ func printStruct() {
 		return
 	}
 
-	fmt.Println("equals:", primitives1 == primitives2)
+	primitives2.MyBinary[1] = 0x2
+
+	fmt.Println("equals:", primitives1.Equals(&primitives2))
+
+	list := identity.NewNexemaList(identity.NexemaListBuilder{
+		List1: []string{"hola"},
+		List4: []runtime.Nullable[string]{runtime.NewNull[string](), runtime.NewNullable("hola")},
+		List5: [][]byte{{5, 3}, {5, 2}},
+	})
+
+	fmt.Println(list)
+
+	defaultValues := identity.NewNexemaDefaultType()
+	fmt.Println(defaultValues)
+
+	defaultValues.MyNullablelist[0].Clear()
+	fmt.Println(defaultValues)
 }
 
 func printEnum() {

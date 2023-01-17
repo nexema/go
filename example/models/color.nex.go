@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// A list of common colors
 type Colors struct {
 	index uint8
 	name  string

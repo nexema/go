@@ -7,9 +7,13 @@ import (
 
 const rawFieldEncoderTemplateString = `
 {{- if .ValueType.IsList}}
-	{{- if .ValueType.IsNullable}}
-	encoder.BeginArray(int64(len(value)))
-	for _, element := range value {
+	{{- if .IsFromUnion}}
+	encoder.BeginArray(int64(len(u.value.([]{{template "fieldDeclaration" (index .ValueType.TypeArguments 0)}}))))
+	for _, element := range u.value.([]{{template "fieldDeclaration" (index .ValueType.TypeArguments 0)}}) {
+	{{- else}}
+	encoder.BeginArray(int64(len(u.{{.FieldName}})))
+	for _, element := range u.{{.FieldName}} {
+	{{- end}}
 		{{- if (index .ValueType.TypeArguments 0).IsNullable}}
 		if element.IsNull() {
 			encoder.EncodeNull()
@@ -20,19 +24,10 @@ const rawFieldEncoderTemplateString = `
 		{{template "encodePrimitive" (index .ValueType.TypeArguments 0)}}(element)
 		{{- end}}
 	}
-	{{- else}}
-	{{- end}}
-
 {{- else if .ValueType.IsEnum}}
 	encoder.EncodeUint8(u.{{.FieldName}}.Index())
 {{- else if .ValueType.IsMap}}
-	{{- if .ValueType.IsNullable}}
-	encoder.BeginMap(int64(len(value)))
-	for key, value := range value {
-	{{- else}}
-	encoder.BeginMap(int64(len(u.{{.FieldName}})))
 	for key, value := range u.{{.FieldName}} {
-	{{- end}}
 		{{template "encodePrimitive" (index .ValueType.TypeArguments 0)}}(key)
 		{{- if (index .ValueType.TypeArguments 1).IsNullable}}
 		if value.IsNull() {
@@ -46,7 +41,7 @@ const rawFieldEncoderTemplateString = `
 	}
 {{- else if .ValueType.IsPrimitive}}
 	{{- if .ValueType.IsNullable}}
-	{{template "encodePrimitive" .ValueType}}(value)
+	{{template "encodePrimitive" .ValueType}}(*u.{{.FieldName}}.Value)
 	{{- else}}
 	{{template "encodePrimitive" .ValueType}}(u.{{getEncoderVariableName .FieldName .ValueType.ImportTypeName .IsFromUnion}})
 	{{- end}}
@@ -62,80 +57,37 @@ const rawFieldEncoderTemplateString = `
 
 const rawFieldDecoderTemplateString = `
 {{- if .ValueType.IsList}}
-	{{- if .ValueType.IsNullable}}
-		{{.LowerFieldName}}ArrayLen, err := decoder.BeginDecodeArray()
-		if err != nil {
-			return err
-		}
+	{{.LowerFieldName}}ArrayLen, err := decoder.BeginDecodeArray()
+	if err != nil {
+		return err
+	}
 
-		u.{{.FieldName}}.SetValue(make({{template "instantiateList" .ValueType}}, {{.LowerFieldName}}ArrayLen))
-		for i := int64(0); i < {{.LowerFieldName}}ArrayLen; i++ {
-			{{- if (index .ValueType.TypeArguments 0).IsNullable}}
-			if decoder.IsNextNull() {
-				{{- if .ValueType.IsNullable}}
-				(*u.{{.FieldName}}.Value)[i] = runtime.NewNull[{{toGoType (index .ValueType.TypeArguments 0).ImportTypeName}}]()
-				{{- else}}
-				u.{{.FieldName}}[i] = runtime.NewNull[{{toGoType (index .ValueType.TypeArguments 0).ImportTypeName}}]()
-				{{- end}}
-			} else {
-				{{.LowerFieldName}},err := {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
-				if err != nil {
-					return err
-				} 
-
-				{{- if .ValueType.IsNullable}}
-				(*u.{{.FieldName}}.Value)[i] = runtime.NewNullable({{.LowerFieldName}})
-				{{- else}}
-				u.{{.FieldName}}[i] = runtime.NewNullable({{.LowerFieldName}})
-				{{- end}}
-			}
-			{{- else}}
-			{{- if .ValueType.IsNullable}}
-			(*u.{{.FieldName}}.Value)[i],err = {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
-			if err != nil {
-				return err
-			} 
-			{{- else}}
-			u.{{.FieldName}}[i],err = {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
-			if err != nil {
-				return err
-			} 
-			{{- end}}
-			{{- end}}
-		}
+	{{- if .IsFromUnion}}
+	value := make({{template "fieldDeclaration" .ValueType}}, {{.LowerFieldName}}ArrayLen)
 	{{- else}}
-		{{.LowerFieldName}}ArrayLen, err := decoder.BeginDecodeArray()
-		if err != nil {
-			return err
-		}
-
-		{{- if .IsFromUnion}}
-		value := make({{template "fieldDeclaration" .ValueType}}, {{.LowerFieldName}}ArrayLen)
-		{{- else}}
-		u.{{.FieldName}} = make({{template "fieldDeclaration" .ValueType}}, {{.LowerFieldName}}ArrayLen)
-		{{- end}}
-		for i := int64(0); i < {{.LowerFieldName}}ArrayLen; i++ {
-			{{- if (index .ValueType.TypeArguments 0).IsNullable}}
-			if decoder.IsNextNull() {
-				{{- if .IsFromUnion}}value{{- else}}u.{{.FieldName}}{{- end}}[i] = runtime.NewNull[{{toGoType (index .ValueType.TypeArguments 0).ImportTypeName}}]()
-			} else {
-				{{.LowerFieldName}},err := {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
-				if err != nil {
-					return err
-				} 
-
-				{{if .IsFromUnion}}value{{- else}}u.{{.FieldName}}{{- end}}[i] = runtime.NewNullable({{.LowerFieldName}})
-			}
-			{{- else}}
-			u.{{.FieldName}}[i],err = {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
+	u.{{.FieldName}} = make({{template "fieldDeclaration" .ValueType}}, {{.LowerFieldName}}ArrayLen)
+	{{- end}}
+	for i := int64(0); i < {{.LowerFieldName}}ArrayLen; i++ {
+		{{- if (index .ValueType.TypeArguments 0).IsNullable}}
+		if decoder.IsNextNull() {
+			{{- if .IsFromUnion}}value{{- else}}u.{{.FieldName}}{{- end}}[i] = runtime.NewNull[{{toGoType (index .ValueType.TypeArguments 0).ImportTypeName}}]()
+		} else {
+			{{.LowerFieldName}},err := {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
 			if err != nil {
 				return err
 			} 
-			{{- end}}
+
+			{{if .IsFromUnion}}value{{- else}}u.{{.FieldName}}{{- end}}[i] = runtime.NewNullable({{.LowerFieldName}})
 		}
-		{{- if .IsFromUnion}}
-		u.value = value
+		{{- else}}
+		u.{{.FieldName}}[i],err = {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
+		if err != nil {
+			return err
+		} 
 		{{- end}}
+	}
+	{{- if .IsFromUnion}}
+	u.value = value
 	{{- end}}
 {{- else if .ValueType.IsEnum}}
 	{{.LowerFieldName}}EnumIndex, err := decoder.DecodeUint8()
@@ -150,35 +102,6 @@ const rawFieldDecoderTemplateString = `
 		return err
 	}
 
-	{{- if .ValueType.IsNullable}}
-	u.{{.FieldName}}.SetValue(make({{template "instantiateMap" .ValueType}}, {{.LowerFieldName}}MapLen))
-	for i:=int64(0); i < {{.LowerFieldName}}MapLen; i++ {
-		key, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
-		if err != nil {
-			return err
-		}
-		
-		{{- if (index .ValueType.TypeArguments 1).IsNullable}}
-		if decoder.IsNextNull() {
-			(*u.{{.FieldName}}.Value)[key] = runtime.NewNull[{{toGoType (index .ValueType.TypeArguments 1).ImportTypeName}}]()
-		} else {
-			value, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 1)}}()
-			if err != nil {
-				return err
-			}
-
-			(*u.{{.FieldName}}.Value)[key] = runtime.NewNullable(value)
-		}
-		{{- else}}
-		value, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 1)}}()
-		if err != nil {
-			return err
-		}
-
-		(*u.{{.FieldName}}.Value)[key] = value
-		{{- end}}
-	}
-	{{- else}}
 	u.{{.FieldName}} = make({{template "fieldDeclaration" .ValueType}}, {{.LowerFieldName}}MapLen)
 	for i:=int64(0); i < {{.LowerFieldName}}MapLen; i++ {
 		key, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
@@ -188,22 +111,14 @@ const rawFieldDecoderTemplateString = `
 		
 		{{- if (index .ValueType.TypeArguments 1).IsNullable}}
 		if decoder.IsNextNull() {
-			{{- if .ValueType.IsNullable}}
-			(*u.{{.FieldName}}.Value)[key] = runtime.NewNull[{{toGoType (index .ValueType.TypeArguments 1).ImportTypeName}}]()
-			{{- else}}
 			u.{{.FieldName}}[key] = runtime.NewNull[{{toGoType (index .ValueType.TypeArguments 1).ImportTypeName}}]()
-			{{- end}}
 		} else {
 			value, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 1)}}()
 			if err != nil {
 				return err
 			}
 
-			{{- if .ValueType.IsNullable}}
-			(*u.{{.FieldName}}.Value)[key] = runtime.NewNullable(value)
-			{{- else}}
 			u.{{.FieldName}}[key] = runtime.NewNullable(value)
-			{{- end}}
 		}
 		{{- else}}
 		value, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 1)}}()
@@ -214,7 +129,6 @@ const rawFieldDecoderTemplateString = `
 		u.{{.FieldName}}[key] = value
 		{{- end}}
 	}
-	{{- end}}
 {{- else if .ValueType.IsPrimitive}}
 	{{if .ValueType.IsNullable}}
 	var value {{toGoType .ValueType.ImportTypeName}}
@@ -258,9 +172,11 @@ const decodePrimitiveTemplateString = `decoder.Decode{{capitalizeFirst .ImportTy
 
 const fieldDeclarationTemplateString = `
 {{- if .IsList -}}
-	{{- setNullableList (setNullable (toGoType (index .TypeArguments 0).ImportTypeName) (index .TypeArguments 0).IsNullable) .IsNullable}}
+	[]{{- setNullable (toGoType (index .TypeArguments 0).ImportTypeName) (index .TypeArguments 0).IsNullable}}
 {{- else if .IsMap -}}
-	{{- setNullableMap (setNullable (toGoType (index .TypeArguments 0).ImportTypeName) (index .TypeArguments 0).IsNullable) (setNullable (toGoType (index .TypeArguments 1).ImportTypeName) (index .TypeArguments 1).IsNullable) .IsNullable}}
+	map[{{toGoType (index .TypeArguments 0).ImportTypeName}}]{{- setNullable (toGoType (index .TypeArguments 1).ImportTypeName) (index .TypeArguments 1).IsNullable}}
+{{- else if .IsType -}}
+	*{{- setNullable (toGoType .ImportTypeName) .IsNullable}}
 {{- else -}}
 	{{- setNullable (toGoType .ImportTypeName) .IsNullable}}
 {{- end}}`
@@ -273,7 +189,13 @@ const instantiateMapTemplateString = `{{- if .IsNullable -}}
 map[{{template "fieldDeclaration" (index .TypeArguments 0)}}]{{template "fieldDeclaration" (index .TypeArguments 1)}}
 {{- end -}}`
 
-const enumTemplateString = `type {{.TypeName}} struct {
+const enumTemplateString = `
+{{- if .HasDocs}}
+{{- range .Documentation}}
+// {{.}}
+{{- end}}
+{{- end}}
+type {{.TypeName}} struct {
 	index uint8
 	name  string
 }
@@ -326,23 +248,78 @@ func ({{.LowerTypeName}}Picker) ByName(name string) {{.TypeName}} {
 }
 `
 
-const structTemplateString = `type {{.TypeName}} struct {
+const structTemplateString = `
+{{- if .HasDocs}}
+{{- range .Documentation}}
+// {{.}}
+{{- end}}
+{{- end}}
+type {{.TypeName}} struct {
 {{range .Fields}}{{.FieldName}} {{template "fieldDeclaration" .ValueType}}
 {{end}}
+}
+
+type {{.TypeName}}Builder struct {
+{{range .Fields}}{{.FieldName}} {{template "fieldDeclaration" .ValueType}}
+{{end}}
+}
+
+// New{{.TypeName}} constructs a new instance of {{.TypeName}}.
+// Calling this takes the adventage of default values and other runtime checks
+func New{{.TypeName}}(builder ...{{.TypeName}}Builder) *{{.TypeName}} {
+	if len(builder) > 1 {
+		panic("builder expects one argument")
+	}
+
+	var builderInst {{.TypeName}}Builder
+	if len(builder) == 1 {
+		builderInst = builder[0]
+	}
+
+	instance := &{{.TypeName}}{}
+{{- range .Fields}}
+	{{- if .HasDefaultValue}}
+		{{- if eq .ValueType.ImportTypeName "string"}}
+		if len(builderInst.{{.FieldName}}) == 0 {
+			instance.{{.FieldName}} = {{formatDefaultValue .DefaultValue .ValueType}}
+		{{- else if .ValueType.IsNumeric}}
+		if builderInst.{{.FieldName}} == 0 {
+			instance.{{.FieldName}} = {{formatDefaultValue .DefaultValue .ValueType}}
+		{{- else}}
+		if true {
+			instance.{{.FieldName}} = {{formatDefaultValue .DefaultValue .ValueType}}
+		{{- end}}
+		} else {
+			instance.{{.FieldName}} = builderInst.{{.FieldName}}
+		}
+	{{- else}}
+	instance.{{.FieldName}} = builderInst.{{.FieldName}}
+	{{- end}}
+{{- end}}
+	return instance
 }
 
 func (u *{{.TypeName}}) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
 	{{- range .Fields}}
 	{{- if .ValueType.IsNullable}}
+		{{- if or .ValueType.IsList .ValueType.IsMap }}
+		if u.{{.FieldName}} == nil {
+		{{- else}}
 		if u.{{.FieldName}}.IsNull() {
+		{{- end}}
 			encoder.EncodeNull()
 		} else {
-			value := *u.{{.FieldName}}.Value
 			{{template "rawFieldEncoder" .}}
 		}
 	{{- else}}
+		{{- if or .ValueType.IsList .ValueType.IsMap }}
+		if u.{{.FieldName}} == nil {
+			return nil, fmt.Errorf("field {{.FieldName}} is null but its not marked as nullable")
+		}
+		{{- else}}
 		{{template "rawFieldEncoder" .}}
+		{{- end}}
 	{{- end}}
 	{{- end}}
 	return encoder.TakeBytes(), nil
@@ -363,7 +340,11 @@ func (u *{{.TypeName}}) Decode(reader io.Reader) error {
 	{{- range .Fields}}
 	{{- if .ValueType.IsNullable}}
 		if decoder.IsNextNull() {
+			{{- if or .ValueType.IsList .ValueType.IsMap }}
+			u.{{.FieldName}} = nil
+			{{- else}}
 			u.{{.FieldName}}.Clear()
+			{{- end}}
 		} else {
 			{{template "rawFieldDecoder" .}}
 		}
@@ -386,7 +367,7 @@ func (u *{{.TypeName}}) MustDecode(reader io.Reader) {
 	}
 }
 
-func (u {{.TypeName}}) String() string {
+func (u *{{.TypeName}}) String() string {
 	parts := make([]string, {{len .Fields}})
 	{{- range $i, $a := .Fields}}
 	parts[{{$i}}] = fmt.Sprintf("{{.FieldName}}: %v", u.{{$a.FieldName}})
@@ -419,45 +400,10 @@ func (u *{{.TypeName}}) Equals(other *{{.TypeName}}) bool {
 			{{- end}}
 		{{- end}}
 	{{- else if .ValueType.IsList}}
-		{{- if .ValueType.IsNullable}}
-		if u.{{.FieldName}}.IsNull() != other.{{.FieldName}}.IsNull() {
+		if (u.{{.FieldName}} == nil) != (other.{{.FieldName}} == nil) {
 			return false
 		}
-		
-		{{.LowerFieldName}}LenThis := len(*u.{{.FieldName}}.Value)
-		{{.LowerFieldName}}LenOther := len(*other.{{.FieldName}}.Value)
-		if {{.LowerFieldName}}LenThis != {{.LowerFieldName}}LenOther {
-			return false
-		}
-
-		for i := 0; i < {{.LowerFieldName}}LenThis; i++ {
-			a := (*u.{{.FieldName}}.Value)[i]
-			b := (*other.{{.FieldName}}.Value)[i]
-
-			{{$typeArgument := (index .ValueType.TypeArguments 0)}}
-			{{- if $typeArgument.IsNullable}}
-				{{- if eq $typeArgument.ImportTypeName "binary"}}
-				if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
-					return false
-				} 
-				{{- else}}
-				if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
-					return false
-				} 
-				{{- end}}
-			{{- else}}
-				{{- if eq $typeArgument.ImportTypeName "binary"}}
-				if (!bytes.Equal(a, b)) {
-					return false
-				}
-				{{- else}}
-				if a != b {
-					return false
-				}
-				{{- end}}
-			{{- end}}
-		} 
-		{{- else}}
+			
 		{{.LowerFieldName}}LenThis := len(u.{{.FieldName}})
 		{{.LowerFieldName}}LenOther := len(other.{{.FieldName}})
 		if {{.LowerFieldName}}LenThis != {{.LowerFieldName}}LenOther {
@@ -491,11 +437,47 @@ func (u *{{.TypeName}}) Equals(other *{{.TypeName}}) bool {
 				{{- end}}
 			{{- end}}
 		}
-		{{- end}}
 	{{- else if .ValueType.IsMap}}
-		{{- if .ValueType.IsNullable}}
+	
+	if (u.{{.FieldName}} == nil) != (other.{{.FieldName}} == nil) {
+		return false
+	}
+		
+	{{.LowerFieldName}}LenThis := len(u.{{.FieldName}})
+	{{.LowerFieldName}}LenOther := len(other.{{.FieldName}})
+	if {{.LowerFieldName}}LenThis != {{.LowerFieldName}}LenOther {
+		return false
+	}
+
+	for k, a := range u.{{.FieldName}} {
+		b, ok := other.{{.FieldName}}[k]
+		if !ok {
+			return false
+		}
+
+		{{$valueTypeArgument := (index .ValueType.TypeArguments 1)}}
+		{{- if $valueTypeArgument.IsNullable}}
+			{{- if eq $valueTypeArgument.ImportTypeName "binary"}}
+			if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
+				return false
+			} 
+			{{- else}}
+			if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+				return false
+			} 
+			{{- end}}
 		{{- else}}
+			{{- if eq $valueTypeArgument.ImportTypeName "binary"}}
+			if (!bytes.Equal(a, b)) {
+				return false
+			}
+			{{- else}}
+			if a != b {
+				return false
+			}
+			{{- end}}
 		{{- end}}
+	}
 	{{- else if .ValueType.IsEnum}}
 		{{- if .ValueType.IsNullable}}
 		if (u.{{.FieldName}}.IsNull() != && other.{{.FieldName}}.IsNull()) || (u.{{.FieldName}}.Value.Index() != other.{{.FieldName}}.Value.Index()) {
@@ -522,7 +504,13 @@ func (u *{{.TypeName}}) Equals(other *{{.TypeName}}) bool {
 }
 `
 
-const unionTemplateString = `type {{.TypeName}} struct {
+const unionTemplateString = `
+{{- if .HasDocs}}
+{{- range .Documentation}}
+// {{.}}
+{{- end}}
+{{- end}}
+type {{.TypeName}} struct {
 	value interface{}
 	fieldIndex int64
 }
@@ -637,7 +625,7 @@ func (u *{{.TypeName}}) MergeFrom(buffer []byte) error {
 	return u.Decode(reader)
 }
 
-func (u {{.TypeName}}) String() string {
+func (u *{{.TypeName}}) String() string {
 	value := "not-set"
 	if u.fieldIndex != -1 {
 		switch u.fieldIndex {
@@ -649,6 +637,10 @@ func (u {{.TypeName}}) String() string {
 	}
 
 	return fmt.Sprintf("{{.TypeName}}(%s)", value)
+}
+
+func (u *{{.TypeName}}) Equals(other *{{.TypeName}}) bool {
+	return false
 }
 `
 
@@ -664,6 +656,7 @@ func init() {
 		"stripRuntimeNullableDecl": stripRuntimeNullableDeclFunc,
 		"getEncoderVariableName":   getEncoderVariableNameFunc,
 		"getDecoderVariableName":   getDecoderVariableNameFunc,
+		"formatDefaultValue":       formatDefaultValueFunc,
 	}
 	rawFieldEncoder = parseTemplateWithFunc("rawFieldEncoder", rawFieldEncoderTemplateString, funcMap)
 	primitiveEncoder = parseTemplateWithFunc("encodePrimitive", encodePrimitiveTemplateString, funcMap)

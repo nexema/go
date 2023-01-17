@@ -38,6 +38,7 @@ func nexemaTypeFieldDefinitionToTemplateData(fieldValueType NexemaValueType) Typ
 			IsEnum:         false,
 			IsType:         false,
 			IsPrimitive:    t.Primitive != "list" && t.Primitive != "map",
+			IsNumeric:      isNumeric(t.Primitive),
 			ImportTypeName: t.Primitive,
 			TypeArguments:  make([]TypeFieldValueKindTemplate, 0),
 		}
@@ -75,5 +76,15 @@ func nexemaTypeFieldDefinitionToTemplateData(fieldValueType NexemaValueType) Typ
 
 	default:
 		panic("invalid value type")
+	}
+}
+
+func isNumeric(primitive string) bool {
+	switch primitive {
+	case "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "float32", "float64":
+		return true
+
+	default:
+		return false
 	}
 }

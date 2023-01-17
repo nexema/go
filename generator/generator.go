@@ -170,13 +170,17 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 
 func (g *Generator) generateStruct(t *NexemaTypeDefinition, pkgName string) error {
 	data := StructTemplateData{
-		TypeName: strcase.ToCamel(t.Name),
+		HasDocs:       len(t.Documentation) > 0,
+		Documentation: t.Documentation,
+		TypeName:      strcase.ToCamel(t.Name),
 		Fields: mapArray(t.Fields, func(field NexemaTypeFieldDefinition) TypeFieldTemplateData {
 			return TypeFieldTemplateData{
-				FieldName:      strcase.ToCamel(field.Name),
-				LowerFieldName: strcase.ToLowerCamel(field.Name),
-				FieldIndex:     field.Index,
-				ValueType:      nexemaTypeFieldDefinitionToTemplateData(field.Type),
+				FieldName:       strcase.ToCamel(field.Name),
+				LowerFieldName:  strcase.ToLowerCamel(field.Name),
+				FieldIndex:      field.Index,
+				ValueType:       nexemaTypeFieldDefinitionToTemplateData(field.Type),
+				DefaultValue:    field.DefaultValue,
+				HasDefaultValue: field.DefaultValue != nil,
 			}
 		}),
 	}
@@ -186,8 +190,10 @@ func (g *Generator) generateStruct(t *NexemaTypeDefinition, pkgName string) erro
 
 func (g *Generator) generateUnion(t *NexemaTypeDefinition, pkgName string) error {
 	data := UnionTemplateData{
-		TypeName:  strcase.ToCamel(t.Name),
-		LowerName: strcase.ToLowerCamel(t.Name),
+		HasDocs:       len(t.Documentation) > 0,
+		Documentation: t.Documentation,
+		TypeName:      strcase.ToCamel(t.Name),
+		LowerName:     strcase.ToLowerCamel(t.Name),
 		Fields: mapArray(t.Fields, func(field NexemaTypeFieldDefinition) TypeFieldTemplateData {
 			return TypeFieldTemplateData{
 				IsFromUnion:    true,
@@ -204,6 +210,8 @@ func (g *Generator) generateUnion(t *NexemaTypeDefinition, pkgName string) error
 
 func (g *Generator) generateEnum(t *NexemaTypeDefinition) error {
 	data := EnumTemplateData{
+		HasDocs:       len(t.Documentation) > 0,
+		Documentation: t.Documentation,
 		TypeName:      t.Name,
 		LowerTypeName: strcase.ToLowerCamel(t.Name),
 		Fields: mapArray(t.Fields, func(field NexemaTypeFieldDefinition) EnumFieldTemplateData {

@@ -2,8 +2,67 @@ package generator
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
+
+func formatDefaultValueFunc(defaultValue interface{}, valueType TypeFieldValueKindTemplate) string {
+	if defaultValue == nil {
+		return fmt.Sprintf("runtime.NewNull[%s]()", valueType.ImportTypeName)
+	}
+
+	switch t := defaultValue.(type) {
+	case string:
+		return convertToNullable(valueType.ImportTypeName, fmt.Sprintf("%q", t), valueType.IsNullable)
+
+	case int64, float64, bool:
+		return convertToNullable(valueType.ImportTypeName, fmt.Sprint(defaultValue), valueType.IsNullable)
+
+	default:
+		value := reflect.ValueOf(defaultValue)
+		switch value.Kind() {
+		case reflect.Slice:
+			values := make([]string, value.Len())
+			keyValueType := valueType.TypeArguments[0]
+			for i := 0; i < value.Len(); i++ {
+				values[i] = formatDefaultValueFunc(value.Index(i).Interface(), keyValueType)
+			}
+
+			if valueType.IsNullable {
+				return fmt.Sprintf("[]runtime.Nullable[%s]{%s}", keyValueType.ImportTypeName, strings.Join(values, ","))
+			} else {
+				return fmt.Sprintf("[]%s{%s}", keyValueType.ImportTypeName, strings.Join(values, ","))
+			}
+
+		case reflect.Map:
+			values := make([]string, value.Len())
+			keyValueType := valueType.TypeArguments[0]
+			valueValueType := valueType.TypeArguments[1]
+			for i, k := range value.MapKeys() {
+				key := formatDefaultValueFunc(k.Interface(), keyValueType)
+				value := formatDefaultValueFunc(value.MapIndex(k).Interface(), valueValueType)
+
+				values[i] = fmt.Sprintf("%s: %s", key, value)
+			}
+
+			if valueType.IsNullable {
+				return fmt.Sprintf("map[%s]runtime.Nullable[%s]{%s}", keyValueType.ImportTypeName, valueValueType.ImportTypeName, strings.Join(values, ","))
+			} else {
+				return fmt.Sprintf("map[%s]%s{%s}", keyValueType.ImportTypeName, valueValueType.ImportTypeName, strings.Join(values, ","))
+			}
+		default:
+			panic(fmt.Errorf("unable to handle default type with kind %s", value.Kind()))
+		}
+	}
+}
+
+func convertToNullable(valueType, declaration string, nullable bool) string {
+	if nullable {
+		return fmt.Sprintf("runtime.NewNullable[%s](%s)", valueType, declaration)
+	} else {
+		return declaration
+	}
+}
 
 func setNullableFunc(fieldDeclaration string, isNullable bool) string {
 	if isNullable {
