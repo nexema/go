@@ -32,7 +32,7 @@ const (
 
 // Generator is the main entry point of the Nexema's Go generator
 type Generator struct {
-	sw     *sourceWriter
+	w      *bytes.Buffer
 	config PluginConfig
 
 	typeMapping map[string]typeMap
@@ -53,7 +53,7 @@ var defaultGenerator *Generator
 // NewGenerator creates a new Generator instance
 func NewGenerator(cfg PluginConfig) *Generator {
 	defaultGenerator = &Generator{
-		sw:     newSourceWriter(),
+		w:      new(bytes.Buffer),
 		config: cfg,
 
 		typeMapping:        make(map[string]typeMap),
@@ -88,7 +88,7 @@ func (g *Generator) Generate(input []byte) ([]*GeneratedFile, error) {
 		generatedFiles[i] = f
 		println(string(f.Content))
 		println("=======================")
-		g.sw.reset()
+		g.w.Reset()
 	}
 
 	return generatedFiles, nil
@@ -124,7 +124,7 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 	}
 
 	// append imports
-	buffer := g.sw.sb.Bytes()
+	buffer := g.w.Bytes()
 	if len(g.currentFileImports) > 0 {
 
 		importsBuffer := new(bytes.Buffer)
@@ -177,7 +177,7 @@ func (g *Generator) generateStruct(t *NexemaTypeDefinition, pkgName string) erro
 		}),
 	}
 
-	return structTemplate.ExecuteTemplate(g.sw.sb, "struct", data)
+	return structTemplate.ExecuteTemplate(g.w, "struct", data)
 }
 
 func (g *Generator) generateUnion(t *NexemaTypeDefinition, pkgName string) error {
@@ -195,7 +195,7 @@ func (g *Generator) generateUnion(t *NexemaTypeDefinition, pkgName string) error
 		}),
 	}
 
-	return unionTemplate.ExecuteTemplate(g.sw.sb, "union", data)
+	return unionTemplate.ExecuteTemplate(g.w, "union", data)
 }
 
 func (g *Generator) generateEnum(t *NexemaTypeDefinition) error {
@@ -212,7 +212,7 @@ func (g *Generator) generateEnum(t *NexemaTypeDefinition) error {
 	}
 
 	// build the template
-	return enumTemplate.Execute(g.sw.sb, data)
+	return enumTemplate.Execute(g.w, data)
 }
 
 func (g *Generator) generateMapping(def *NexemaDefinition) {

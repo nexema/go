@@ -84,9 +84,9 @@ const rawFieldDecoderTemplateString = `
 				} 
 
 				{{- if .ValueType.IsNullable}}
-				(*u.{{.FieldName}}.Value)[i] = runtime.NewNullable[{{toGoType (index .ValueType.TypeArguments 0).ImportTypeName}}]({{.LowerFieldName}})
+				(*u.{{.FieldName}}.Value)[i] = runtime.NewNullable({{.LowerFieldName}})
 				{{- else}}
-				u.{{.FieldName}}[i] = runtime.NewNullable[{{toGoType (index .ValueType.TypeArguments 0).ImportTypeName}}]({{.LowerFieldName}})
+				u.{{.FieldName}}[i] = runtime.NewNullable({{.LowerFieldName}})
 				{{- end}}
 			}
 			{{- else}}
@@ -124,7 +124,7 @@ const rawFieldDecoderTemplateString = `
 					return err
 				} 
 
-				{{if .IsFromUnion}}value{{- else}}u.{{.FieldName}}{{- end}}[i] = runtime.NewNullable[{{toGoType (index .ValueType.TypeArguments 0).ImportTypeName}}]({{.LowerFieldName}})
+				{{if .IsFromUnion}}value{{- else}}u.{{.FieldName}}{{- end}}[i] = runtime.NewNullable({{.LowerFieldName}})
 			}
 			{{- else}}
 			u.{{.FieldName}}[i],err = {{template "decodePrimitive" (index .ValueType.TypeArguments 0)}}()
@@ -167,7 +167,7 @@ const rawFieldDecoderTemplateString = `
 				return err
 			}
 
-			(*u.{{.FieldName}}.Value)[key] = runtime.NewNullable[{{toGoType (index .ValueType.TypeArguments 1).ImportTypeName}}](value)
+			(*u.{{.FieldName}}.Value)[key] = runtime.NewNullable(value)
 		}
 		{{- else}}
 		value, err := {{template "decodePrimitive" (index .ValueType.TypeArguments 1)}}()
@@ -200,9 +200,9 @@ const rawFieldDecoderTemplateString = `
 			}
 
 			{{- if .ValueType.IsNullable}}
-			(*u.{{.FieldName}}.Value)[key] = runtime.NewNullable[{{toGoType (index .ValueType.TypeArguments 1).ImportTypeName}}](value)
+			(*u.{{.FieldName}}.Value)[key] = runtime.NewNullable(value)
 			{{- else}}
-			u.{{.FieldName}}[key] = runtime.NewNullable[{{toGoType (index .ValueType.TypeArguments 1).ImportTypeName}}](value)
+			u.{{.FieldName}}[key] = runtime.NewNullable(value)
 			{{- end}}
 		}
 		{{- else}}
@@ -354,7 +354,7 @@ func (u *{{.TypeName}}) MustEncode() []byte {
 	return bytes
 }
 
-func (u {{.TypeName}}) Decode(reader io.Reader) error {
+func (u *{{.TypeName}}) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
 	{{range .Fields}}
@@ -371,12 +371,12 @@ func (u {{.TypeName}}) Decode(reader io.Reader) error {
 	return nil
 }
 
-func (u {{.TypeName}}) MergeFrom(buffer []byte) error {
+func (u *{{.TypeName}}) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	return u.Decode(reader)
 }
 
-func (u {{.TypeName}}) MustDecode(reader io.Reader) {
+func (u *{{.TypeName}}) MustDecode(reader io.Reader) {
 	err := u.Decode(reader)
 	if err != nil {
 		panic(err)
@@ -466,7 +466,7 @@ func (u *{{.TypeName}}) MustEncode() []byte {
 	return bytes
 }
 
-func (u {{.TypeName}}) Decode(reader io.Reader) error {
+func (u *{{.TypeName}}) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
 	u.fieldIndex, err = decoder.DecodeVarint()
@@ -487,11 +487,16 @@ func (u {{.TypeName}}) Decode(reader io.Reader) error {
 	return nil
 }
 
-func (u {{.TypeName}}) MustDecode(reader io.Reader) {
+func (u *{{.TypeName}}) MustDecode(reader io.Reader) {
 	err := u.Decode(reader)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (u *{{.TypeName}}) MergeFrom(buffer []byte) error {
+	reader := bytes.NewBuffer(buffer)
+	return u.Decode(reader)
 }
 `
 

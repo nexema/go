@@ -5,6 +5,12 @@ import (
 	"path/filepath"
 )
 
+const (
+	quotes  byte = '"'
+	newline byte = '\n'
+	rParen  byte = ')'
+)
+
 func stringPtr(v string) *string {
 	return &v
 }

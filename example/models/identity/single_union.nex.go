@@ -1,9 +1,9 @@
 package identity
 
 import (
-	"io"
-
+	"bytes"
 	"github.com/nexema/go/runtime"
+	"io"
 )
 
 type SingleUnion struct {
@@ -119,7 +119,7 @@ func (u *SingleUnion) MustEncode() []byte {
 	return bytes
 }
 
-func (u SingleUnion) Decode(reader io.Reader) error {
+func (u *SingleUnion) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
 	u.fieldIndex, err = decoder.DecodeVarint()
@@ -161,7 +161,7 @@ func (u SingleUnion) Decode(reader io.Reader) error {
 					return err
 				}
 
-				value[i] = runtime.NewNullable[string](field3)
+				value[i] = runtime.NewNullable(field3)
 			}
 		}
 		u.value = value
@@ -171,9 +171,14 @@ func (u SingleUnion) Decode(reader io.Reader) error {
 	return nil
 }
 
-func (u SingleUnion) MustDecode(reader io.Reader) {
+func (u *SingleUnion) MustDecode(reader io.Reader) {
 	err := u.Decode(reader)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (u *SingleUnion) MergeFrom(buffer []byte) error {
+	reader := bytes.NewBuffer(buffer)
+	return u.Decode(reader)
 }

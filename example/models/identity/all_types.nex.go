@@ -64,7 +64,7 @@ func (u *NexemaPrimitives) MustEncode() []byte {
 	return bytes
 }
 
-func (u NexemaPrimitives) Decode(reader io.Reader) error {
+func (u *NexemaPrimitives) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
 
@@ -136,12 +136,12 @@ func (u NexemaPrimitives) Decode(reader io.Reader) error {
 	return nil
 }
 
-func (u NexemaPrimitives) MergeFrom(buffer []byte) error {
+func (u *NexemaPrimitives) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	return u.Decode(reader)
 }
 
-func (u NexemaPrimitives) MustDecode(reader io.Reader) {
+func (u *NexemaPrimitives) MustDecode(reader io.Reader) {
 	err := u.Decode(reader)
 	if err != nil {
 		panic(err)
@@ -296,7 +296,7 @@ func (u *NexemaNullablePrimitives) MustEncode() []byte {
 	return bytes
 }
 
-func (u NexemaNullablePrimitives) Decode(reader io.Reader) error {
+func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
 
@@ -485,12 +485,12 @@ func (u NexemaNullablePrimitives) Decode(reader io.Reader) error {
 	return nil
 }
 
-func (u NexemaNullablePrimitives) MergeFrom(buffer []byte) error {
+func (u *NexemaNullablePrimitives) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	return u.Decode(reader)
 }
 
-func (u NexemaNullablePrimitives) MustDecode(reader io.Reader) {
+func (u *NexemaNullablePrimitives) MustDecode(reader io.Reader) {
 	err := u.Decode(reader)
 	if err != nil {
 		panic(err)
@@ -566,7 +566,7 @@ func (u *NexemaList) MustEncode() []byte {
 	return bytes
 }
 
-func (u NexemaList) Decode(reader io.Reader) error {
+func (u *NexemaList) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
 
@@ -608,7 +608,7 @@ func (u NexemaList) Decode(reader io.Reader) error {
 				return err
 			}
 
-			u.List3[i] = runtime.NewNullable[string](list3)
+			u.List3[i] = runtime.NewNullable(list3)
 		}
 	}
 
@@ -630,7 +630,7 @@ func (u NexemaList) Decode(reader io.Reader) error {
 				if err != nil {
 					return err
 				}
-				(*u.List4.Value)[i] = runtime.NewNullable[string](list4)
+				(*u.List4.Value)[i] = runtime.NewNullable(list4)
 			}
 		}
 
@@ -669,7 +669,7 @@ func (u NexemaList) Decode(reader io.Reader) error {
 				return err
 			}
 
-			u.List6[i] = runtime.NewNullable[[]byte](list6)
+			u.List6[i] = runtime.NewNullable(list6)
 		}
 	}
 
@@ -691,7 +691,7 @@ func (u NexemaList) Decode(reader io.Reader) error {
 				if err != nil {
 					return err
 				}
-				(*u.List7.Value)[i] = runtime.NewNullable[[]byte](list7)
+				(*u.List7.Value)[i] = runtime.NewNullable(list7)
 			}
 		}
 
@@ -700,12 +700,12 @@ func (u NexemaList) Decode(reader io.Reader) error {
 	return nil
 }
 
-func (u NexemaList) MergeFrom(buffer []byte) error {
+func (u *NexemaList) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	return u.Decode(reader)
 }
 
-func (u NexemaList) MustDecode(reader io.Reader) {
+func (u *NexemaList) MustDecode(reader io.Reader) {
 	err := u.Decode(reader)
 	if err != nil {
 		panic(err)
@@ -816,7 +816,7 @@ func (u *NexemaMap) MustEncode() []byte {
 	return bytes
 }
 
-func (u NexemaMap) Decode(reader io.Reader) error {
+func (u *NexemaMap) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
 
@@ -855,7 +855,7 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 			if err != nil {
 				return err
 			}
-			u.Map1[key] = runtime.NewNullable[string](value)
+			u.Map1[key] = runtime.NewNullable(value)
 		}
 	}
 
@@ -905,7 +905,7 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 					return err
 				}
 
-				(*u.Map3.Value)[key] = runtime.NewNullable[string](value)
+				(*u.Map3.Value)[key] = runtime.NewNullable(value)
 			}
 		}
 
@@ -946,7 +946,7 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 			if err != nil {
 				return err
 			}
-			u.Map5[key] = runtime.NewNullable[[]byte](value)
+			u.Map5[key] = runtime.NewNullable(value)
 		}
 	}
 
@@ -972,7 +972,7 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 					return err
 				}
 
-				(*u.Map6.Value)[key] = runtime.NewNullable[[]byte](value)
+				(*u.Map6.Value)[key] = runtime.NewNullable(value)
 			}
 		}
 
@@ -981,12 +981,12 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 	return nil
 }
 
-func (u NexemaMap) MergeFrom(buffer []byte) error {
+func (u *NexemaMap) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	return u.Decode(reader)
 }
 
-func (u NexemaMap) MustDecode(reader io.Reader) {
+func (u *NexemaMap) MustDecode(reader io.Reader) {
 	err := u.Decode(reader)
 	if err != nil {
 		panic(err)
@@ -1022,7 +1022,7 @@ func (u *EmbeddedType) MustEncode() []byte {
 	return bytes
 }
 
-func (u EmbeddedType) Decode(reader io.Reader) error {
+func (u *EmbeddedType) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
 
@@ -1046,12 +1046,12 @@ func (u EmbeddedType) Decode(reader io.Reader) error {
 	return nil
 }
 
-func (u EmbeddedType) MergeFrom(buffer []byte) error {
+func (u *EmbeddedType) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	return u.Decode(reader)
 }
 
-func (u EmbeddedType) MustDecode(reader io.Reader) {
+func (u *EmbeddedType) MustDecode(reader io.Reader) {
 	err := u.Decode(reader)
 	if err != nil {
 		panic(err)
