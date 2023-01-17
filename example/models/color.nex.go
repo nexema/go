@@ -17,6 +17,10 @@ func (enum Colors) Name() string {
 	return enum.name
 }
 
+func (enum Colors) String() string {
+	return fmt.Sprintf("Colors(%s)", enum.name)
+}
+
 type colorsPicker struct{}
 
 var ColorsPicker colorsPicker = colorsPicker{}

@@ -24,6 +24,7 @@ const (
 	fmtImport     string = "fmt"
 	ioImport      string = "io"
 	bytesImport   string = "bytes"
+	stringsImport string = "strings"
 )
 
 const (
@@ -110,11 +111,14 @@ func (g *Generator) generateFile(f *NexemaFile) (*GeneratedFile, error) {
 			g.addImport(runtimeImport)
 			g.addImport(ioImport)
 			g.addImport(bytesImport)
+			g.addImport(fmtImport)
+			g.addImport(stringsImport)
 			err = g.generateStruct(&t, pkgName)
 		} else if t.Modifier == modifierUnion {
 			g.addImport(runtimeImport)
 			g.addImport(ioImport)
 			g.addImport(bytesImport)
+			g.addImport(fmtImport)
 			err = g.generateUnion(&t, pkgName)
 		}
 

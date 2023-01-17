@@ -286,6 +286,10 @@ func (enum {{.TypeName}}) Name() string {
 	return enum.name
 }
 
+func (enum {{.TypeName}}) String() string {
+	return fmt.Sprintf("{{.TypeName}}(%s)", enum.name)
+}
+
 type {{.LowerTypeName}}Picker struct{}
 
 var {{.TypeName}}Picker {{.LowerTypeName}}Picker = {{.LowerTypeName}}Picker{}
@@ -329,7 +333,7 @@ const structTemplateString = `type {{.TypeName}} struct {
 
 func (u *{{.TypeName}}) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
-	{{range .Fields}}
+	{{- range .Fields}}
 	{{- if .ValueType.IsNullable}}
 		if u.{{.FieldName}}.IsNull() {
 			encoder.EncodeNull()
@@ -340,8 +344,7 @@ func (u *{{.TypeName}}) Encode() ([]byte, error) {
 	{{- else}}
 		{{template "rawFieldEncoder" .}}
 	{{- end}}
-	{{end}}
-
+	{{- end}}
 	return encoder.TakeBytes(), nil
 }
 
@@ -357,7 +360,7 @@ func (u *{{.TypeName}}) MustEncode() []byte {
 func (u *{{.TypeName}}) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
-	{{range .Fields}}
+	{{- range .Fields}}
 	{{- if .ValueType.IsNullable}}
 		if decoder.IsNextNull() {
 			u.{{.FieldName}}.Clear()
@@ -367,7 +370,7 @@ func (u *{{.TypeName}}) Decode(reader io.Reader) error {
 	{{- else}}
 		{{template "rawFieldDecoder" .}}
 	{{- end}}
-	{{end}}
+	{{- end}}
 	return nil
 }
 
@@ -381,6 +384,141 @@ func (u *{{.TypeName}}) MustDecode(reader io.Reader) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (u {{.TypeName}}) String() string {
+	parts := make([]string, {{len .Fields}})
+	{{- range $i, $a := .Fields}}
+	parts[{{$i}}] = fmt.Sprintf("{{.FieldName}}: %v", u.{{$a.FieldName}})
+	{{- end}}
+	return fmt.Sprintf("{{.TypeName}}(%s)", strings.Join(parts, ", "))
+}
+
+func (u *{{.TypeName}}) Equals(other *{{.TypeName}}) bool {
+	{{- range .Fields}}
+	{{- if .ValueType.IsPrimitive}}
+		{{- if .ValueType.IsNullable}}
+			{{- if eq .ValueType.ImportTypeName "binary"}}
+			if (u.{{.FieldName}}.IsNull() != other.{{.FieldName}}.IsNull()) || (!bytes.Equal(*u.{{.FieldName}}.Value, *other.{{.FieldName}}.Value)) {
+				return false
+			}
+			{{- else}}
+			if (u.{{.FieldName}}.IsNull() != other.{{.FieldName}}.IsNull()) || (*u.{{.FieldName}}.Value != *other.{{.FieldName}}.Value){
+				return false
+			}
+			{{- end}}
+		{{- else}}
+			{{- if eq .ValueType.ImportTypeName "binary"}}
+			if !bytes.Equal(u.{{.FieldName}}, other.{{.FieldName}}) {
+				return false
+			}
+			{{- else}}
+			if u.{{.FieldName}} != other.{{.FieldName}} {
+				return false
+			}
+			{{- end}}
+		{{- end}}
+	{{- else if .ValueType.IsList}}
+		{{- if .ValueType.IsNullable}}
+		if u.{{.FieldName}}.IsNull() != other.{{.FieldName}}.IsNull() {
+			return false
+		}
+		
+		{{.LowerFieldName}}LenThis := len(*u.{{.FieldName}}.Value)
+		{{.LowerFieldName}}LenOther := len(*other.{{.FieldName}}.Value)
+		if {{.LowerFieldName}}LenThis != {{.LowerFieldName}}LenOther {
+			return false
+		}
+
+		for i := 0; i < {{.LowerFieldName}}LenThis; i++ {
+			a := (*u.{{.FieldName}}.Value)[i]
+			b := (*other.{{.FieldName}}.Value)[i]
+
+			{{$typeArgument := (index .ValueType.TypeArguments 0)}}
+			{{- if $typeArgument.IsNullable}}
+				{{- if eq $typeArgument.ImportTypeName "binary"}}
+				if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
+					return false
+				} 
+				{{- else}}
+				if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+					return false
+				} 
+				{{- end}}
+			{{- else}}
+				{{- if eq $typeArgument.ImportTypeName "binary"}}
+				if (!bytes.Equal(a, b)) {
+					return false
+				}
+				{{- else}}
+				if a != b {
+					return false
+				}
+				{{- end}}
+			{{- end}}
+		} 
+		{{- else}}
+		{{.LowerFieldName}}LenThis := len(u.{{.FieldName}})
+		{{.LowerFieldName}}LenOther := len(other.{{.FieldName}})
+		if {{.LowerFieldName}}LenThis != {{.LowerFieldName}}LenOther {
+			return false
+		}
+
+		for i := 0; i < {{.LowerFieldName}}LenThis; i++ {
+			a := u.{{.FieldName}}[i]
+			b := other.{{.FieldName}}[i]
+
+			{{$typeArgument := (index .ValueType.TypeArguments 0)}}
+			{{- if $typeArgument.IsNullable}}
+				{{- if eq $typeArgument.ImportTypeName "binary"}}
+				if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
+					return false
+				} 
+				{{- else}}
+				if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+					return false
+				} 
+				{{- end}}
+			{{- else}}
+				{{- if eq $typeArgument.ImportTypeName "binary"}}
+				if (!bytes.Equal(a, b)) {
+					return false
+				}
+				{{- else}}
+				if a != b {
+					return false
+				}
+				{{- end}}
+			{{- end}}
+		}
+		{{- end}}
+	{{- else if .ValueType.IsMap}}
+		{{- if .ValueType.IsNullable}}
+		{{- else}}
+		{{- end}}
+	{{- else if .ValueType.IsEnum}}
+		{{- if .ValueType.IsNullable}}
+		if (u.{{.FieldName}}.IsNull() != && other.{{.FieldName}}.IsNull()) || (u.{{.FieldName}}.Value.Index() != other.{{.FieldName}}.Value.Index()) {
+			return false
+		}
+		{{- else}}
+		if u.{{.FieldName}}.Index() != other.{{.FieldName}}.Index() {
+			return false
+		}
+		{{- end}}
+	{{- else if .ValueType.IsType}}
+		{{- if .ValueType.IsNullable}}
+		if (u.{{.FieldName}}.IsNull() != other.{{.FieldName}}.IsNull()) || (!u.{{.FieldName}}.Equals(other.{{.FieldName}})) {
+			return false
+		}
+		{{- else}}
+		if !u.{{.FieldName}}.Equals(other.{{.FieldName}}) {
+			return false
+		}
+		{{- end}}
+	{{- end}}
+	{{- end}}
+	return true
 }
 `
 
@@ -497,6 +635,20 @@ func (u *{{.TypeName}}) MustDecode(reader io.Reader) {
 func (u *{{.TypeName}}) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	return u.Decode(reader)
+}
+
+func (u {{.TypeName}}) String() string {
+	value := "not-set"
+	if u.fieldIndex != -1 {
+		switch u.fieldIndex {
+		{{range .Fields}}
+		case {{.FieldIndex}}:
+			value = fmt.Sprintf("%d: %v", u.fieldIndex, u.value)
+		{{end}}
+		}
+	}
+
+	return fmt.Sprintf("{{.TypeName}}(%s)", value)
 }
 `
 

@@ -2,9 +2,11 @@ package identity
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/example/models"
 	"github.com/nexema/go/runtime"
 	"io"
+	"strings"
 )
 
 type NexemaPrimitives struct {
@@ -148,6 +150,67 @@ func (u *NexemaPrimitives) MustDecode(reader io.Reader) {
 	}
 }
 
+func (u NexemaPrimitives) String() string {
+	parts := make([]string, 13)
+	parts[0] = fmt.Sprintf("MyString: %v", u.MyString)
+	parts[1] = fmt.Sprintf("MyBoolean: %v", u.MyBoolean)
+	parts[2] = fmt.Sprintf("MyUint8: %v", u.MyUint8)
+	parts[3] = fmt.Sprintf("MyUint16: %v", u.MyUint16)
+	parts[4] = fmt.Sprintf("MyUint32: %v", u.MyUint32)
+	parts[5] = fmt.Sprintf("MyUint64: %v", u.MyUint64)
+	parts[6] = fmt.Sprintf("MyInt8: %v", u.MyInt8)
+	parts[7] = fmt.Sprintf("MyInt16: %v", u.MyInt16)
+	parts[8] = fmt.Sprintf("MyInt32: %v", u.MyInt32)
+	parts[9] = fmt.Sprintf("MyInt64: %v", u.MyInt64)
+	parts[10] = fmt.Sprintf("MyFloat32: %v", u.MyFloat32)
+	parts[11] = fmt.Sprintf("MyFloat64: %v", u.MyFloat64)
+	parts[12] = fmt.Sprintf("MyBinary: %v", u.MyBinary)
+	return fmt.Sprintf("NexemaPrimitives(%s)", strings.Join(parts, ", "))
+}
+
+func (u *NexemaPrimitives) Equals(other *NexemaPrimitives) bool {
+	if u.MyString != other.MyString {
+		return false
+	}
+	if u.MyBoolean != other.MyBoolean {
+		return false
+	}
+	if u.MyUint8 != other.MyUint8 {
+		return false
+	}
+	if u.MyUint16 != other.MyUint16 {
+		return false
+	}
+	if u.MyUint32 != other.MyUint32 {
+		return false
+	}
+	if u.MyUint64 != other.MyUint64 {
+		return false
+	}
+	if u.MyInt8 != other.MyInt8 {
+		return false
+	}
+	if u.MyInt16 != other.MyInt16 {
+		return false
+	}
+	if u.MyInt32 != other.MyInt32 {
+		return false
+	}
+	if u.MyInt64 != other.MyInt64 {
+		return false
+	}
+	if u.MyFloat32 != other.MyFloat32 {
+		return false
+	}
+	if u.MyFloat64 != other.MyFloat64 {
+		return false
+	}
+	if !bytes.Equal(u.MyBinary, other.MyBinary) {
+		return false
+	}
+	return true
+}
+
 type NexemaNullablePrimitives struct {
 	MyString  runtime.Nullable[string]
 	MyBoolean runtime.Nullable[bool]
@@ -166,7 +229,6 @@ type NexemaNullablePrimitives struct {
 
 func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
-
 	if u.MyString.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -175,7 +237,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeString(value)
 
 	}
-
 	if u.MyBoolean.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -184,7 +245,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeBool(value)
 
 	}
-
 	if u.MyUint8.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -193,7 +253,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeUint8(value)
 
 	}
-
 	if u.MyUint16.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -202,7 +261,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeUint16(value)
 
 	}
-
 	if u.MyUint32.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -211,7 +269,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeUint32(value)
 
 	}
-
 	if u.MyUint64.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -220,7 +277,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeUint64(value)
 
 	}
-
 	if u.MyInt8.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -229,7 +285,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeInt8(value)
 
 	}
-
 	if u.MyInt16.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -238,7 +293,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeInt16(value)
 
 	}
-
 	if u.MyInt32.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -247,7 +301,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeInt32(value)
 
 	}
-
 	if u.MyInt64.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -256,7 +309,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeInt64(value)
 
 	}
-
 	if u.MyFloat32.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -265,7 +317,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeFloat32(value)
 
 	}
-
 	if u.MyFloat64.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -274,7 +325,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeFloat64(value)
 
 	}
-
 	if u.MyBinary.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -283,7 +333,6 @@ func (u *NexemaNullablePrimitives) Encode() ([]byte, error) {
 		encoder.EncodeBinary(value)
 
 	}
-
 	return encoder.TakeBytes(), nil
 }
 
@@ -299,7 +348,6 @@ func (u *NexemaNullablePrimitives) MustEncode() []byte {
 func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 	decoder := runtime.GetDecoder(reader)
 	var err error
-
 	if decoder.IsNextNull() {
 		u.MyString.Clear()
 	} else {
@@ -313,7 +361,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyString.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyBoolean.Clear()
 	} else {
@@ -327,7 +374,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyBoolean.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyUint8.Clear()
 	} else {
@@ -341,7 +387,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyUint8.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyUint16.Clear()
 	} else {
@@ -355,7 +400,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyUint16.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyUint32.Clear()
 	} else {
@@ -369,7 +413,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyUint32.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyUint64.Clear()
 	} else {
@@ -383,7 +426,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyUint64.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyInt8.Clear()
 	} else {
@@ -397,7 +439,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyInt8.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyInt16.Clear()
 	} else {
@@ -411,7 +452,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyInt16.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyInt32.Clear()
 	} else {
@@ -425,7 +465,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyInt32.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyInt64.Clear()
 	} else {
@@ -439,7 +478,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyInt64.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyFloat32.Clear()
 	} else {
@@ -453,7 +491,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyFloat32.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyFloat64.Clear()
 	} else {
@@ -467,7 +504,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyFloat64.SetValue(value)
 
 	}
-
 	if decoder.IsNextNull() {
 		u.MyBinary.Clear()
 	} else {
@@ -481,7 +517,6 @@ func (u *NexemaNullablePrimitives) Decode(reader io.Reader) error {
 		u.MyBinary.SetValue(value)
 
 	}
-
 	return nil
 }
 
@@ -495,6 +530,67 @@ func (u *NexemaNullablePrimitives) MustDecode(reader io.Reader) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (u NexemaNullablePrimitives) String() string {
+	parts := make([]string, 13)
+	parts[0] = fmt.Sprintf("MyString: %v", u.MyString)
+	parts[1] = fmt.Sprintf("MyBoolean: %v", u.MyBoolean)
+	parts[2] = fmt.Sprintf("MyUint8: %v", u.MyUint8)
+	parts[3] = fmt.Sprintf("MyUint16: %v", u.MyUint16)
+	parts[4] = fmt.Sprintf("MyUint32: %v", u.MyUint32)
+	parts[5] = fmt.Sprintf("MyUint64: %v", u.MyUint64)
+	parts[6] = fmt.Sprintf("MyInt8: %v", u.MyInt8)
+	parts[7] = fmt.Sprintf("MyInt16: %v", u.MyInt16)
+	parts[8] = fmt.Sprintf("MyInt32: %v", u.MyInt32)
+	parts[9] = fmt.Sprintf("MyInt64: %v", u.MyInt64)
+	parts[10] = fmt.Sprintf("MyFloat32: %v", u.MyFloat32)
+	parts[11] = fmt.Sprintf("MyFloat64: %v", u.MyFloat64)
+	parts[12] = fmt.Sprintf("MyBinary: %v", u.MyBinary)
+	return fmt.Sprintf("NexemaNullablePrimitives(%s)", strings.Join(parts, ", "))
+}
+
+func (u *NexemaNullablePrimitives) Equals(other *NexemaNullablePrimitives) bool {
+	if (u.MyString.IsNull() != other.MyString.IsNull()) || (*u.MyString.Value != *other.MyString.Value) {
+		return false
+	}
+	if (u.MyBoolean.IsNull() != other.MyBoolean.IsNull()) || (*u.MyBoolean.Value != *other.MyBoolean.Value) {
+		return false
+	}
+	if (u.MyUint8.IsNull() != other.MyUint8.IsNull()) || (*u.MyUint8.Value != *other.MyUint8.Value) {
+		return false
+	}
+	if (u.MyUint16.IsNull() != other.MyUint16.IsNull()) || (*u.MyUint16.Value != *other.MyUint16.Value) {
+		return false
+	}
+	if (u.MyUint32.IsNull() != other.MyUint32.IsNull()) || (*u.MyUint32.Value != *other.MyUint32.Value) {
+		return false
+	}
+	if (u.MyUint64.IsNull() != other.MyUint64.IsNull()) || (*u.MyUint64.Value != *other.MyUint64.Value) {
+		return false
+	}
+	if (u.MyInt8.IsNull() != other.MyInt8.IsNull()) || (*u.MyInt8.Value != *other.MyInt8.Value) {
+		return false
+	}
+	if (u.MyInt16.IsNull() != other.MyInt16.IsNull()) || (*u.MyInt16.Value != *other.MyInt16.Value) {
+		return false
+	}
+	if (u.MyInt32.IsNull() != other.MyInt32.IsNull()) || (*u.MyInt32.Value != *other.MyInt32.Value) {
+		return false
+	}
+	if (u.MyInt64.IsNull() != other.MyInt64.IsNull()) || (*u.MyInt64.Value != *other.MyInt64.Value) {
+		return false
+	}
+	if (u.MyFloat32.IsNull() != other.MyFloat32.IsNull()) || (*u.MyFloat32.Value != *other.MyFloat32.Value) {
+		return false
+	}
+	if (u.MyFloat64.IsNull() != other.MyFloat64.IsNull()) || (*u.MyFloat64.Value != *other.MyFloat64.Value) {
+		return false
+	}
+	if (u.MyBinary.IsNull() != other.MyBinary.IsNull()) || (!bytes.Equal(*u.MyBinary.Value, *other.MyBinary.Value)) {
+		return false
+	}
+	return true
 }
 
 type NexemaList struct {
@@ -525,7 +621,6 @@ func (u *NexemaList) Encode() ([]byte, error) {
 		}
 
 	}
-
 	if u.List5.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -553,7 +648,6 @@ func (u *NexemaList) Encode() ([]byte, error) {
 		}
 
 	}
-
 	return encoder.TakeBytes(), nil
 }
 
@@ -635,7 +729,6 @@ func (u *NexemaList) Decode(reader io.Reader) error {
 		}
 
 	}
-
 	if decoder.IsNextNull() {
 		u.List5.Clear()
 	} else {
@@ -696,7 +789,6 @@ func (u *NexemaList) Decode(reader io.Reader) error {
 		}
 
 	}
-
 	return nil
 }
 
@@ -710,6 +802,132 @@ func (u *NexemaList) MustDecode(reader io.Reader) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (u NexemaList) String() string {
+	parts := make([]string, 7)
+	parts[0] = fmt.Sprintf("List1: %v", u.List1)
+	parts[1] = fmt.Sprintf("List2: %v", u.List2)
+	parts[2] = fmt.Sprintf("List3: %v", u.List3)
+	parts[3] = fmt.Sprintf("List4: %v", u.List4)
+	parts[4] = fmt.Sprintf("List5: %v", u.List5)
+	parts[5] = fmt.Sprintf("List6: %v", u.List6)
+	parts[6] = fmt.Sprintf("List7: %v", u.List7)
+	return fmt.Sprintf("NexemaList(%s)", strings.Join(parts, ", "))
+}
+
+func (u *NexemaList) Equals(other *NexemaList) bool {
+	list1LenThis := len(u.List1)
+	list1LenOther := len(other.List1)
+	if list1LenThis != list1LenOther {
+		return false
+	}
+
+	for i := 0; i < list1LenThis; i++ {
+		a := u.List1[i]
+		b := other.List1[i]
+
+		if a != b {
+			return false
+		}
+	}
+	list2LenThis := len(u.List2)
+	list2LenOther := len(other.List2)
+	if list2LenThis != list2LenOther {
+		return false
+	}
+
+	for i := 0; i < list2LenThis; i++ {
+		a := u.List2[i]
+		b := other.List2[i]
+
+		if !bytes.Equal(a, b) {
+			return false
+		}
+	}
+	list3LenThis := len(u.List3)
+	list3LenOther := len(other.List3)
+	if list3LenThis != list3LenOther {
+		return false
+	}
+
+	for i := 0; i < list3LenThis; i++ {
+		a := u.List3[i]
+		b := other.List3[i]
+
+		if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+			return false
+		}
+	}
+	if u.List4.IsNull() != other.List4.IsNull() {
+		return false
+	}
+
+	list4LenThis := len(*u.List4.Value)
+	list4LenOther := len(*other.List4.Value)
+	if list4LenThis != list4LenOther {
+		return false
+	}
+
+	for i := 0; i < list4LenThis; i++ {
+		a := (*u.List4.Value)[i]
+		b := (*other.List4.Value)[i]
+
+		if (a.IsNull() != b.IsNull()) || (*a.Value != *b.Value) {
+			return false
+		}
+	}
+	if u.List5.IsNull() != other.List5.IsNull() {
+		return false
+	}
+
+	list5LenThis := len(*u.List5.Value)
+	list5LenOther := len(*other.List5.Value)
+	if list5LenThis != list5LenOther {
+		return false
+	}
+
+	for i := 0; i < list5LenThis; i++ {
+		a := (*u.List5.Value)[i]
+		b := (*other.List5.Value)[i]
+
+		if !bytes.Equal(a, b) {
+			return false
+		}
+	}
+	list6LenThis := len(u.List6)
+	list6LenOther := len(other.List6)
+	if list6LenThis != list6LenOther {
+		return false
+	}
+
+	for i := 0; i < list6LenThis; i++ {
+		a := u.List6[i]
+		b := other.List6[i]
+
+		if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
+			return false
+		}
+	}
+	if u.List7.IsNull() != other.List7.IsNull() {
+		return false
+	}
+
+	list7LenThis := len(*u.List7.Value)
+	list7LenOther := len(*other.List7.Value)
+	if list7LenThis != list7LenOther {
+		return false
+	}
+
+	for i := 0; i < list7LenThis; i++ {
+		a := (*u.List7.Value)[i]
+		b := (*other.List7.Value)[i]
+
+		if (a.IsNull() != b.IsNull()) || (!bytes.Equal(*a.Value, *b.Value)) {
+			return false
+		}
+	}
+	return true
 }
 
 type NexemaMap struct {
@@ -753,7 +971,6 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 		}
 
 	}
-
 	if u.Map3.IsNull() {
 		encoder.EncodeNull()
 	} else {
@@ -803,7 +1020,6 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 		}
 
 	}
-
 	return encoder.TakeBytes(), nil
 }
 
@@ -882,7 +1098,6 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 		}
 
 	}
-
 	if decoder.IsNextNull() {
 		u.Map3.Clear()
 	} else {
@@ -977,7 +1192,6 @@ func (u *NexemaMap) Decode(reader io.Reader) error {
 		}
 
 	}
-
 	return nil
 }
 
@@ -991,6 +1205,22 @@ func (u *NexemaMap) MustDecode(reader io.Reader) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (u NexemaMap) String() string {
+	parts := make([]string, 7)
+	parts[0] = fmt.Sprintf("Map0: %v", u.Map0)
+	parts[1] = fmt.Sprintf("Map1: %v", u.Map1)
+	parts[2] = fmt.Sprintf("Map2: %v", u.Map2)
+	parts[3] = fmt.Sprintf("Map3: %v", u.Map3)
+	parts[4] = fmt.Sprintf("Map4: %v", u.Map4)
+	parts[5] = fmt.Sprintf("Map5: %v", u.Map5)
+	parts[6] = fmt.Sprintf("Map6: %v", u.Map6)
+	return fmt.Sprintf("NexemaMap(%s)", strings.Join(parts, ", "))
+}
+
+func (u *NexemaMap) Equals(other *NexemaMap) bool {
+	return true
 }
 
 type EmbeddedType struct {
@@ -1056,4 +1286,21 @@ func (u *EmbeddedType) MustDecode(reader io.Reader) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (u EmbeddedType) String() string {
+	parts := make([]string, 2)
+	parts[0] = fmt.Sprintf("MyUnion: %v", u.MyUnion)
+	parts[1] = fmt.Sprintf("MyEnum: %v", u.MyEnum)
+	return fmt.Sprintf("EmbeddedType(%s)", strings.Join(parts, ", "))
+}
+
+func (u *EmbeddedType) Equals(other *EmbeddedType) bool {
+	if !u.MyUnion.Equals(other.MyUnion) {
+		return false
+	}
+	if u.MyEnum.Index() != other.MyEnum.Index() {
+		return false
+	}
+	return true
 }

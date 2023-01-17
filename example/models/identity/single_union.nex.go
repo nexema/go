@@ -2,6 +2,7 @@ package identity
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/nexema/go/runtime"
 	"io"
 )
@@ -181,4 +182,24 @@ func (u *SingleUnion) MustDecode(reader io.Reader) {
 func (u *SingleUnion) MergeFrom(buffer []byte) error {
 	reader := bytes.NewBuffer(buffer)
 	return u.Decode(reader)
+}
+
+func (u SingleUnion) String() string {
+	value := "not-set"
+	if u.fieldIndex != -1 {
+		switch u.fieldIndex {
+
+		case 0:
+			value = fmt.Sprintf("%d: %v", u.fieldIndex, u.value)
+
+		case 1:
+			value = fmt.Sprintf("%d: %v", u.fieldIndex, u.value)
+
+		case 2:
+			value = fmt.Sprintf("%d: %v", u.fieldIndex, u.value)
+
+		}
+	}
+
+	return fmt.Sprintf("SingleUnion(%s)", value)
 }

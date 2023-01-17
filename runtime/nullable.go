@@ -1,6 +1,8 @@
 package runtime
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Nullable represents T but allowing to set it as "null"
 type Nullable[T any] struct {
