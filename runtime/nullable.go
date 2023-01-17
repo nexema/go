@@ -1,5 +1,7 @@
 package runtime
 
+import "fmt"
+
 // Nullable represents T but allowing to set it as "null"
 type Nullable[T any] struct {
 	Value *T
@@ -41,8 +43,10 @@ func (n *Nullable[T]) Clear() {
 	n.Value = nil
 }
 
-// NullableList is just a shortcut for runtime.Nullable[[]T] to avoid verbosity
-type NullableList[T any] Nullable[[]T]
+func (n Nullable[T]) String() string {
+	if n.Value == nil {
+		return "<null>"
+	}
 
-// NullableListArgument is just a shortcut for runtime.NullableList[runtime.Nullable[T]]
-type NullableListArgument[T any] NullableList[Nullable[T]]
+	return fmt.Sprint(*n.Value)
+}
