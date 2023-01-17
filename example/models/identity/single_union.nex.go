@@ -1,9 +1,9 @@
 package identity
 
 import (
-	"bytes"
-	"github.com/nexema/go/runtime"
 	"io"
+
+	"github.com/nexema/go/runtime"
 )
 
 type SingleUnion struct {
@@ -97,11 +97,11 @@ func (u *SingleUnion) Encode() ([]byte, error) {
 
 	case 0:
 
-		encoder.EncodeString(u.Field1)
+		encoder.EncodeString(u.value.(string))
 
 	case 1:
 
-		encoder.EncodeBool(u.Field2)
+		encoder.EncodeBool(u.value.(bool))
 
 	case 2:
 
@@ -133,14 +133,14 @@ func (u SingleUnion) Decode(reader io.Reader) error {
 
 	case 0:
 
-		u.Field1, err = decoder.DecodeString()
+		u.value, err = decoder.DecodeString()
 		if err != nil {
 			return err
 		}
 
 	case 1:
 
-		u.Field2, err = decoder.DecodeBool()
+		u.value, err = decoder.DecodeBool()
 		if err != nil {
 			return err
 		}
@@ -151,20 +151,20 @@ func (u SingleUnion) Decode(reader io.Reader) error {
 		if err != nil {
 			return err
 		}
-
-		u.Field3 = make([]runtime.Nullable[string], field3ArrayLen)
+		value := make([]runtime.Nullable[string], field3ArrayLen)
 		for i := int64(0); i < field3ArrayLen; i++ {
 			if decoder.IsNextNull() {
-				u.Field3[i] = runtime.NewNull[string]()
+				value[i] = runtime.NewNull[string]()
 			} else {
 				field3, err := decoder.DecodeString()
 				if err != nil {
 					return err
 				}
 
-				u.Field3[i] = runtime.NewNullable[string](field3)
+				value[i] = runtime.NewNullable[string](field3)
 			}
 		}
+		u.value = value
 
 	}
 

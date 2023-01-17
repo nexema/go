@@ -186,6 +186,7 @@ func (g *Generator) generateUnion(t *NexemaTypeDefinition, pkgName string) error
 		LowerName: strcase.ToLowerCamel(t.Name),
 		Fields: mapArray(t.Fields, func(field NexemaTypeFieldDefinition) TypeFieldTemplateData {
 			return TypeFieldTemplateData{
+				IsFromUnion:    true,
 				FieldName:      strcase.ToCamel(field.Name),
 				LowerFieldName: strcase.ToLowerCamel(field.Name),
 				FieldIndex:     field.Index,

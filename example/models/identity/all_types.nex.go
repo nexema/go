@@ -2,10 +2,9 @@ package identity
 
 import (
 	"bytes"
-	"io"
-
 	"github.com/example/models"
 	"github.com/nexema/go/runtime"
+	"io"
 )
 
 type NexemaPrimitives struct {
@@ -575,7 +574,6 @@ func (u NexemaList) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
-
 	u.List1 = make([]string, list1ArrayLen)
 	for i := int64(0); i < list1ArrayLen; i++ {
 		u.List1[i], err = decoder.DecodeString()
@@ -588,7 +586,6 @@ func (u NexemaList) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
-
 	u.List2 = make([][]byte, list2ArrayLen)
 	for i := int64(0); i < list2ArrayLen; i++ {
 		u.List2[i], err = decoder.DecodeBinary()
@@ -601,7 +598,6 @@ func (u NexemaList) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
-
 	u.List3 = make([]runtime.Nullable[string], list3ArrayLen)
 	for i := int64(0); i < list3ArrayLen; i++ {
 		if decoder.IsNextNull() {
@@ -663,7 +659,6 @@ func (u NexemaList) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
-
 	u.List6 = make([]runtime.Nullable[[]byte], list6ArrayLen)
 	for i := int64(0); i < list6ArrayLen; i++ {
 		if decoder.IsNextNull() {
@@ -720,11 +715,11 @@ func (u NexemaList) MustDecode(reader io.Reader) {
 type NexemaMap struct {
 	Map0 map[string]string
 	Map1 map[string]runtime.Nullable[string]
-	Map2 map[string]string
-	Map3 map[string]runtime.Nullable[string]
+	Map2 runtime.Nullable[map[string]string]
+	Map3 runtime.Nullable[map[string]runtime.Nullable[string]]
 	Map4 map[string][]byte
 	Map5 map[string]runtime.Nullable[[]byte]
-	Map6 map[string]runtime.Nullable[[]byte]
+	Map6 runtime.Nullable[map[string]runtime.Nullable[[]byte]]
 }
 
 func (u *NexemaMap) Encode() ([]byte, error) {
@@ -751,8 +746,8 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 	} else {
 		value := *u.Map2.Value
 
-		encoder.BeginMap(int64(len(u.Map2)))
-		for key, value := range u.Map2 {
+		encoder.BeginMap(int64(len(value)))
+		for key, value := range value {
 			encoder.EncodeString(key)
 			encoder.EncodeString(value)
 		}
@@ -764,8 +759,8 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 	} else {
 		value := *u.Map3.Value
 
-		encoder.BeginMap(int64(len(u.Map3)))
-		for key, value := range u.Map3 {
+		encoder.BeginMap(int64(len(value)))
+		for key, value := range value {
 			encoder.EncodeString(key)
 			if value.IsNull() {
 				encoder.EncodeNull()
@@ -797,8 +792,8 @@ func (u *NexemaMap) Encode() ([]byte, error) {
 	} else {
 		value := *u.Map6.Value
 
-		encoder.BeginMap(int64(len(u.Map6)))
-		for key, value := range u.Map6 {
+		encoder.BeginMap(int64(len(value)))
+		for key, value := range value {
 			encoder.EncodeString(key)
 			if value.IsNull() {
 				encoder.EncodeNull()
@@ -829,35 +824,30 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
-
 	u.Map0 = make(map[string]string, map0MapLen)
 	for i := int64(0); i < map0MapLen; i++ {
 		key, err := decoder.DecodeString()
 		if err != nil {
 			return err
 		}
-
 		value, err := decoder.DecodeString()
 		if err != nil {
 			return err
 		}
 
 		u.Map0[key] = value
-
 	}
 
 	map1MapLen, err := decoder.BeginDecodeMap()
 	if err != nil {
 		return err
 	}
-
 	u.Map1 = make(map[string]runtime.Nullable[string], map1MapLen)
 	for i := int64(0); i < map1MapLen; i++ {
 		key, err := decoder.DecodeString()
 		if err != nil {
 			return err
 		}
-
 		if decoder.IsNextNull() {
 			u.Map1[key] = runtime.NewNull[string]()
 		} else {
@@ -865,10 +855,8 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 			if err != nil {
 				return err
 			}
-
 			u.Map1[key] = runtime.NewNullable[string](value)
 		}
-
 	}
 
 	if decoder.IsNextNull() {
@@ -879,21 +867,18 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 		if err != nil {
 			return err
 		}
-
-		u.Map2 = make(map[string]string, map2MapLen)
+		u.Map2.SetValue(make(map[string]string, map2MapLen))
 		for i := int64(0); i < map2MapLen; i++ {
 			key, err := decoder.DecodeString()
 			if err != nil {
 				return err
 			}
-
 			value, err := decoder.DecodeString()
 			if err != nil {
 				return err
 			}
 
-			u.Map2[key] = value
-
+			(*u.Map2.Value)[key] = value
 		}
 
 	}
@@ -906,25 +891,22 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 		if err != nil {
 			return err
 		}
-
-		u.Map3 = make(map[string]runtime.Nullable[string], map3MapLen)
+		u.Map3.SetValue(make(map[string]runtime.Nullable[string], map3MapLen))
 		for i := int64(0); i < map3MapLen; i++ {
 			key, err := decoder.DecodeString()
 			if err != nil {
 				return err
 			}
-
 			if decoder.IsNextNull() {
-				u.Map3[key] = runtime.NewNull[string]()
+				(*u.Map3.Value)[key] = runtime.NewNull[string]()
 			} else {
 				value, err := decoder.DecodeString()
 				if err != nil {
 					return err
 				}
 
-				u.Map3[key] = runtime.NewNullable[string](value)
+				(*u.Map3.Value)[key] = runtime.NewNullable[string](value)
 			}
-
 		}
 
 	}
@@ -933,35 +915,30 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 	if err != nil {
 		return err
 	}
-
 	u.Map4 = make(map[string][]byte, map4MapLen)
 	for i := int64(0); i < map4MapLen; i++ {
 		key, err := decoder.DecodeString()
 		if err != nil {
 			return err
 		}
-
 		value, err := decoder.DecodeBinary()
 		if err != nil {
 			return err
 		}
 
 		u.Map4[key] = value
-
 	}
 
 	map5MapLen, err := decoder.BeginDecodeMap()
 	if err != nil {
 		return err
 	}
-
 	u.Map5 = make(map[string]runtime.Nullable[[]byte], map5MapLen)
 	for i := int64(0); i < map5MapLen; i++ {
 		key, err := decoder.DecodeString()
 		if err != nil {
 			return err
 		}
-
 		if decoder.IsNextNull() {
 			u.Map5[key] = runtime.NewNull[[]byte]()
 		} else {
@@ -969,10 +946,8 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 			if err != nil {
 				return err
 			}
-
 			u.Map5[key] = runtime.NewNullable[[]byte](value)
 		}
-
 	}
 
 	if decoder.IsNextNull() {
@@ -983,25 +958,22 @@ func (u NexemaMap) Decode(reader io.Reader) error {
 		if err != nil {
 			return err
 		}
-
-		u.Map6 = make(map[string]runtime.Nullable[[]byte], map6MapLen)
+		u.Map6.SetValue(make(map[string]runtime.Nullable[[]byte], map6MapLen))
 		for i := int64(0); i < map6MapLen; i++ {
 			key, err := decoder.DecodeString()
 			if err != nil {
 				return err
 			}
-
 			if decoder.IsNextNull() {
-				u.Map6[key] = runtime.NewNull[[]byte]()
+				(*u.Map6.Value)[key] = runtime.NewNull[[]byte]()
 			} else {
 				value, err := decoder.DecodeBinary()
 				if err != nil {
 					return err
 				}
 
-				u.Map6[key] = runtime.NewNullable[[]byte](value)
+				(*u.Map6.Value)[key] = runtime.NewNullable[[]byte](value)
 			}
-
 		}
 
 	}
@@ -1029,7 +1001,7 @@ type EmbeddedType struct {
 func (u *EmbeddedType) Encode() ([]byte, error) {
 	encoder := runtime.GetEncoder()
 
-	myUnionBytes, err := myUnion.Encode()
+	myUnionBytes, err := u.MyUnion.Encode()
 	if err != nil {
 		return nil, err
 	}

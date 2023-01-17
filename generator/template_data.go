@@ -27,6 +27,7 @@ type TypeFieldTemplateData struct {
 	FieldName      string // FieldName is field's name but in Go (CamelCase)
 	LowerFieldName string // LowerFieldName is field's name in Go, but lowerCamelCase
 	FieldIndex     int64
+	IsFromUnion    bool
 	ValueType      TypeFieldValueKindTemplate
 }
 
