@@ -12,7 +12,7 @@ import (
 func TestGenerate(t *testing.T) {
 	const snapshotPath = "../testdata/snapshot.json"
 	buf, _ := os.ReadFile(snapshotPath)
-	generator := NewGenerator(PluginConfig{
+	generator := NewGenerator(&PluginConfig{
 		OutputPath: "../example/models",
 		ModuleName: "github.com/example",
 	})

@@ -34,7 +34,7 @@ const (
 // Generator is the main entry point of the Nexema's Go generator
 type Generator struct {
 	w      *bytes.Buffer
-	config PluginConfig
+	config *PluginConfig
 
 	typeMapping map[string]typeMap
 	fileMapping map[string]string
@@ -52,7 +52,7 @@ type typeMap struct {
 var defaultGenerator *Generator
 
 // NewGenerator creates a new Generator instance
-func NewGenerator(cfg PluginConfig) *Generator {
+func NewGenerator(cfg *PluginConfig) *Generator {
 	defaultGenerator = &Generator{
 		w:      new(bytes.Buffer),
 		config: cfg,
